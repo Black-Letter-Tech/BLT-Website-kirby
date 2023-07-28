@@ -41,7 +41,8 @@ RUN apk update && \
     # php81-tokenizer\
     # php81-xmlwriter\
     imagemagick\
-    curl
+    curl\
+    apache2-utils
     # OLD STUFF
     # rsync\
     # git\
@@ -65,7 +66,6 @@ WORKDIR /app
 
 
 COPY ./docker /docker
-COPY ./docker/nginx/.htpasswd /etc/nginx/
 COPY ./docker/php/00_opcache.ini /etc/php81/conf.d
 # sometimes debugging is nice
 # COPY ./docker/php/50_xdebug.ini /etc/php81/conf.d
@@ -73,7 +73,7 @@ RUN chmod +x /docker/docker-entrypoint.sh
 COPY ./ /app
 
 #remove stuff we don't need or could be security problems (git repos and password files)
-RUN find . -name "*.git" -type d -print0 | xargs -0 /bin/rm -rf && rm -f ./docker/nginx/.htpasswd
+RUN find . -name "*.git" -type d -print0 | xargs -0 /bin/rm -rf
 
 ENV VIRTUAL_HOST localhost
 ENV SERVER_NAME localhost

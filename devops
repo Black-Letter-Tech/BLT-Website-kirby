@@ -67,6 +67,8 @@ fn_deployapp() {
         docker-compose up -d --force-recreate
         echo $(yellowprint "Copying .env File To $1") && \
         docker cp ./.env ${SLD}-${1}:app
+        echo $(yellowprint "Creating .htpasswd File On $1") && \
+        docker exec -it ${SLD}-${1} sh -c 'set -o allexport; source .env; set +o allexport; htpasswd -c -B -b /etc/nginx/.htpasswd $BASIC_AUTH_USER $BASIC_AUTH_PASSWORD'
     else 
         redprint "Canceling app deployement to $1."
         $2

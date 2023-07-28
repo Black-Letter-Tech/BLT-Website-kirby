@@ -17,6 +17,7 @@ redirects
 *.sublime-workspace
 private-notes.md
 .env
+.htpasswd
 
 ## backups
 /backups
