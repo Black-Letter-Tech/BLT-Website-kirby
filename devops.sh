@@ -126,17 +126,7 @@ fn_pushcontent() {
     if fn_confirm "Would you really like to push content to $1?
 This will DELETE AND REPLACE all content on $1. [y/N]"
     then
-        eval $(docker-machine env ${DOCKER_MACHINE}) && \
-        echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
-        docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/content/*'  && \
-        docker cp ./content ${SLD}-${1}:app && \
-        echo $(yellowprint "Setting Permissions On $1") && \
-        docker exec -it ${SLD}-${1} sh -c 'chown -R nobody:nobody /app/content' && \
-        echo $(yellowprint "Files Now in Content On $1") && \
-        docker exec -it ${SLD}-${1} sh -c 'ls -la /app/content' && \
-        echo $(yellowprint "Deleting Cache On $1") && \
-        docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/storage/cache/*' && \
-        echo $(yellowprint "Finished Content Push to $1")
+        fn_pushcontent_atomic "$1"
 
     else 
         redprint "Canceling content push to $1."
@@ -144,23 +134,104 @@ This will DELETE AND REPLACE all content on $1. [y/N]"
     fi
 }
 
+fn_pushcontent_atomic() {
+    local target=${1:-stg}
+    local sync_container="${SLD}-content-sync"
+
+    if [ "$target" != "stg" ]; then
+        redprint "Atomic local content pushes are restricted to staging."
+        return 1
+    fi
+    if [ ! -f ./content/site.en.txt ]; then
+        redprint "Local content failed validation: content/site.en.txt is missing."
+        return 1
+    fi
+
+    eval $(docker-machine env ${DOCKER_MACHINE}) || return 1
+    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` )
+
+    docker rm -f "$sync_container" >/dev/null 2>&1 || true
+    docker create --name "$sync_container" \
+        -v "${SLD}-stg-content:/target" \
+        alpine sleep 600 >/dev/null || return 1
+    docker cp ./content "$sync_container:/incoming" || {
+        docker rm -f "$sync_container" >/dev/null
+        return 1
+    }
+    docker start "$sync_container" >/dev/null || return 1
+    docker exec "$sync_container" test -f /incoming/site.en.txt || {
+        redprint "Uploaded content failed validation. Staging was not changed."
+        docker rm -f "$sync_container" >/dev/null
+        return 1
+    }
+
+    yellowprint "Backing up current staging content before replacement."
+    docker exec "${SLD}-content-backups-stg" backup || {
+        redprint "Backup failed. Staging was not changed."
+        docker rm -f "$sync_container" >/dev/null
+        return 1
+    }
+
+    docker stop "${SLD}-stg" >/dev/null || return 1
+    if docker exec "$sync_container" sh -c '
+        rm -rf /rollback && mkdir /rollback &&
+        cp -a /target/. /rollback/ &&
+        find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
+        cp -a /incoming/. /target/ &&
+        chown -R 65534:65534 /target
+    '; then
+        docker start "${SLD}-stg" >/dev/null
+        docker rm -f "$sync_container" >/dev/null
+        docker exec "${SLD}-stg" test -f /app/public/assets/css/site.css || return 1
+        greenprint "Local content is live on staging and custom CSS was regenerated."
+    else
+        redprint "Replacement failed; restoring the previous staging content."
+        docker exec "$sync_container" sh -c '
+            find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
+            cp -a /rollback/. /target/ &&
+            chown -R 65534:65534 /target
+        '
+        docker start "${SLD}-stg" >/dev/null
+        docker rm -f "$sync_container" >/dev/null
+        return 1
+    fi
+}
+
 fn_pullcontent() {
     if fn_confirm "Would you really like to pull content from $1?
 This will DELETE AND REPLACE all content on localhost. [y/N]"
     then
-
-
-        eval $(docker-machine env ${DOCKER_MACHINE}) && \
-        echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
-        rm -Rf ./content/* && \
-        docker cp ${SLD}-stg:app/content . && \
-        echo $(yellowprint "Files Now in Content On localhost") && \
-        ls -la ./content && \
-        echo $(yellowprint "Finished Content Pull from $1")
+        fn_synccontent "$1"
 
     else 
         redprint "Canceling content pull from $1."
         $2
+    fi
+}
+
+fn_synccontent() {
+    local source=${1:-stg}
+    local sync_dir
+    sync_dir=$(mktemp -d "${TMPDIR:-/tmp}/blt-content-sync.XXXXXX") || return 1
+
+    eval $(docker-machine env ${DOCKER_MACHINE}) || return 1
+    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` )
+    docker cp "${SLD}-${source}:/app/content" "${sync_dir}/" || return 1
+
+    if [ ! -f "${sync_dir}/content/site.en.txt" ]; then
+        redprint "Downloaded content failed validation. Local content was not changed."
+        return 1
+    fi
+
+    [ ! -d ./content ] || mv ./content "${sync_dir}/content.previous" || return 1
+    if mv "${sync_dir}/content" ./content; then
+        rm -rf "${sync_dir}/content.previous"
+        rmdir "${sync_dir}"
+        greenprint "Local content now matches ${source}."
+    else
+        redprint "Could not install downloaded content; restoring the previous copy."
+        [ ! -d "${sync_dir}/content.previous" ] || mv "${sync_dir}/content.previous" ./content
+        return 1
     fi
 }
 
@@ -372,4 +443,23 @@ Choose an option:  "
     esac
 }
 
-menu_mainmenu
+case "${1:-}" in
+    sync-stg)
+        fn_synccontent stg
+        ;;
+    push-stg)
+        if fn_confirm "Back up staging and replace its content with local content? [y/N]"; then
+            fn_pushcontent_atomic stg
+        else
+            redprint "Canceling content push to staging."
+        fi
+        ;;
+    "")
+        menu_mainmenu
+        ;;
+    *)
+        redprint "Unknown command: $1"
+        echo "Usage: $0 [sync-stg|push-stg]"
+        exit 1
+        ;;
+esac

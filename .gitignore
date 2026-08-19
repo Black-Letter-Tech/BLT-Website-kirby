@@ -17,3 +17,4 @@ content-starter
 site-starter
 .htpasswd
 content
+/public/assets/css/site.css
