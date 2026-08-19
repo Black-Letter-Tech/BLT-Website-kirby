@@ -1,0 +1,112 @@
+#process .uk-grid {
+    margin: -10px;
+}
+#process .uk-grid > div {
+    border: 10px solid transparent;
+}
+#process .uk-grid > div > .uk-background-top-right {
+    background-position: right 15px top 15px;
+}
+
+#eliminate-complexity .uk-grid {
+    margin:0px;
+}
+#too-complex {
+    padding-left:0px;
+}
+@media (max-width: 395px) {
+    #what-we-do {
+        font-size: 2.34rem;
+    }
+}
+
+div.uk-typedtext {
+    height: 1.6em;
+}
+
+div.uk-typedtext.uk-h1 {
+    height: 1.6em;
+}
+div.uk-typedtext.uk-h2 {
+    height: 1.6em;
+}
+.uk-typedtext.uk-h3,
+.uk-typedtext.uk-h4,
+.uk-typedtext.uk-h5,
+.uk-typedtext.uk-h6
+ {
+    height: 1.4em;
+}
+.tm-text-shadow {
+    text-shadow: 0px 0px 10px black;
+}
+.tm-divider-remove::before {
+    display: none;
+}
+
+/* processing page customization */
+#processing-hero > div:first-of-type {
+    background-position: 48% calc(10% + 268px);
+    background-size: calc(140% + 442px);
+}
+@media (min-width: 649px) {
+    #processing-hero > div:first-of-type {
+        background-position: 50% 50%;
+        background-size: inherit;
+    }
+}
+#processing-hero-main-headlines {
+    min-height: 556px;
+}
+@media (min-width: 649px) {
+    #processing-hero-main-headlines {
+        min-height: 500px;
+    }
+}
+
+
+
+
+
+/* review page customization */
+#review-hero > div:first-of-type {
+    background-position: 27% calc(20% + 172px);
+    background-size: calc(70% + 475px);
+}
+@media (min-width: 649px) {
+    #review-hero > div:first-of-type {
+        background-position: 50% 60%;
+        background-size: inherit;
+    }
+}
+#review-hero-main-headlines {
+    min-height: 700px;
+}
+@media (min-width: 649px) {
+    #review-hero-main-headlines {
+        min-height: 800px;
+    }
+}
+
+#review-key-features > div:first-of-type {
+    background-size: calc(100% + 500px);
+}
+
+#review-essential-enhancements > div:first-of-type {
+    background-position: 50% 800px;
+    background-size: calc(40% + 1500px);
+}
+
+@media (min-width: 649px) {
+    #review-essential-enhancements > div:first-of-type {
+        background-position: 50% 524px;
+    }
+}
+
+.tm-sidebar-block .uk-icon-button {
+    margin-bottom: 15px;
+}
+
+/* missive chat */
+
+div:has(>#missive-link) { display: none }

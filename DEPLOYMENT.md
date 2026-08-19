@@ -96,6 +96,6 @@ https://docs.docker.com/engine/reference/commandline/image_prune/
 **letsencrypt certificate renew commands**
 
     set -o allexport; source .env; set +o allexport && \
-    docker exec $(PROXY_CONTAINER) /app/force_renew
+    docker exec letsencrypt /app/force_renew
 
 test
