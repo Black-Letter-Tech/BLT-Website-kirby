@@ -1,5 +1,5 @@
 FROM nginx:1.25.0-alpine-slim
-MAINTAINER Paul Wagner, paul@oxfordservicesinc.com
+LABEL org.opencontainers.image.authors="Paul Wagner <paul@oxfordservicesinc.com>"
 
 #core apk package installs
 RUN apk update && \
@@ -75,13 +75,13 @@ COPY ./ /app
 #remove stuff we don't need or could be security problems (git repos and password files)
 RUN find . -name "*.git" -type d -print0 | xargs -0 /bin/rm -rf
 
-ENV VIRTUAL_HOST localhost
-ENV SERVER_NAME localhost
+ENV VIRTUAL_HOST=localhost
+ENV SERVER_NAME=localhost
 
 #disable pw by default; override with docker-compose
-ENV ENABLE_PW "false"
+ENV ENABLE_PW=false
 
 ENTRYPOINT ["/docker/docker-entrypoint.sh"]
 
-ENV PORT 80
+ENV PORT=80
 EXPOSE 80
