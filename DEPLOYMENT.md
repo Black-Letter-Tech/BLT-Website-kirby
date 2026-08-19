@@ -154,6 +154,11 @@ Jobs run daily at 04:00 UTC. A new full chain starts after one month. Production
 content is published from staging, so the staging content backup is the content
 recovery source.
 
+After each successful backup, a Compose-defined post-backup hook retains the
+latest three full chains and their incrementals. This provides about three
+months of history. Set `VOLUMERIZE_RETAIN_FULL_CHAINS` on both backup services
+to change the retention count. Failed backups do not trigger pruning.
+
 Create and inspect backups through the interactive menu:
 
 ```sh
@@ -173,11 +178,11 @@ docker exec "${SLD}-accounts-backups-stg" list
 
 The `list` operation can take several minutes when many chains exist.
 
-Retain only the latest complete chain:
+Run retention manually when required:
 
 ```sh
-docker exec "${SLD}-content-backups-stg" remove-all-but-n-full 1 --force
-docker exec "${SLD}-accounts-backups-stg" remove-all-but-n-full 1 --force
+docker exec "${SLD}-content-backups-stg" remove-all-but-n-full 3 --force
+docker exec "${SLD}-accounts-backups-stg" remove-all-but-n-full 3 --force
 ```
 
 This operation permanently deletes all older chains. Run a new backup and list

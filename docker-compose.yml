@@ -41,20 +41,50 @@ services:
     image: blacklabelops/volumerize
     container_name: ${SLD}-content-backups-stg
     restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /postexecute/backup
+        printf '%s\n' \
+          'if [ "$${DUPLICITY_RETURN_CODE:-1}" -eq 0 ]; then' \
+          '  echo "Pruning old backup chains; retaining $${VOLUMERIZE_RETAIN_FULL_CHAINS:-3}."' \
+          '  /etc/volumerize/remove-all-but-n-full "$${VOLUMERIZE_RETAIN_FULL_CHAINS:-3}" --force' \
+          'else' \
+          '  echo "Backup failed; skipping retention cleanup."' \
+          'fi' \
+          > /postexecute/backup/retention.sh
+        exec /opt/volumerize/docker-entrypoint.sh volumerize
     volumes:
       - content:/content:ro
     environment:
       VOLUMERIZE_FULL_IF_OLDER_THAN: 1M
+      VOLUMERIZE_RETAIN_FULL_CHAINS: 3
       VOLUMERIZE_SOURCE: /content
       VOLUMERIZE_TARGET: b2://${B2_ID}:${B2_KEY}@${B2_BUCKET}/${SLD}-backups/content-stg
   backups-accounts-stg:
     image: blacklabelops/volumerize
     container_name: ${SLD}-accounts-backups-stg
     restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /postexecute/backup
+        printf '%s\n' \
+          'if [ "$${DUPLICITY_RETURN_CODE:-1}" -eq 0 ]; then' \
+          '  echo "Pruning old backup chains; retaining $${VOLUMERIZE_RETAIN_FULL_CHAINS:-3}."' \
+          '  /etc/volumerize/remove-all-but-n-full "$${VOLUMERIZE_RETAIN_FULL_CHAINS:-3}" --force' \
+          'else' \
+          '  echo "Backup failed; skipping retention cleanup."' \
+          'fi' \
+          > /postexecute/backup/retention.sh
+        exec /opt/volumerize/docker-entrypoint.sh volumerize
     volumes:
       - accounts:/accounts:ro
     environment:
       VOLUMERIZE_FULL_IF_OLDER_THAN: 1M
+      VOLUMERIZE_RETAIN_FULL_CHAINS: 3
       VOLUMERIZE_SOURCE: /accounts
       VOLUMERIZE_TARGET: b2://${B2_ID}:${B2_KEY}@${B2_BUCKET}/${SLD}-backups/accounts-stg
 networks:
