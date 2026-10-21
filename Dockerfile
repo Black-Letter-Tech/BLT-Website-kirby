@@ -1,74 +1,59 @@
-FROM nginx:1.25.0-alpine-slim
+FROM php:8.2-fpm-alpine
 LABEL org.opencontainers.image.authors="Paul Wagner <paul@oxfordservicesinc.com>"
 
-#core apk package installs
+# nginx, runtime libraries, and tools
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache --virtual .build-deps\
-    php81\
-    php81-gd\
-    php81-pecl-imagick\
-    php81-ctype\
-    php81-curl\
-    php81-dom\
-    php81-json\
-    php81-mbstring\
-    php81-openssl\
-    php81-exif\
-    php81-fileinfo\
-    php81-intl\
-    php81-zip\
-    php81-zlib\
-    php81-fpm\
-    php81-phar\
-    php81-simplexml\
-    php81-iconv\
-    # sometimes debugging is nice
-    # php81-pecl-xdebug\
-    # required by kirby but docs say these are enabled by default
-    # php81-filter\
-    # php81-hash\
-    # php81-libxml\
-    # TODO: get opcache and jit  working https://medium.com/@edouard.courty/make-your-php-8-apps-twice-as-fast-opcache-jit-8d3542276595
-    php81-opcache\
-    # TODO: check out apcu, memcached and PDO
-    # php81-apcu\
-    # php81-memcached\
-    # php81-PDO\
-    # OLD STUFF
-    # php81-session\
-    # php81-xml\
-    # php81-tokenizer\
-    # php81-xmlwriter\
-    imagemagick\
-    curl\
+    apk add --no-cache \
+    nginx \
+    gettext \
+    imagemagick \
+    icu-libs \
+    libzip \
+    freetype \
+    libjpeg-turbo \
+    libwebp \
+    libpng \
+    libgomp \
+    curl \
     apache2-utils
-    # OLD STUFF
-    # rsync\
-    # git\
-    # openssh-client\
 
-# Small fixes
-RUN ln -s /etc/php81 /etc/php && \
-    ln -sf /usr/bin/php81 /usr/bin/php && \
-    ln -s /usr/sbin/php-fpm81 /usr/bin/php-fpm && \
-    ln -s /usr/lib/php81 /usr/lib/php && \
-    sed -i "s|;*upload_max_filesize =.*|upload_max_filesize = 100M;|i" /etc/php81/php.ini  && \
-    sed -i "s|;*post_max_size =.*|post_max_size = 100M|i" /etc/php81/php.ini  && \
-    rm -fr /var/cache/apk/*
+# PHP extensions Kirby needs beyond the image defaults.
+# The base image already ships ctype, curl, dom, fileinfo, iconv, mbstring,
+# openssl, phar, simplexml and friends.
+RUN apk add --no-cache --virtual .build-deps \
+    $PHPIZE_DEPS \
+    icu-dev \
+    libzip-dev \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    libpng-dev \
+    imagemagick-dev && \
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
+    docker-php-ext-install -j$(nproc) gd intl zip exif opcache && \
+    pecl install imagick && \
+    docker-php-ext-enable imagick && \
+    apk del .build-deps && \
+    rm -fr /tmp/pear /var/cache/apk/*
+
+# php.ini: production defaults plus Kirby upload sizes
+RUN cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
+    sed -i "s|;*upload_max_filesize =.*|upload_max_filesize = 100M|" /usr/local/etc/php/php.ini && \
+    sed -i "s|;*post_max_size =.*|post_max_size = 100M|" /usr/local/etc/php/php.ini
+
+# keep container environment visible to PHP (config.php reads getenv)
+RUN { echo '[www]'; echo 'clear_env = no'; } > /usr/local/etc/php-fpm.d/zz-env.conf
 
 # Install composer global bin
-RUN curl -sS https://getcomposer.org/installer | php &&\
-    mv composer.phar /usr/local/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-RUN mkdir /app 
-WORKDIR /app 
+RUN mkdir /app
+WORKDIR /app
 
 
 COPY ./docker /docker
-COPY ./docker/php/00_opcache.ini /etc/php81/conf.d
-# sometimes debugging is nice
-# COPY ./docker/php/50_xdebug.ini /etc/php81/conf.d
+COPY ./docker/php/00_opcache.ini /usr/local/etc/php/conf.d
 RUN chmod +x /docker/docker-entrypoint.sh
 COPY ./ /app
 
