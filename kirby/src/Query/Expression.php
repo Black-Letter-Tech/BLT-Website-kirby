@@ -25,7 +25,7 @@ class Expression
 	/**
 	 * Parses an expression string into its parts
 	 */
-	public static function factory(string $expression, Query $parent = null): static|Segments
+	public static function factory(string $expression, Query|null $parent = null): static|Segments
 	{
 		// split into different expression parts and operators
 		$parts = static::parse($expression);
@@ -62,7 +62,7 @@ class Expression
 		return preg_split(
 			'/\s+([\?\:]+)\s+|' . Arguments::OUTSIDE . '/',
 			trim($string),
-			flags: PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY
+			flags: PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
 		);
 	}
 

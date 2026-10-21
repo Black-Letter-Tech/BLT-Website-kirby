@@ -17,7 +17,7 @@ return [
 		/**
 		 * Overwrites manual sorting and sorts by the given field and sorting direction (i.e. `date desc`)
 		 */
-		'sortBy' => function (string $sortBy = null) {
+		'sortBy' => function (string|null $sortBy = null) {
 			return $sortBy;
 		},
 	],
@@ -36,6 +36,10 @@ return [
 
 			// don't allow sorting while search filter is active
 			if (empty($this->searchterm()) === false) {
+				return false;
+			}
+
+			if ($this->query !== null) {
 				return false;
 			}
 

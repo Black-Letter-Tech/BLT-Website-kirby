@@ -32,7 +32,7 @@ $cover_height     = $site->coverHeight()->isNotEmpty() ? $site->coverHeight()->t
             <?php else: ?>
             <picture>
                 <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $cover_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $cover_width, 'height' => $cover_height, 'format' => 'webp'])->url()) ?>" />
-                <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->clip(null, $cover_height)->url(), $img->crop($cover_width, $cover_height)->url()) ?>" alt="<?= $project->title()->html() ?>" width="<?= $img->clip()->width() ?>" height="<?= $img->clip()->height() ?>" loading="lazy">
+                <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->resize(null, $cover_height)->url(), $img->crop($cover_width, $cover_height)->url()) ?>" alt="<?= $project->title()->html() ?>" width="<?= $img->resize()->width() ?>" height="<?= $img->resize()->height() ?>" loading="lazy">
             </picture>
             <?php endif ?>
             <div class="uk-overlay-gradient uk-position-cover"></div>

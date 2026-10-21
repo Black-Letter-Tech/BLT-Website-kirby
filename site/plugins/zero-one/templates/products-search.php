@@ -40,18 +40,18 @@ $coverimg_height  = site()->productImageratio()->isNotEmpty() ? (site()->product
           <?php if($image = $product->gallery()->toImage()): ?>
             <picture>
               <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $coverimg_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $coverimg_width, 'height' => $coverimg_height, 'format' => 'webp'])->url()) ?>" />
-              <img src="<?php e($img->getClip() !== null, $img->clip(null, $coverimg_height)->url(), $img->crop($coverimg_width, $coverimg_height)->url()) ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $product->title()->html() ?>" width="<?= $coverimg_width ?>" height="<?= $coverimg_height ?>" loading="lazy">
+              <img src="<?php e($img->getClip() !== null, $img->resize(null, $coverimg_height)->url(), $img->crop($coverimg_width, $coverimg_height)->url()) ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $product->title()->html() ?>" width="<?= $coverimg_width ?>" height="<?= $coverimg_height ?>" loading="lazy">
             </picture>
             <?php if($image = $product->gallery()->first()->toImage()) : ?>
             <picture>
               <source type="image/webp" srcset="<?php e($image->getClip() !== null, $image->thumb(['clip' => $image->getClip(), 'height' => $coverimg_height, 'format' => 'webp'])->url(), $image->thumb(['crop' => 'true', 'width' => $coverimg_width, 'height' => $coverimg_height, 'format' => 'webp'])->url()) ?>" />
-              <img class="uk-transition-scale-up uk-position-cover" src="<?php e($image->getClip() !== null, $image->clip(null, $coverimg_height)->url(), $image->crop($coverimg_width, $coverimg_height)->url()) ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $product->title()->html() ?>" width="<?= $coverimg_width ?>" height="<?= $coverimg_height ?>" loading="lazy">
+              <img class="uk-transition-scale-up uk-position-cover" src="<?php e($image->getClip() !== null, $image->resize(null, $coverimg_height)->url(), $image->crop($coverimg_width, $coverimg_height)->url()) ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $product->title()->html() ?>" width="<?= $coverimg_width ?>" height="<?= $coverimg_height ?>" loading="lazy">
             </picture>
             <?php endif ?>
           <?php else: ?>
           <picture>
             <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $coverimg_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $coverimg_width, 'height' => $coverimg_height, 'format' => 'webp'])->url()) ?>" />
-            <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->clip(null, $coverimg_height)->url(), $img->crop($coverimg_width, $coverimg_height)->url()) ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $product->title()->html() ?>" width="<?= $coverimg_width ?>" height="<?= $coverimg_height ?>" loading="lazy">
+            <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->resize(null, $coverimg_height)->url(), $img->crop($coverimg_width, $coverimg_height)->url()) ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $product->title()->html() ?>" width="<?= $coverimg_width ?>" height="<?= $coverimg_height ?>" loading="lazy">
           </picture>
           <?php endif ?>
           <div class="uk-position-small uk-position-top-left uk-flex uk-flex-column uk-flex-wrap-top">
@@ -124,7 +124,7 @@ $coverimg_height  = site()->productImageratio()->isNotEmpty() ? (site()->product
                   data-item-description="<?= $product->productIntro()->kt()->excerpt(150) ?>"
                   <?php if($product->category()->isNotEmpty()): ?>data-item-categories="<?= $product->category() ?>"<?php endif ?>
                   <?php if($img = $product->cover()->toImage()): ?>
-                      data-item-image="<?php e($img->getClip() !== null, $img->clip(null, 300)->url(), $img->crop(300, 300)->url()) ?>"
+                      data-item-image="<?php e($img->getClip() !== null, $img->resize(null, 300)->url(), $img->crop(300, 300)->url()) ?>"
                   <?php endif ?>
                   data-item-name="<?= $product->title()->html() ?>"
                   data-item-min-quantity="<?= $product->snipcartMinquantity() ?>"

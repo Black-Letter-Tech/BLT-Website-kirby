@@ -4,7 +4,10 @@ namespace Kirby\Parsley\Schema;
 
 use DOMElement;
 use DOMText;
+use Kirby\Http\Url;
 use Kirby\Parsley\Element;
+use Kirby\Sane\Html;
+use Kirby\Toolkit\Dom;
 use Kirby\Toolkit\Str;
 
 /**
@@ -23,8 +26,7 @@ class Blocks extends Plain
 {
 	public function blockquote(Element $node): array
 	{
-		$citation = null;
-		$text     = [];
+		$text = [];
 
 		// get all the text for the quote
 		foreach ($node->children() as $child) {
@@ -36,7 +38,8 @@ class Blocks extends Plain
 				$child instanceof DOMElement &&
 				$child->tagName !== 'footer'
 			) {
-				$text[] = (new Element($child))->innerHTML($this->marks());
+				$element = new Element($child);
+				$text[]  = $element->innerHTML($this->marks());
 			}
 		}
 
@@ -44,9 +47,7 @@ class Blocks extends Plain
 		$text = implode('', array_filter($text));
 
 		// get the citation from the footer
-		if ($footer = $node->find('footer')) {
-			$citation = $footer->innerHTML($this->marks());
-		}
+		$citation = $node->find('footer')?->innerHTML($this->marks());
 
 		return [
 			'content' => [
@@ -113,17 +114,14 @@ class Blocks extends Plain
 		];
 	}
 
-	public function iframe(Element $node): array
+	public function iframe(Element $node): array|null
 	{
-		$caption = null;
-		$src     = $node->attr('src');
+		$src        = $node->attr('src') ?? '';
+		$figcaption = $node->find('ancestor::figure[1]//figcaption');
+		$caption    = $figcaption?->innerHTML($this->marks());
 
-		if ($figcaption = $node->find('ancestor::figure[1]//figcaption')) {
-			$caption = $figcaption->innerHTML($this->marks());
-
-			// avoid parsing the caption twice
-			$figcaption->remove();
-		}
+		// avoid parsing the caption twice
+		$figcaption?->remove();
 
 		// reverse engineer video URLs
 		if (preg_match('!player.vimeo.com\/video\/([0-9]+)!i', $src, $array) === 1) {
@@ -136,8 +134,9 @@ class Blocks extends Plain
 			$src = false;
 		}
 
-		// correct video URL
-		if ($src) {
+		// only convert iframes with a known video URL; any other
+		// iframe is dropped as it can't be stored safely
+		if ($src !== false) {
 			return [
 				'content' => [
 					'caption' => $caption,
@@ -147,29 +146,21 @@ class Blocks extends Plain
 			];
 		}
 
-		return [
-			'content' => [
-				'text' => $node->outerHTML()
-			],
-			'type' => 'markdown',
-		];
+		return null;
 	}
 
 	public function img(Element $node): array
 	{
-		$caption = null;
-		$link = null;
+		$link       = $node->find('ancestor::a')?->attr('href');
+		$figcaption = $node->find('ancestor::figure[1]//figcaption');
+		$caption    = $figcaption?->innerHTML($this->marks());
 
-		if ($figcaption = $node->find('ancestor::figure[1]//figcaption')) {
-			$caption = $figcaption->innerHTML($this->marks());
-
-			// avoid parsing the caption twice
-			$figcaption->remove();
+		if (Url::hasDangerousScheme($link) === true) {
+			$link = null;
 		}
 
-		if ($a = $node->find('ancestor::a')) {
-			$link = $a->attr('href');
-		}
+		// avoid parsing the caption twice
+		$figcaption?->remove();
 
 		return [
 			'content' => [
@@ -198,19 +189,21 @@ class Blocks extends Plain
 					$innerHtml .= $child->textContent;
 				} elseif ($child instanceof DOMElement) {
 					$child = new Element($child);
-
-					if (in_array($child->tagName(), ['ul', 'ol']) === true) {
-						$innerHtml .= $this->list($child);
-					} else {
-						$innerHtml .= $child->innerHTML($this->marks());
-					}
+					$list  = ['ul', 'ol'];
+					$innerHtml .= match (in_array($child->tagName(), $list)) {
+						true    => $this->list($child),
+						default => $child->innerHTML($this->marks())
+					};
 				}
 			}
 
 			$html[] = '<li>' . trim($innerHtml) . '</li>';
 		}
 
-		return '<' . $node->tagName() . '>' . implode($html) . '</' . $node->tagName() . '>';
+		$outerHtml  = '<' . $node->tagName() . '>';
+		$outerHtml .= implode($html);
+		$outerHtml .= '</' . $node->tagName() . '>';
+		return $outerHtml;
 	}
 
 	/**
@@ -369,11 +362,42 @@ class Blocks extends Plain
 		];
 	}
 
+	/**
+	 * Sanitizes raw HTML that is stored verbatim in a block
+	 * (e.g. the markdown block created from a table) with a
+	 * strict allowlist to prevent stored XSS
+	 */
+	public function sanitize(string $html): string
+	{
+		$dom = new Dom($html);
+
+		// reuse the options of the HTML sane handler
+		$dom->sanitize([
+			...Html::options(isExternal: false),
+			'allowedTags' => [
+				...Html::$allowedTags,
+				'caption'  => true,
+				'col'      => ['span'],
+				'colgroup' => ['span'],
+				'img'      => ['alt', 'height', 'src', 'width'],
+				'table'    => true,
+				'tbody'    => true,
+				'td'       => ['colspan', 'headers', 'rowspan'],
+				'tfoot'    => true,
+				'th'       => ['abbr', 'colspan', 'headers', 'rowspan', 'scope'],
+				'thead'    => true,
+				'tr'       => true,
+			],
+		]);
+
+		return $dom->toString();
+	}
+
 	public function table(Element $node): array
 	{
 		return [
 			'content' => [
-				'text' => $node->outerHTML(),
+				'text' => $this->sanitize($node->outerHTML()),
 			],
 			'type' => 'markdown',
 		];

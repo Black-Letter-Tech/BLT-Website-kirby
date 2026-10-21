@@ -19,6 +19,16 @@ class Cookie
 {
 	/**
 	 * Key to use for cookie signing
+	 *
+	 * A hardcoded default is used intentionally: there is no install step
+	 * during which a random key could be generated and persisted. Kirby goes
+	 * live the moment files are present on the server, so there is no defined
+	 * point at which to write a one-time secret. Config files are typically
+	 * kept in version control and cannot be written by the system without
+	 * causing merge conflicts. No value in $_SERVER is both universally
+	 * available across hosting environments and stable enough to serve as a
+	 * key. Sites with security requirements must override this property with
+	 * a secret random value before the first cookie is set.
 	 */
 	public static string $key = 'KirbyHttpCookieKey';
 
@@ -39,8 +49,11 @@ class Cookie
 	 * @return bool true: cookie was created,
 	 *              false: cookie creation failed
 	 */
-	public static function set(string $key, string $value, array $options = []): bool
-	{
+	public static function set(
+		string $key,
+		string $value,
+		array $options = []
+	): bool {
 		// modify CMS caching behavior
 		static::trackUsage($key);
 
@@ -59,8 +72,11 @@ class Cookie
 		$_COOKIE[$key] = $value;
 
 		// store the cookie
-		$options = compact('expires', 'path', 'domain', 'secure', 'httponly', 'samesite');
-		return setcookie($key, $value, $options);
+		return setcookie(
+			$key,
+			$value,
+			compact('expires', 'path', 'domain', 'secure', 'httponly', 'samesite')
+		);
 	}
 
 	/**
@@ -70,13 +86,13 @@ class Cookie
 	 */
 	public static function lifetime(int $minutes): int
 	{
+		// absolute timestamp
 		if ($minutes > 1000000000) {
-			// absolute timestamp
 			return $minutes;
 		}
 
+		// minutes from now
 		if ($minutes > 0) {
-			// minutes from now
 			return time() + ($minutes * 60);
 		}
 
@@ -100,8 +116,11 @@ class Cookie
 	 * @return bool true: cookie was created,
 	 *              false: cookie creation failed
 	 */
-	public static function forever(string $key, string $value, array $options = []): bool
-	{
+	public static function forever(
+		string $key,
+		string $value,
+		array $options = []
+	): bool {
 		// 9999-12-31 if supported (lower on 32-bit servers)
 		$options['lifetime'] = min(253402214400, PHP_INT_MAX);
 		return static::set($key, $value, $options);
@@ -111,10 +130,8 @@ class Cookie
 	 * Get a cookie value
 	 *
 	 * <code>
-	 *
 	 * cookie::get('mycookie', 'peter');
 	 * // sample output: 'hello' or if the cookie is not set 'peter'
-	 *
 	 * </code>
 	 *
 	 * @param string|null $key The name of the cookie
@@ -122,8 +139,10 @@ class Cookie
 	 *                             if the cookie has not been found
 	 * @return string|array|null The found value
 	 */
-	public static function get(string|null $key = null, string|null $default = null): string|array|null
-	{
+	public static function get(
+		string|null $key = null,
+		string|null $default = null
+	): string|array|null {
 		if ($key === null) {
 			return $_COOKIE;
 		}
@@ -131,8 +150,11 @@ class Cookie
 		// modify CMS caching behavior
 		static::trackUsage($key);
 
-		$value = $_COOKIE[$key] ?? null;
-		return empty($value) ? $default : static::parse($value);
+		if ($value = $_COOKIE[$key] ?? null) {
+			return static::parse($value);
+		}
+
+		return $default;
 	}
 
 	/**
@@ -149,7 +171,12 @@ class Cookie
 	 */
 	protected static function hmac(string $value): string
 	{
-		return hash_hmac('sha1', $value, static::$key);
+		// prefer the option if it was set, otherwise use the value
+		// set directly to this class (for backwards-compatibility)
+		// or fall back to the fixed default set directly with the prop
+		$key = App::instance(lazy: true)?->option('cookie.key') ?: static::$key;
+
+		return hash_hmac('sha1', $value, $key);
 	}
 
 	/**

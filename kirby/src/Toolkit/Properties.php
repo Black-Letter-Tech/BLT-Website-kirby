@@ -7,6 +7,8 @@ use ReflectionMethod;
 
 /**
  * Properties
+ * @deprecated 4.0.0 Will be remove in Kirby 5
+ * @codeCoverageIgnore
  *
  * @package   Kirby Toolkit
  * @author    Bastian Allgeier <bastian@getkirby.com>
@@ -94,7 +96,7 @@ trait Properties
 		}
 	}
 
-	protected function setProperties($props, array $keys = null)
+	protected function setProperties($props, array|null $keys = null)
 	{
 		foreach (get_object_vars($this) as $name => $default) {
 			if ($name === 'propertyData') {

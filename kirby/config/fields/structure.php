@@ -1,8 +1,11 @@
 <?php
 
 use Kirby\Data\Data;
+use Kirby\Exception\InvalidArgumentException;
 use Kirby\Form\Form;
+use Kirby\Toolkit\A;
 use Kirby\Toolkit\I18n;
+use Kirby\Toolkit\Str;
 
 return [
 	'mixins' => ['min'],
@@ -42,51 +45,51 @@ return [
 		/**
 		 * Set the default rows for the structure
 		 */
-		'default' => function (array $default = null) {
+		'default' => function (array|null $default = null) {
 			return $default;
 		},
 
 		/**
 		 * Fields setup for the structure form. Works just like fields in regular forms.
 		 */
-		'fields' => function (array $fields) {
+		'fields' => function (array $fields = []) {
 			return $fields;
 		},
 		/**
 		 * The number of entries that will be displayed on a single page. Afterwards pagination kicks in.
 		 */
-		'limit' => function (int $limit = null) {
+		'limit' => function (int|null $limit = null) {
 			return $limit;
 		},
 		/**
 		 * Maximum allowed entries in the structure. Afterwards the "Add" button will be switched off.
 		 */
-		'max' => function (int $max = null) {
+		'max' => function (int|null $max = null) {
 			return $max;
 		},
 		/**
 		 * Minimum required entries in the structure
 		 */
-		'min' => function (int $min = null) {
+		'min' => function (int|null $min = null) {
 			return $min;
 		},
 		/**
 		 * Toggles adding to the top or bottom of the list
 		 */
-		'prepend' => function (bool $prepend = null) {
+		'prepend' => function (bool|null $prepend = null) {
 			return $prepend;
 		},
 		/**
 		 * Toggles drag & drop sorting
 		 */
-		'sortable' => function (bool $sortable = null) {
+		'sortable' => function (bool|null $sortable = null) {
 			return $sortable;
 		},
 		/**
 		 * Sorts the entries by the given field and order (i.e. `title desc`)
 		 * Drag & drop is disabled in this case
 		 */
-		'sortBy' => function (string $sort = null) {
+		'sortBy' => function (string|null $sort = null) {
 			return $sort;
 		}
 	],
@@ -99,57 +102,54 @@ return [
 		},
 		'fields' => function () {
 			if (empty($this->fields) === true) {
-				throw new Exception('Please provide some fields for the structure');
+				return [];
 			}
 
 			return $this->form()->fields()->toArray();
 		},
 		'columns' => function () {
-			$columns = [];
-			$mobile  = 0;
+			$columns   = [];
+			$blueprint = $this->columns;
 
-			if (empty($this->columns) === true) {
-				foreach ($this->fields as $field) {
-					// Skip hidden and unsaveable fields
-					// They should never be included as column
-					if ($field['type'] === 'hidden' || $field['saveable'] === false) {
-						continue;
-					}
+			// if no custom columns have been defined,
+			// gather all fields as columns
+			if (empty($blueprint) === true) {
+				// skip hidden fields
+				$fields    = array_filter(
+					$this->fields,
+					fn ($field) =>
+						$field['type'] !== 'hidden' && $field['hidden'] !== true
+				);
+				$fields    = array_column($fields, 'name');
+				$blueprint = array_fill_keys($fields, true);
+			}
 
-					$columns[$field['name']] = [
-						'type'  => $field['type'],
-						'label' => $field['label'] ?? $field['name']
-					];
+			foreach ($blueprint as $name => $column) {
+				$field = $this->fields[$name] ?? null;
+
+				// Skip empty and unsaveable fields
+				// They should never be included as column
+				if (
+					empty($field) === true ||
+					$field['saveable'] === false
+				) {
+					continue;
 				}
-			} else {
-				foreach ($this->columns as $columnName => $columnProps) {
-					if (is_array($columnProps) === false) {
-						$columnProps = [];
-					}
 
-					$field = $this->fields[$columnName] ?? null;
-
-					if (
-						empty($field) === true ||
-						$field['saveable'] === false
-					) {
-						continue;
-					}
-
-					if (($columnProps['mobile'] ?? false) === true) {
-						$mobile++;
-					}
-
-					$columns[$columnName] = array_merge([
-						'type'  => $field['type'],
-						'label' => $field['label'] ?? $field['name']
-					], $columnProps);
+				if (is_array($column) === false) {
+					$column = [];
 				}
+
+				$column['type']  ??= $field['type'];
+				$column['label'] ??= $field['label'] ?? $name;
+				$column['label']   = I18n::translate($column['label'], $column['label']);
+
+				$columns[$name] = $column;
 			}
 
 			// make the first column visible on mobile
 			// if no other mobile columns are defined
-			if ($mobile === 0) {
+			if (in_array(true, array_column($columns, 'mobile')) === false) {
 				$columns[array_key_first($columns)]['mobile'] = true;
 			}
 
@@ -173,34 +173,53 @@ return [
 		},
 		'form' => function (array $values = []) {
 			return new Form([
-				'fields' => $this->attrs['fields'],
+				'fields' => $this->attrs['fields'] ?? [],
 				'values' => $values,
 				'model'  => $this->model
 			]);
 		},
 	],
-	'api' => function () {
-		return [
-			[
-				'pattern' => 'validate',
-				'method'  => 'ALL',
-				'action'  => function () {
-					return array_values($this->field()->form($this->requestBody())->errors());
-				}
-			]
-		];
-	},
 	'save' => function ($value) {
 		$data = [];
 
 		foreach ($value as $row) {
-			$data[] = $this->form($row)->content();
+			$row = $this->form($row)->content();
+
+			// remove frontend helper id
+			unset($row['_id']);
+
+			$data[] = $row;
 		}
 
 		return $data;
 	},
 	'validations' => [
 		'min',
-		'max'
+		'max',
+		'structure' => function ($value) {
+			if (empty($value) === true) {
+				return true;
+			}
+
+			$values = A::wrap($value);
+
+			foreach ($values as $index => $value) {
+				$form = $this->form($value);
+
+				foreach ($form->fields() as $field) {
+					$errors = $field->errors();
+
+					if (empty($errors) === false) {
+						throw new InvalidArgumentException([
+							'key'  => 'structure.validation',
+							'data' => [
+								'field' => $field->label() ?? Str::ucfirst($field->name()),
+								'index' => $index + 1
+							]
+						]);
+					}
+				}
+			}
+		}
 	]
 ];

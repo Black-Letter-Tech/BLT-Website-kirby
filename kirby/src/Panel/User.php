@@ -3,6 +3,7 @@
 namespace Kirby\Panel;
 
 use Kirby\Cms\File as CmsFile;
+use Kirby\Cms\ModelWithContent;
 use Kirby\Cms\Translation;
 use Kirby\Cms\Url;
 use Kirby\Filesystem\Asset;
@@ -20,6 +21,11 @@ use Kirby\Toolkit\I18n;
  */
 class User extends Model
 {
+	/**
+	 * @var \Kirby\Cms\User
+	 */
+	protected ModelWithContent $model;
+
 	/**
 	 * Breadcrumb array
 	 */
@@ -64,8 +70,17 @@ class User extends Model
 			'dialog'   => $url . '/changeRole',
 			'icon'     => 'bolt',
 			'text'     => I18n::translate('user.changeRole'),
-			'disabled' => $this->isDisabledDropdownOption('changeRole', $options, $permissions)
+			'disabled' => $this->isDisabledDropdownOption('changeRole', $options, $permissions) || $this->model->roles()->count() < 2
 		];
+
+		$result[] = [
+			'dialog'   => $url . '/changeLanguage',
+			'icon'     => 'translate',
+			'text'     => I18n::translate('user.changeLanguage'),
+			'disabled' => $this->isDisabledDropdownOption('changeLanguage', $options, $permissions)
+		];
+
+		$result[] = '-';
 
 		$result[] = [
 			'dialog'   => $url . '/changePassword',
@@ -74,12 +89,23 @@ class User extends Model
 			'disabled' => $this->isDisabledDropdownOption('changePassword', $options, $permissions)
 		];
 
-		$result[] = [
-			'dialog'   => $url . '/changeLanguage',
-			'icon'     => 'globe',
-			'text'     => I18n::translate('user.changeLanguage'),
-			'disabled' => $this->isDisabledDropdownOption('changeLanguage', $options, $permissions)
-		];
+		if ($this->model->kirby()->system()->is2FAWithTOTP() === true) {
+			if ($account || $this->model->kirby()->user()->isAdmin()) {
+				if ($this->model->secret('totp') !== null) {
+					$result[] = [
+						'dialog'   => $url . '/totp/disable',
+						'icon'     => 'qr-code',
+						'text'     => I18n::translate('login.totp.disable.option'),
+					];
+				} elseif ($account) {
+					$result[] = [
+						'dialog'   => $url . '/totp/enable',
+						'icon'     => 'qr-code',
+						'text'     => I18n::translate('login.totp.enable.option')
+					];
+				}
+			}
+		}
 
 		$result[] = '-';
 
@@ -176,11 +202,12 @@ class User extends Model
 	 */
 	public function prevNext(): array
 	{
-		$user = $this->model;
+		$user     = $this->model;
+		$siblings = $user->siblings()->filter('isListable', true);
 
 		return [
-			'next' => fn () => $this->toPrevNextLink($user->next(), 'username'),
-			'prev' => fn () => $this->toPrevNextLink($user->prev(), 'username')
+			'next' => fn () => $this->toPrevNextLink($user->next($siblings), 'username'),
+			'prev' => fn () => $this->toPrevNextLink($user->prev($siblings), 'username')
 		];
 	}
 
@@ -192,18 +219,22 @@ class User extends Model
 	 */
 	public function props(): array
 	{
-		$user    = $this->model;
-		$account = $user->isLoggedIn();
-		$avatar  = $user->avatar();
+		$user        = $this->model;
+		$account     = $user->isLoggedIn();
+		$permissions = $this->options();
 
 		return array_merge(
 			parent::props(),
-			$account ? [] : $this->prevNext(),
+			$this->prevNext(),
 			[
-				'blueprint' => $this->model->role()->name(),
+				'blueprint'         => $this->model->role()->name(),
+				'canChangeEmail'    => $permissions['changeEmail'],
+				'canChangeLanguage' => $permissions['changeLanguage'],
+				'canChangeName'     => $permissions['changeName'],
+				'canChangeRole'     => $this->model->roles()->count() > 1,
 				'model' => [
 					'account'  => $account,
-					'avatar'   => $avatar ? $avatar->url() : null,
+					'avatar'   => $user->avatar()?->url(),
 					'content'  => $this->content(),
 					'email'    => $user->email(),
 					'id'       => $user->id(),
@@ -212,6 +243,7 @@ class User extends Model
 					'name'     => $user->name()->toString(),
 					'role'     => $user->role()->title(),
 					'username' => $user->username(),
+					'uuid'     => fn () => $user->uuid()?->toString()
 				]
 			]
 		);

@@ -13,11 +13,11 @@ if ($block->location() == 'web' && $block->src()->isNotEmpty()) {
 } elseif ($image = $block->image()->toImage()) {
     $alt      = $alt->isNotEmpty() ? $alt : $image->alt();
     $caption  = $block->caption()->isNotEmpty() ? $caption : $image->caption();
-    $src      = $block->resizeWidth()->isNotEmpty() ? $image->clip($block->resizeWidth()->toInt())->url() : $image->clip()->url();
+    $src      = $block->resizeWidth()->isNotEmpty() ? $image->resize($block->resizeWidth()->toInt())->url() : $image->resize()->url();
     $srcurl   = $image->url();
     $srcset   = $block->resizeWidth()->isNotEmpty() ? $image->thumb(['clip' => $image->getClip(), 'width' => $block->resizeWidth()->toInt(), 'format' => 'webp'])->url() : $image->thumb(['clip' => $image->getClip(), 'format' => 'webp'])->url();
-    $width    = $block->resizeWidth()->isNotEmpty() ? $image->clip($block->resizeWidth()->toInt())->width() : $image->clip()->width();
-    $height   = $block->resizeWidth()->isNotEmpty() ? $image->clip($block->resizeWidth()->toInt())->height() : $image->clip()->height();
+    $width    = $block->resizeWidth()->isNotEmpty() ? $image->resize($block->resizeWidth()->toInt())->width() : $image->resize()->width();
+    $height   = $block->resizeWidth()->isNotEmpty() ? $image->resize($block->resizeWidth()->toInt())->height() : $image->resize()->height();
 }
 
 ?>

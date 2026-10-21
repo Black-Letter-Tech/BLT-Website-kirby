@@ -3,10 +3,14 @@
 namespace Kirby\Cms;
 
 use Kirby\Exception\DuplicateException;
+use Kirby\Exception\Exception;
 use Kirby\Exception\InvalidArgumentException;
 use Kirby\Exception\LogicException;
+use Kirby\Exception\NotFoundException;
 use Kirby\Exception\PermissionException;
+use Kirby\Filesystem\F;
 use Kirby\Toolkit\Str;
+use Kirby\Toolkit\Totp;
 use Kirby\Toolkit\V;
 use SensitiveParameter;
 
@@ -22,11 +26,15 @@ use SensitiveParameter;
 class UserRules
 {
 	/**
+	 * Pattern of safe characters allowed in a user id.
+	 * Restricting ids this way prevents path traversal
+	 * into subfolders of the accounts root.
+	 */
+	public const ID_PATTERN = '/^[a-z0-9_-]+\z/i';
+
+	/**
 	 * Validates if the email address can be changed
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param string $email
-	 * @return bool
 	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to change the address
 	 */
 	public static function changeEmail(User $user, string $email): bool
@@ -44,9 +52,6 @@ class UserRules
 	/**
 	 * Validates if the language can be changed
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param string $language
-	 * @return bool
 	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to change the language
 	 */
 	public static function changeLanguage(User $user, string $language): bool
@@ -64,9 +69,6 @@ class UserRules
 	/**
 	 * Validates if the name can be changed
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param string $name
-	 * @return bool
 	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to change the name
 	 */
 	public static function changeName(User $user, string $name): bool
@@ -104,25 +106,11 @@ class UserRules
 	/**
 	 * Validates if the role can be changed
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param string $role
-	 * @return bool
 	 * @throws \Kirby\Exception\LogicException If the user is the last admin
 	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to change the role
 	 */
 	public static function changeRole(User $user, string $role): bool
 	{
-		// protect admin from role changes by non-admin
-		if (
-			$user->kirby()->user()->isAdmin() === false &&
-			$user->isAdmin() === true
-		) {
-			throw new PermissionException([
-				'key'  => 'user.changeRole.permission',
-				'data' => ['name' => $user->username()]
-			]);
-		}
-
 		// prevent non-admins making a user to admin
 		if (
 			$user->kirby()->user()->isAdmin() === false &&
@@ -133,8 +121,7 @@ class UserRules
 			]);
 		}
 
-		static::validRole($user, $role);
-
+		// prevent demoting the last admin
 		if ($role !== 'admin' && $user->isLastAdmin() === true) {
 			throw new LogicException([
 				'key'  => 'user.changeRole.lastAdmin',
@@ -142,11 +129,48 @@ class UserRules
 			]);
 		}
 
+		// check permissions
 		if ($user->permissions()->changeRole() !== true) {
 			throw new PermissionException([
 				'key'  => 'user.changeRole.permission',
 				'data' => ['name' => $user->username()]
 			]);
+		}
+
+		// prevent changing to role that is not available for user
+		if ($user->roles()->find($role) instanceof Role === false) {
+			throw new InvalidArgumentException([
+				'key' => 'user.role.invalid',
+			]);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validates if the TOTP can be changed
+	 * @since 4.0.0
+	 *
+	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to change the password
+	 */
+	public static function changeTotp(
+		User $user,
+		#[SensitiveParameter]
+		string|null $secret
+	): bool {
+		$currentUser = $user->kirby()->user();
+
+		if (
+			$currentUser->is($user) === false &&
+			$currentUser->isAdmin() === false
+		) {
+			throw new PermissionException('You cannot change the time-based code for ' . $user->email());
+		}
+
+		// safety check to avoid accidental insecure secrets;
+		// throws an exception for secrets of the wrong length
+		if ($secret !== null) {
+			new Totp($secret);
 		}
 
 		return true;
@@ -155,9 +179,6 @@ class UserRules
 	/**
 	 * Validates if the user can be created
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param array $props
-	 * @return bool
 	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to create a new user
 	 */
 	public static function create(User $user, array $props = []): bool
@@ -184,22 +205,27 @@ class UserRules
 			return true;
 		}
 
-		// only admins are allowed to add admins
-		$role = $props['role'] ?? null;
+		// allow to create the first user
+		if ($user->kirby()->users()->count() === 0) {
+			return true;
+		}
 
-		if ($role === 'admin' && $currentUser?->isAdmin() === false) {
+		// check user permissions
+		if ($user->permissions()->create() !== true) {
 			throw new PermissionException([
 				'key' => 'user.create.permission'
 			]);
 		}
 
-		// check user permissions (if not on install)
+		$role = $props['role'] ?? null;
+
+		// prevent creating a role that is not available for user
 		if (
-			$user->kirby()->users()->count() > 0 &&
-			$user->permissions()->create() !== true
+			in_array($role, [null, 'default', 'nobody'], true) === false &&
+			$user->kirby()->roles()->canBeCreated()->find($role) instanceof Role === false
 		) {
-			throw new PermissionException([
-				'key' => 'user.create.permission'
+			throw new InvalidArgumentException([
+				'key' => 'user.role.invalid',
 			]);
 		}
 
@@ -207,10 +233,32 @@ class UserRules
 	}
 
 	/**
+	 * Validates if a new avatar can be created
+	 *
+	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to create a new avatar
+	 */
+	public static function createAvatar(User $user, string $source, string $extension): bool
+	{
+		if ($user->permissions()->can('update') !== true) {
+			throw new PermissionException([
+				'key'  => 'user.update.permission',
+				'data' => ['name' => $user->username()]
+			]);
+		}
+
+		if ($user->avatar() !== null) {
+			throw new DuplicateException([
+				'key'  => 'file.duplicate',
+				'data' => ['filename' => $user->avatar()->filename()]
+			]);
+		}
+
+		return static::validAvatar($user, $source, $extension);
+	}
+
+	/**
 	 * Validates if the user can be deleted
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @return bool
 	 * @throws \Kirby\Exception\LogicException If this is the last user or last admin, which cannot be deleted
 	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to delete this user
 	 */
@@ -237,16 +285,63 @@ class UserRules
 	}
 
 	/**
+	 * Validates if the avatar for the user can be deleted
+	 *
+	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to delete this user's avatar
+	 */
+	public static function deleteAvatar(User $user): bool
+	{
+		if ($user->permissions()->can('update') !== true) {
+			throw new PermissionException([
+				'key'  => 'user.update.permission',
+				'data' => ['name' => $user->username()]
+			]);
+		}
+
+		if ($user->avatar() === null) {
+			throw new NotFoundException([
+				'key'  => 'file.notFound',
+				'data' => ['filename' => 'avatar']
+			]);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validates if the avatar can be replaced
+	 *
+	 * @throws \Kirby\Exception\PermissionException If the user is not allowed to change the avatar
+	 */
+	public static function replaceAvatar(User $user, string $source, string $extension): bool
+	{
+		if ($user->permissions()->can('update') !== true) {
+			throw new PermissionException([
+				'key'  => 'user.update.permission',
+				'data' => ['name' => $user->username()]
+			]);
+		}
+
+		if ($user->avatar() === null) {
+			throw new NotFoundException([
+				'key'  => 'file.notFound',
+				'data' => ['filename' => 'avatar']
+			]);
+		}
+
+		return static::validAvatar($user, $source, $extension);
+	}
+
+	/**
 	 * Validates if the user can be updated
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param array $values
-	 * @param array $strings
-	 * @return bool
 	 * @throws \Kirby\Exception\PermissionException If the user it not allowed to update this user
 	 */
-	public static function update(User $user, array $values = [], array $strings = []): bool
-	{
+	public static function update(
+		User $user,
+		array $values = [],
+		array $strings = []
+	): bool {
 		if ($user->permissions()->update() !== true) {
 			throw new PermissionException([
 				'key'  => 'user.update.permission',
@@ -258,17 +353,42 @@ class UserRules
 	}
 
 	/**
+	 * Validates an avatar source file and extension
+	 */
+	public static function validAvatar(User $user, string $source, string $extension): bool
+	{
+		$type = F::extensionToType($extension);
+
+		if ($type !== 'image') {
+			throw new Exception([
+				'key'  => 'file.type.invalid',
+				'data' => compact('type')
+			]);
+		}
+
+		$mime = F::mime($source);
+
+		if (Str::startsWith($mime, 'image/') !== true) {
+			throw new Exception([
+				'key'  => 'file.mime.invalid',
+				'data' => compact('mime')
+			]);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Validates an email address
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param string $email
-	 * @param bool $strict
-	 * @return bool
 	 * @throws \Kirby\Exception\DuplicateException If the email address already exists
 	 * @throws \Kirby\Exception\InvalidArgumentException If the email address is invalid
 	 */
-	public static function validEmail(User $user, string $email, bool $strict = false): bool
-	{
+	public static function validEmail(
+		User $user,
+		string $email,
+		bool $strict = false
+	): bool {
 		if (V::email($email ?? null) === false) {
 			throw new InvalidArgumentException([
 				'key' => 'user.email.invalid',
@@ -294,15 +414,17 @@ class UserRules
 	/**
 	 * Validates a user id
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param string $id
-	 * @return bool
 	 * @throws \Kirby\Exception\DuplicateException If the user already exists
+	 * @throws \Kirby\Exception\InvalidArgumentException If the id is not valid or a reserved word
 	 */
 	public static function validId(User $user, string $id): bool
 	{
-		if ($id === 'account') {
-			throw new InvalidArgumentException('"account" is a reserved word and cannot be used as user id');
+		if (V::match($id, static::ID_PATTERN) !== true) {
+			throw new InvalidArgumentException('"' . $id . '" is not a valid user id');
+		}
+
+		if (in_array($id, ['account', 'kirby', 'nobody']) === true) {
+			throw new InvalidArgumentException('"' . $id . '" is a reserved word and cannot be used as user id');
 		}
 
 		if ($user->kirby()->users()->find($id)) {
@@ -315,9 +437,6 @@ class UserRules
 	/**
 	 * Validates a user language code
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param string $language
-	 * @return bool
 	 * @throws \Kirby\Exception\InvalidArgumentException If the language does not exist
 	 */
 	public static function validLanguage(User $user, string $language): bool
@@ -341,9 +460,20 @@ class UserRules
 		#[SensitiveParameter]
 		string $password
 	): bool {
+		// too short passwords are ineffective
 		if (Str::length($password ?? null) < 8) {
 			throw new InvalidArgumentException([
 				'key' => 'user.password.invalid',
+			]);
+		}
+
+		// too long passwords can cause DoS attacks
+		// and are therefore blocked in the auth system
+		// (blocked here as well to avoid passwords
+		// that cannot be used to log in)
+		if (Str::length($password ?? null) > 1000) {
+			throw new InvalidArgumentException([
+				'key' => 'user.password.excessive',
 			]);
 		}
 
@@ -353,10 +483,8 @@ class UserRules
 	/**
 	 * Validates a user role
 	 *
-	 * @param \Kirby\Cms\User $user
-	 * @param string $role
-	 * @return bool
 	 * @throws \Kirby\Exception\InvalidArgumentException If the user role does not exist
+	 * @deprecated 4.5.0
 	 */
 	public static function validRole(User $user, string $role): bool
 	{

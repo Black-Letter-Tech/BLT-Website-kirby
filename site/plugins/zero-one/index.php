@@ -330,6 +330,13 @@ Kirby::plugin('zero/zero-one', [
       ],
 
       'fieldMethods' => [
+        // toImage/toImages came from k3-image-clip; map them to core toFile/toFiles
+        'toImage' => function ($field) {
+            return $field->toFile();
+        },
+        'toImages' => function ($field) {
+            return $field->toFiles();
+        },
         'price' => function ($field) {
             return number_format((float)$field->value, 2, site()->decimalSeparator(), site()->thousandSeparator());
         },

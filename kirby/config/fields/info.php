@@ -12,7 +12,6 @@ return [
 		'before'      => null,
 		'default'     => null,
 		'disabled'    => null,
-		'icon'        => null,
 		'placeholder' => null,
 		'required'    => null,
 		'translate'   => null,
@@ -27,7 +26,7 @@ return [
 		/**
 		 * Change the design of the info box
 		 */
-		'theme' => function (string $theme = null) {
+		'theme' => function (string|null $theme = null) {
 			return $theme;
 		}
 	],

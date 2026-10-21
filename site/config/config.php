@@ -30,20 +30,6 @@ return [
     'medienbaecker.autoresize.maxWidth' => 2500,
     'medienbaecker.autoresize.quality' => 85,
 
-    // Commentions plugin https://github.com/sebastiangreger/kirby3-commentions
-    'sgkirby.commentions.templatesWithComments' => ['article'],
-    'sgkirby.commentions.templatesWithWebmentions' => [''],
-    'sgkirby.commentions.hideforms' => false, /* Comment form hide buttom, if true */
-    'sgkirby.commentions.expand' => true, /* Webmention form hide buttom, if true */
-    'sgkirby.commentions.allowlinks' => true, /* Allow links in comments, if true */
-    'sgkirby.commentions.autolinks' => true,  /* Automatically recognize URLs in comments and turn them into links. Has no effect, if allowlinks is false. */
-    'sgkirby.commentions.commentfields' => [
-      'name' => true,  // include name field and mark as required
-      'email'=> true,  // include email as optional field
-      'website',       // include optional website field
-    ],
-    'sgkirby.commentions.secret' => '<YOUR-SECRET>', // A valid secret key must be at least 10 characters long and may NOT include any of the following: & % # + nor a space sign .
-
     // https://getkirby.com/docs/reference/system/options/thumbs
     'thumbs' => [
       'quality' => '85',

@@ -60,10 +60,6 @@
 <?php endif ?>
 <?= js('@auto') ?>
 
-<?php if($page->template() == "article" and $site->children()->findBy('intendedTemplate', 'blog')->webmentions() == "true"): ?>
-<?php commentions('endpoints') ?>
-<?php endif ?>
-
 <?php if($site->headCustomCode()->isNotEmpty()): ?>
 <?= $site->headCustomCode()->value() ?>
 <?php endif ?>

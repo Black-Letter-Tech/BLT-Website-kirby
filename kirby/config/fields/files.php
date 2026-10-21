@@ -1,5 +1,6 @@
 <?php
 
+use Kirby\Cms\ModelWithContent;
 use Kirby\Data\Data;
 use Kirby\Toolkit\A;
 
@@ -36,7 +37,10 @@ return [
 		'parentModel' => function () {
 			if (
 				is_string($this->parent) === true &&
-				$model = $this->model()->query($this->parent, 'Kirby\Cms\Model')
+				$model = $this->model()->query(
+					$this->parent,
+					ModelWithContent::class
+				)
 			) {
 				return $model;
 			}
@@ -78,7 +82,12 @@ return [
 					$id !== null &&
 					($file = $this->kirby()->file($id, $this->model()))
 				) {
-					$files[] = $this->fileResponse($file);
+					// never disclose a file the current user must not list,
+					// but keep its ID to not drop it from the value on save
+					$files[] = match ($file->isListable()) {
+						true  => $this->fileResponse($file),
+						false => $this->protectedResponse($id)
+					};
 				}
 			}
 

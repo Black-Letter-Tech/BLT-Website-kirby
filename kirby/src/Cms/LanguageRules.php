@@ -20,14 +20,13 @@ class LanguageRules
 	/**
 	 * Validates if the language can be created
 	 *
-	 * @param \Kirby\Cms\Language $language
-	 * @return bool
 	 * @throws \Kirby\Exception\DuplicateException If the language already exists
 	 */
 	public static function create(Language $language): bool
 	{
 		static::validLanguageCode($language);
 		static::validLanguageName($language);
+		static::validLanguageVariables($language);
 
 		if ($language->exists() === true) {
 			throw new DuplicateException([
@@ -43,20 +42,19 @@ class LanguageRules
 
 	/**
 	 * Validates if the language can be updated
-	 *
-	 * @param \Kirby\Cms\Language $language
 	 */
-	public static function update(Language $language)
-	{
+	public static function update(
+		Language $language,
+		Language|null $oldLanguage = null
+	): void {
 		static::validLanguageCode($language);
 		static::validLanguageName($language);
+		static::validLanguageVariables($language, $oldLanguage);
 	}
 
 	/**
 	 * Validates if the language code is formatted correctly
 	 *
-	 * @param \Kirby\Cms\Language $language
-	 * @return bool
 	 * @throws \Kirby\Exception\InvalidArgumentException If the language code is not valid
 	 */
 	public static function validLanguageCode(Language $language): bool
@@ -77,8 +75,6 @@ class LanguageRules
 	/**
 	 * Validates if the language name is formatted correctly
 	 *
-	 * @param \Kirby\Cms\Language $language
-	 * @return bool
 	 * @throws \Kirby\Exception\InvalidArgumentException If the language name is invalid
 	 */
 	public static function validLanguageName(Language $language): bool
@@ -94,5 +90,54 @@ class LanguageRules
 		}
 
 		return true;
+	}
+
+	/**
+	 * Validates the custom variables of a language. Only keys that are
+	 * new or whose value changed are checked, so that a variable which
+	 * is already stored never blocks an unrelated update.
+	 *
+	 * @throws \Kirby\Exception\InvalidArgumentException If a variable key is invalid
+	 * @since 4.9.6
+	 */
+	public static function validLanguageVariables(
+		Language $newLanguage,
+		Language|null $oldLanguage = null
+	): void {
+		$old     = $oldLanguage?->translations() ?? [];
+		$changed = array_filter(
+			$newLanguage->translations(),
+			fn ($value, $key) => ($old[$key] ?? null) !== $value,
+			ARRAY_FILTER_USE_BOTH
+		);
+
+		if ($changed === []) {
+			return;
+		}
+
+		$core = App::instance()->coreI18nStrings($newLanguage->code());
+
+		foreach (array_keys($changed) as $key) {
+			if (is_numeric($key) === true) {
+				throw new InvalidArgumentException([
+					'key' => 'language.variable.numeric'
+				]);
+			}
+
+			if ($key === '') {
+				throw new InvalidArgumentException([
+					'key' => 'language.variable.key'
+				]);
+			}
+
+			if (isset($core[$key]) === true) {
+				throw new InvalidArgumentException([
+					'key'  => 'language.variable.core',
+					'data' => [
+						'key' => $key
+					]
+				]);
+			}
+		}
 	}
 }

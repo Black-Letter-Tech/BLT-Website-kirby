@@ -12,22 +12,17 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
-        '2cffec82183ee1cea088009cef9a6fc3' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.composer.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         'f864ae44e8154e5ff6f4eec32f46d37f' => __DIR__ . '/../..' . '/kirby/config/setup.php',
         '87988fc7b1c1f093da22a1a3de972f3a' => __DIR__ . '/../..' . '/kirby/config/helpers.php',
     );
 
     public static $prefixLengthsPsr4 = array (
-        's' => 
-        array (
-            'sgkirby\\Commentions\\' => 20,
-        ),
-        'W' => 
+        'W' =>
         array (
             'Whoops\\' => 7,
         ),
-        'S' => 
+        'S' =>
         array (
             'Symfony\\Polyfill\\Php80\\' => 23,
             'Symfony\\Polyfill\\Mbstring\\' => 26,
@@ -36,151 +31,139 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
             'Symfony\\Polyfill\\Ctype\\' => 23,
             'Symfony\\Component\\Yaml\\' => 23,
         ),
-        'P' => 
+        'P' =>
         array (
             'Psr\\Log\\' => 8,
             'PhpOption\\' => 10,
             'PHPMailer\\PHPMailer\\' => 20,
         ),
-        'M' => 
-        array (
-            'Masterminds\\' => 12,
-        ),
-        'L' => 
+        'L' =>
         array (
             'League\\ColorExtractor\\' => 22,
             'Laminas\\Escaper\\' => 16,
         ),
-        'K' => 
+        'K' =>
         array (
             'Kirby\\' => 6,
         ),
-        'G' => 
+        'G' =>
         array (
             'GrahamCampbell\\ResultType\\' => 26,
         ),
-        'D' => 
+        'D' =>
         array (
             'Dotenv\\' => 7,
         ),
-        'C' => 
+        'C' =>
         array (
             'Composer\\Semver\\' => 16,
         ),
-        'B' => 
+        'B' =>
         array (
             'Bnomei\\' => 7,
+            'Base32\\' => 7,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'sgkirby\\Commentions\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/site/plugins/commentions/lib',
-        ),
-        'Whoops\\' => 
+        'Whoops\\' =>
         array (
             0 => __DIR__ . '/..' . '/filp/whoops/src/Whoops',
         ),
-        'Symfony\\Polyfill\\Php80\\' => 
+        'Symfony\\Polyfill\\Php80\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
-        'Symfony\\Polyfill\\Mbstring\\' => 
+        'Symfony\\Polyfill\\Mbstring\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
-        'Symfony\\Polyfill\\Intl\\Normalizer\\' => 
+        'Symfony\\Polyfill\\Intl\\Normalizer\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
         ),
-        'Symfony\\Polyfill\\Intl\\Idn\\' => 
+        'Symfony\\Polyfill\\Intl\\Idn\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-idn',
         ),
-        'Symfony\\Polyfill\\Ctype\\' => 
+        'Symfony\\Polyfill\\Ctype\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
         ),
-        'Symfony\\Component\\Yaml\\' => 
+        'Symfony\\Component\\Yaml\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/yaml',
         ),
-        'Psr\\Log\\' => 
+        'Psr\\Log\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',
         ),
-        'PhpOption\\' => 
+        'PhpOption\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
         ),
-        'PHPMailer\\PHPMailer\\' => 
+        'PHPMailer\\PHPMailer\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
-        'Masterminds\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/masterminds/html5/src',
-        ),
-        'League\\ColorExtractor\\' => 
+        'League\\ColorExtractor\\' =>
         array (
             0 => __DIR__ . '/..' . '/league/color-extractor/src',
         ),
-        'Laminas\\Escaper\\' => 
+        'Laminas\\Escaper\\' =>
         array (
             0 => __DIR__ . '/..' . '/laminas/laminas-escaper/src',
         ),
-        'Kirby\\' => 
+        'Kirby\\' =>
         array (
             0 => __DIR__ . '/../..' . '/kirby/src',
             1 => __DIR__ . '/..' . '/getkirby/composer-installer/src',
         ),
-        'GrahamCampbell\\ResultType\\' => 
+        'GrahamCampbell\\ResultType\\' =>
         array (
             0 => __DIR__ . '/..' . '/graham-campbell/result-type/src',
         ),
-        'Dotenv\\' => 
+        'Dotenv\\' =>
         array (
             0 => __DIR__ . '/..' . '/vlucas/phpdotenv/src',
         ),
-        'Composer\\Semver\\' => 
+        'Composer\\Semver\\' =>
         array (
             0 => __DIR__ . '/..' . '/composer/semver/src',
         ),
-        'Bnomei\\' => 
+        'Bnomei\\' =>
         array (
-            0 => __DIR__ . '/../..' . '/site/plugins/kirby3-fingerprint/classes',
-            1 => __DIR__ . '/../..' . '/site/plugins/kirby3-robots-txt/classes',
+            0 => __DIR__ . '/../..' . '/site/plugins/kirby3-robots-txt/classes',
+            1 => __DIR__ . '/../..' . '/site/plugins/kirby3-fingerprint/classes',
             2 => __DIR__ . '/../..' . '/site/plugins/kirby3-dotenv/classes',
+        ),
+        'Base32\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/christian-riesen/base32/src',
         ),
     );
 
     public static $prefixesPsr0 = array (
-        'c' => 
+        'c' =>
         array (
-            'claviska' => 
+            'claviska' =>
             array (
                 0 => __DIR__ . '/..' . '/claviska/simpleimage/src',
             ),
         ),
-        'M' => 
+        'M' =>
         array (
-            'Michelf' => 
+            'Michelf' =>
             array (
                 0 => __DIR__ . '/..' . '/michelf/php-smartypants',
-            ),
-        ),
-        'H' => 
-        array (
-            'HTMLPurifier' => 
-            array (
-                0 => __DIR__ . '/..' . '/ezyang/htmlpurifier/library',
             ),
         ),
     );
 
     public static $classMap = array (
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
+        'Base32\\Base32' => __DIR__ . '/..' . '/christian-riesen/base32/src/Base32.php',
+        'Base32\\Base32Hex' => __DIR__ . '/..' . '/christian-riesen/base32/src/Base32Hex.php',
         'Bnomei\\DotEnv' => __DIR__ . '/../..' . '/site/plugins/kirby3-dotenv/classes/DotEnv.php',
         'Bnomei\\Fingerprint' => __DIR__ . '/../..' . '/site/plugins/kirby3-fingerprint/classes/Fingerprint.php',
         'Bnomei\\FingerprintFile' => __DIR__ . '/../..' . '/site/plugins/kirby3-fingerprint/classes/FingerprintFile.php',
@@ -242,237 +225,6 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'GrahamCampbell\\ResultType\\Error' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Error.php',
         'GrahamCampbell\\ResultType\\Result' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Result.php',
         'GrahamCampbell\\ResultType\\Success' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Success.php',
-        'HTMLPurifier' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.php',
-        'HTMLPurifier_Arborize' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Arborize.php',
-        'HTMLPurifier_AttrCollections' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrCollections.php',
-        'HTMLPurifier_AttrDef' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef.php',
-        'HTMLPurifier_AttrDef_CSS' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS.php',
-        'HTMLPurifier_AttrDef_CSS_AlphaValue' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/AlphaValue.php',
-        'HTMLPurifier_AttrDef_CSS_Background' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Background.php',
-        'HTMLPurifier_AttrDef_CSS_BackgroundPosition' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/BackgroundPosition.php',
-        'HTMLPurifier_AttrDef_CSS_Border' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Border.php',
-        'HTMLPurifier_AttrDef_CSS_Color' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Color.php',
-        'HTMLPurifier_AttrDef_CSS_Composite' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Composite.php',
-        'HTMLPurifier_AttrDef_CSS_DenyElementDecorator' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/DenyElementDecorator.php',
-        'HTMLPurifier_AttrDef_CSS_Filter' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Filter.php',
-        'HTMLPurifier_AttrDef_CSS_Font' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Font.php',
-        'HTMLPurifier_AttrDef_CSS_FontFamily' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/FontFamily.php',
-        'HTMLPurifier_AttrDef_CSS_Ident' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Ident.php',
-        'HTMLPurifier_AttrDef_CSS_ImportantDecorator' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/ImportantDecorator.php',
-        'HTMLPurifier_AttrDef_CSS_Length' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Length.php',
-        'HTMLPurifier_AttrDef_CSS_ListStyle' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/ListStyle.php',
-        'HTMLPurifier_AttrDef_CSS_Multiple' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Multiple.php',
-        'HTMLPurifier_AttrDef_CSS_Number' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Number.php',
-        'HTMLPurifier_AttrDef_CSS_Percentage' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/Percentage.php',
-        'HTMLPurifier_AttrDef_CSS_TextDecoration' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/TextDecoration.php',
-        'HTMLPurifier_AttrDef_CSS_URI' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/CSS/URI.php',
-        'HTMLPurifier_AttrDef_Clone' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/Clone.php',
-        'HTMLPurifier_AttrDef_Enum' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/Enum.php',
-        'HTMLPurifier_AttrDef_HTML_Bool' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/Bool.php',
-        'HTMLPurifier_AttrDef_HTML_Class' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/Class.php',
-        'HTMLPurifier_AttrDef_HTML_Color' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/Color.php',
-        'HTMLPurifier_AttrDef_HTML_ContentEditable' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/ContentEditable.php',
-        'HTMLPurifier_AttrDef_HTML_FrameTarget' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/FrameTarget.php',
-        'HTMLPurifier_AttrDef_HTML_ID' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/ID.php',
-        'HTMLPurifier_AttrDef_HTML_Length' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/Length.php',
-        'HTMLPurifier_AttrDef_HTML_LinkTypes' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/LinkTypes.php',
-        'HTMLPurifier_AttrDef_HTML_MultiLength' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/MultiLength.php',
-        'HTMLPurifier_AttrDef_HTML_Nmtokens' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/Nmtokens.php',
-        'HTMLPurifier_AttrDef_HTML_Pixels' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/HTML/Pixels.php',
-        'HTMLPurifier_AttrDef_Integer' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/Integer.php',
-        'HTMLPurifier_AttrDef_Lang' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/Lang.php',
-        'HTMLPurifier_AttrDef_Switch' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/Switch.php',
-        'HTMLPurifier_AttrDef_Text' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/Text.php',
-        'HTMLPurifier_AttrDef_URI' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/URI.php',
-        'HTMLPurifier_AttrDef_URI_Email' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/URI/Email.php',
-        'HTMLPurifier_AttrDef_URI_Email_SimpleCheck' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/URI/Email/SimpleCheck.php',
-        'HTMLPurifier_AttrDef_URI_Host' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/URI/Host.php',
-        'HTMLPurifier_AttrDef_URI_IPv4' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/URI/IPv4.php',
-        'HTMLPurifier_AttrDef_URI_IPv6' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrDef/URI/IPv6.php',
-        'HTMLPurifier_AttrTransform' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform.php',
-        'HTMLPurifier_AttrTransform_Background' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/Background.php',
-        'HTMLPurifier_AttrTransform_BdoDir' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/BdoDir.php',
-        'HTMLPurifier_AttrTransform_BgColor' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/BgColor.php',
-        'HTMLPurifier_AttrTransform_BoolToCSS' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/BoolToCSS.php',
-        'HTMLPurifier_AttrTransform_Border' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/Border.php',
-        'HTMLPurifier_AttrTransform_EnumToCSS' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/EnumToCSS.php',
-        'HTMLPurifier_AttrTransform_ImgRequired' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/ImgRequired.php',
-        'HTMLPurifier_AttrTransform_ImgSpace' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/ImgSpace.php',
-        'HTMLPurifier_AttrTransform_Input' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/Input.php',
-        'HTMLPurifier_AttrTransform_Lang' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/Lang.php',
-        'HTMLPurifier_AttrTransform_Length' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/Length.php',
-        'HTMLPurifier_AttrTransform_Name' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/Name.php',
-        'HTMLPurifier_AttrTransform_NameSync' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/NameSync.php',
-        'HTMLPurifier_AttrTransform_Nofollow' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/Nofollow.php',
-        'HTMLPurifier_AttrTransform_SafeEmbed' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/SafeEmbed.php',
-        'HTMLPurifier_AttrTransform_SafeObject' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/SafeObject.php',
-        'HTMLPurifier_AttrTransform_SafeParam' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/SafeParam.php',
-        'HTMLPurifier_AttrTransform_ScriptRequired' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/ScriptRequired.php',
-        'HTMLPurifier_AttrTransform_TargetBlank' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/TargetBlank.php',
-        'HTMLPurifier_AttrTransform_TargetNoopener' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/TargetNoopener.php',
-        'HTMLPurifier_AttrTransform_TargetNoreferrer' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/TargetNoreferrer.php',
-        'HTMLPurifier_AttrTransform_Textarea' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTransform/Textarea.php',
-        'HTMLPurifier_AttrTypes' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrTypes.php',
-        'HTMLPurifier_AttrValidator' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/AttrValidator.php',
-        'HTMLPurifier_Bootstrap' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Bootstrap.php',
-        'HTMLPurifier_CSSDefinition' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/CSSDefinition.php',
-        'HTMLPurifier_ChildDef' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ChildDef.php',
-        'HTMLPurifier_ChildDef_Chameleon' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ChildDef/Chameleon.php',
-        'HTMLPurifier_ChildDef_Custom' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ChildDef/Custom.php',
-        'HTMLPurifier_ChildDef_Empty' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ChildDef/Empty.php',
-        'HTMLPurifier_ChildDef_List' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ChildDef/List.php',
-        'HTMLPurifier_ChildDef_Optional' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ChildDef/Optional.php',
-        'HTMLPurifier_ChildDef_Required' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ChildDef/Required.php',
-        'HTMLPurifier_ChildDef_StrictBlockquote' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ChildDef/StrictBlockquote.php',
-        'HTMLPurifier_ChildDef_Table' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ChildDef/Table.php',
-        'HTMLPurifier_Config' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Config.php',
-        'HTMLPurifier_ConfigSchema' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema.php',
-        'HTMLPurifier_ConfigSchema_Builder_ConfigSchema' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema/Builder/ConfigSchema.php',
-        'HTMLPurifier_ConfigSchema_Builder_Xml' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema/Builder/Xml.php',
-        'HTMLPurifier_ConfigSchema_Exception' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema/Exception.php',
-        'HTMLPurifier_ConfigSchema_Interchange' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema/Interchange.php',
-        'HTMLPurifier_ConfigSchema_InterchangeBuilder' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema/InterchangeBuilder.php',
-        'HTMLPurifier_ConfigSchema_Interchange_Directive' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema/Interchange/Directive.php',
-        'HTMLPurifier_ConfigSchema_Interchange_Id' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema/Interchange/Id.php',
-        'HTMLPurifier_ConfigSchema_Validator' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema/Validator.php',
-        'HTMLPurifier_ConfigSchema_ValidatorAtom' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ConfigSchema/ValidatorAtom.php',
-        'HTMLPurifier_ContentSets' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ContentSets.php',
-        'HTMLPurifier_Context' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Context.php',
-        'HTMLPurifier_Definition' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Definition.php',
-        'HTMLPurifier_DefinitionCache' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/DefinitionCache.php',
-        'HTMLPurifier_DefinitionCacheFactory' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/DefinitionCacheFactory.php',
-        'HTMLPurifier_DefinitionCache_Decorator' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/DefinitionCache/Decorator.php',
-        'HTMLPurifier_DefinitionCache_Decorator_Cleanup' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/DefinitionCache/Decorator/Cleanup.php',
-        'HTMLPurifier_DefinitionCache_Decorator_Memory' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/DefinitionCache/Decorator/Memory.php',
-        'HTMLPurifier_DefinitionCache_Null' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/DefinitionCache/Null.php',
-        'HTMLPurifier_DefinitionCache_Serializer' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/DefinitionCache/Serializer.php',
-        'HTMLPurifier_Doctype' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Doctype.php',
-        'HTMLPurifier_DoctypeRegistry' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/DoctypeRegistry.php',
-        'HTMLPurifier_ElementDef' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ElementDef.php',
-        'HTMLPurifier_Encoder' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Encoder.php',
-        'HTMLPurifier_EntityLookup' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/EntityLookup.php',
-        'HTMLPurifier_EntityParser' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/EntityParser.php',
-        'HTMLPurifier_ErrorCollector' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ErrorCollector.php',
-        'HTMLPurifier_ErrorStruct' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/ErrorStruct.php',
-        'HTMLPurifier_Exception' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Exception.php',
-        'HTMLPurifier_Filter' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Filter.php',
-        'HTMLPurifier_Filter_ExtractStyleBlocks' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Filter/ExtractStyleBlocks.php',
-        'HTMLPurifier_Filter_YouTube' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Filter/YouTube.php',
-        'HTMLPurifier_Generator' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Generator.php',
-        'HTMLPurifier_HTMLDefinition' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLDefinition.php',
-        'HTMLPurifier_HTMLModule' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule.php',
-        'HTMLPurifier_HTMLModuleManager' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModuleManager.php',
-        'HTMLPurifier_HTMLModule_Bdo' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Bdo.php',
-        'HTMLPurifier_HTMLModule_CommonAttributes' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/CommonAttributes.php',
-        'HTMLPurifier_HTMLModule_Edit' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Edit.php',
-        'HTMLPurifier_HTMLModule_Forms' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Forms.php',
-        'HTMLPurifier_HTMLModule_Hypertext' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Hypertext.php',
-        'HTMLPurifier_HTMLModule_Iframe' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Iframe.php',
-        'HTMLPurifier_HTMLModule_Image' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Image.php',
-        'HTMLPurifier_HTMLModule_Legacy' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Legacy.php',
-        'HTMLPurifier_HTMLModule_List' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/List.php',
-        'HTMLPurifier_HTMLModule_Name' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Name.php',
-        'HTMLPurifier_HTMLModule_Nofollow' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Nofollow.php',
-        'HTMLPurifier_HTMLModule_NonXMLCommonAttributes' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/NonXMLCommonAttributes.php',
-        'HTMLPurifier_HTMLModule_Object' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Object.php',
-        'HTMLPurifier_HTMLModule_Presentation' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Presentation.php',
-        'HTMLPurifier_HTMLModule_Proprietary' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Proprietary.php',
-        'HTMLPurifier_HTMLModule_Ruby' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Ruby.php',
-        'HTMLPurifier_HTMLModule_SafeEmbed' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/SafeEmbed.php',
-        'HTMLPurifier_HTMLModule_SafeObject' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/SafeObject.php',
-        'HTMLPurifier_HTMLModule_SafeScripting' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/SafeScripting.php',
-        'HTMLPurifier_HTMLModule_Scripting' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Scripting.php',
-        'HTMLPurifier_HTMLModule_StyleAttribute' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/StyleAttribute.php',
-        'HTMLPurifier_HTMLModule_Tables' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Tables.php',
-        'HTMLPurifier_HTMLModule_Target' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Target.php',
-        'HTMLPurifier_HTMLModule_TargetBlank' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/TargetBlank.php',
-        'HTMLPurifier_HTMLModule_TargetNoopener' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/TargetNoopener.php',
-        'HTMLPurifier_HTMLModule_TargetNoreferrer' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/TargetNoreferrer.php',
-        'HTMLPurifier_HTMLModule_Text' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Text.php',
-        'HTMLPurifier_HTMLModule_Tidy' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Tidy.php',
-        'HTMLPurifier_HTMLModule_Tidy_Name' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Tidy/Name.php',
-        'HTMLPurifier_HTMLModule_Tidy_Proprietary' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Tidy/Proprietary.php',
-        'HTMLPurifier_HTMLModule_Tidy_Strict' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Tidy/Strict.php',
-        'HTMLPurifier_HTMLModule_Tidy_Transitional' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Tidy/Transitional.php',
-        'HTMLPurifier_HTMLModule_Tidy_XHTML' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Tidy/XHTML.php',
-        'HTMLPurifier_HTMLModule_Tidy_XHTMLAndHTML4' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/Tidy/XHTMLAndHTML4.php',
-        'HTMLPurifier_HTMLModule_XMLCommonAttributes' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/HTMLModule/XMLCommonAttributes.php',
-        'HTMLPurifier_IDAccumulator' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/IDAccumulator.php',
-        'HTMLPurifier_Injector' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Injector.php',
-        'HTMLPurifier_Injector_AutoParagraph' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Injector/AutoParagraph.php',
-        'HTMLPurifier_Injector_DisplayLinkURI' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Injector/DisplayLinkURI.php',
-        'HTMLPurifier_Injector_Linkify' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Injector/Linkify.php',
-        'HTMLPurifier_Injector_PurifierLinkify' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Injector/PurifierLinkify.php',
-        'HTMLPurifier_Injector_RemoveEmpty' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Injector/RemoveEmpty.php',
-        'HTMLPurifier_Injector_RemoveSpansWithoutAttributes' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Injector/RemoveSpansWithoutAttributes.php',
-        'HTMLPurifier_Injector_SafeObject' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Injector/SafeObject.php',
-        'HTMLPurifier_Language' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Language.php',
-        'HTMLPurifier_LanguageFactory' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/LanguageFactory.php',
-        'HTMLPurifier_Length' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Length.php',
-        'HTMLPurifier_Lexer' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Lexer.php',
-        'HTMLPurifier_Lexer_DOMLex' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Lexer/DOMLex.php',
-        'HTMLPurifier_Lexer_DirectLex' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Lexer/DirectLex.php',
-        'HTMLPurifier_Lexer_PH5P' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Lexer/PH5P.php',
-        'HTMLPurifier_Node' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Node.php',
-        'HTMLPurifier_Node_Comment' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Node/Comment.php',
-        'HTMLPurifier_Node_Element' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Node/Element.php',
-        'HTMLPurifier_Node_Text' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Node/Text.php',
-        'HTMLPurifier_PercentEncoder' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/PercentEncoder.php',
-        'HTMLPurifier_Printer' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Printer.php',
-        'HTMLPurifier_Printer_CSSDefinition' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Printer/CSSDefinition.php',
-        'HTMLPurifier_Printer_ConfigForm' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Printer/ConfigForm.php',
-        'HTMLPurifier_Printer_HTMLDefinition' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Printer/HTMLDefinition.php',
-        'HTMLPurifier_PropertyList' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/PropertyList.php',
-        'HTMLPurifier_PropertyListIterator' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/PropertyListIterator.php',
-        'HTMLPurifier_Queue' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Queue.php',
-        'HTMLPurifier_Strategy' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Strategy.php',
-        'HTMLPurifier_Strategy_Composite' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Strategy/Composite.php',
-        'HTMLPurifier_Strategy_Core' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Strategy/Core.php',
-        'HTMLPurifier_Strategy_FixNesting' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Strategy/FixNesting.php',
-        'HTMLPurifier_Strategy_MakeWellFormed' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Strategy/MakeWellFormed.php',
-        'HTMLPurifier_Strategy_RemoveForeignElements' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Strategy/RemoveForeignElements.php',
-        'HTMLPurifier_Strategy_ValidateAttributes' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Strategy/ValidateAttributes.php',
-        'HTMLPurifier_StringHash' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/StringHash.php',
-        'HTMLPurifier_StringHashParser' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/StringHashParser.php',
-        'HTMLPurifier_TagTransform' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/TagTransform.php',
-        'HTMLPurifier_TagTransform_Font' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/TagTransform/Font.php',
-        'HTMLPurifier_TagTransform_Simple' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/TagTransform/Simple.php',
-        'HTMLPurifier_Token' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Token.php',
-        'HTMLPurifier_TokenFactory' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/TokenFactory.php',
-        'HTMLPurifier_Token_Comment' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Token/Comment.php',
-        'HTMLPurifier_Token_Empty' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Token/Empty.php',
-        'HTMLPurifier_Token_End' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Token/End.php',
-        'HTMLPurifier_Token_Start' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Token/Start.php',
-        'HTMLPurifier_Token_Tag' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Token/Tag.php',
-        'HTMLPurifier_Token_Text' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Token/Text.php',
-        'HTMLPurifier_URI' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URI.php',
-        'HTMLPurifier_URIDefinition' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIDefinition.php',
-        'HTMLPurifier_URIFilter' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIFilter.php',
-        'HTMLPurifier_URIFilter_DisableExternal' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIFilter/DisableExternal.php',
-        'HTMLPurifier_URIFilter_DisableExternalResources' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIFilter/DisableExternalResources.php',
-        'HTMLPurifier_URIFilter_DisableResources' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIFilter/DisableResources.php',
-        'HTMLPurifier_URIFilter_HostBlacklist' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIFilter/HostBlacklist.php',
-        'HTMLPurifier_URIFilter_MakeAbsolute' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIFilter/MakeAbsolute.php',
-        'HTMLPurifier_URIFilter_Munge' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIFilter/Munge.php',
-        'HTMLPurifier_URIFilter_SafeIframe' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIFilter/SafeIframe.php',
-        'HTMLPurifier_URIParser' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIParser.php',
-        'HTMLPurifier_URIScheme' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme.php',
-        'HTMLPurifier_URISchemeRegistry' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URISchemeRegistry.php',
-        'HTMLPurifier_URIScheme_data' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme/data.php',
-        'HTMLPurifier_URIScheme_file' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme/file.php',
-        'HTMLPurifier_URIScheme_ftp' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme/ftp.php',
-        'HTMLPurifier_URIScheme_http' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme/http.php',
-        'HTMLPurifier_URIScheme_https' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme/https.php',
-        'HTMLPurifier_URIScheme_mailto' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme/mailto.php',
-        'HTMLPurifier_URIScheme_news' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme/news.php',
-        'HTMLPurifier_URIScheme_nntp' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme/nntp.php',
-        'HTMLPurifier_URIScheme_tel' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/URIScheme/tel.php',
-        'HTMLPurifier_UnitConverter' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/UnitConverter.php',
-        'HTMLPurifier_VarParser' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/VarParser.php',
-        'HTMLPurifier_VarParserException' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/VarParserException.php',
-        'HTMLPurifier_VarParser_Flexible' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/VarParser/Flexible.php',
-        'HTMLPurifier_VarParser_Native' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/VarParser/Native.php',
-        'HTMLPurifier_Zipper' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier/Zipper.php',
         'Kirby\\Api\\Api' => __DIR__ . '/../..' . '/kirby/src/Api/Api.php',
         'Kirby\\Api\\Collection' => __DIR__ . '/../..' . '/kirby/src/Api/Collection.php',
         'Kirby\\Api\\Model' => __DIR__ . '/../..' . '/kirby/src/Api/Model.php',
@@ -504,20 +256,18 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\Cms\\Auth\\Challenge' => __DIR__ . '/../..' . '/kirby/src/Cms/Auth/Challenge.php',
         'Kirby\\Cms\\Auth\\EmailChallenge' => __DIR__ . '/../..' . '/kirby/src/Cms/Auth/EmailChallenge.php',
         'Kirby\\Cms\\Auth\\Status' => __DIR__ . '/../..' . '/kirby/src/Cms/Auth/Status.php',
+        'Kirby\\Cms\\Auth\\TotpChallenge' => __DIR__ . '/../..' . '/kirby/src/Cms/Auth/TotpChallenge.php',
         'Kirby\\Cms\\Block' => __DIR__ . '/../..' . '/kirby/src/Cms/Block.php',
         'Kirby\\Cms\\BlockConverter' => __DIR__ . '/../..' . '/kirby/src/Cms/BlockConverter.php',
         'Kirby\\Cms\\Blocks' => __DIR__ . '/../..' . '/kirby/src/Cms/Blocks.php',
         'Kirby\\Cms\\Blueprint' => __DIR__ . '/../..' . '/kirby/src/Cms/Blueprint.php',
         'Kirby\\Cms\\Collection' => __DIR__ . '/../..' . '/kirby/src/Cms/Collection.php',
         'Kirby\\Cms\\Collections' => __DIR__ . '/../..' . '/kirby/src/Cms/Collections.php',
-        'Kirby\\Cms\\Content' => __DIR__ . '/../..' . '/kirby/src/Cms/Content.php',
         'Kirby\\Cms\\ContentLock' => __DIR__ . '/../..' . '/kirby/src/Cms/ContentLock.php',
         'Kirby\\Cms\\ContentLocks' => __DIR__ . '/../..' . '/kirby/src/Cms/ContentLocks.php',
-        'Kirby\\Cms\\ContentTranslation' => __DIR__ . '/../..' . '/kirby/src/Cms/ContentTranslation.php',
         'Kirby\\Cms\\Core' => __DIR__ . '/../..' . '/kirby/src/Cms/Core.php',
         'Kirby\\Cms\\Email' => __DIR__ . '/../..' . '/kirby/src/Cms/Email.php',
         'Kirby\\Cms\\Event' => __DIR__ . '/../..' . '/kirby/src/Cms/Event.php',
-        'Kirby\\Cms\\Field' => __DIR__ . '/../..' . '/kirby/src/Cms/Field.php',
         'Kirby\\Cms\\Fieldset' => __DIR__ . '/../..' . '/kirby/src/Cms/Fieldset.php',
         'Kirby\\Cms\\Fieldsets' => __DIR__ . '/../..' . '/kirby/src/Cms/Fieldsets.php',
         'Kirby\\Cms\\File' => __DIR__ . '/../..' . '/kirby/src/Cms/File.php',
@@ -543,11 +293,15 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\Cms\\LanguageRouter' => __DIR__ . '/../..' . '/kirby/src/Cms/LanguageRouter.php',
         'Kirby\\Cms\\LanguageRoutes' => __DIR__ . '/../..' . '/kirby/src/Cms/LanguageRoutes.php',
         'Kirby\\Cms\\LanguageRules' => __DIR__ . '/../..' . '/kirby/src/Cms/LanguageRules.php',
+        'Kirby\\Cms\\LanguageVariable' => __DIR__ . '/../..' . '/kirby/src/Cms/LanguageVariable.php',
         'Kirby\\Cms\\Languages' => __DIR__ . '/../..' . '/kirby/src/Cms/Languages.php',
         'Kirby\\Cms\\Layout' => __DIR__ . '/../..' . '/kirby/src/Cms/Layout.php',
         'Kirby\\Cms\\LayoutColumn' => __DIR__ . '/../..' . '/kirby/src/Cms/LayoutColumn.php',
         'Kirby\\Cms\\LayoutColumns' => __DIR__ . '/../..' . '/kirby/src/Cms/LayoutColumns.php',
         'Kirby\\Cms\\Layouts' => __DIR__ . '/../..' . '/kirby/src/Cms/Layouts.php',
+        'Kirby\\Cms\\License' => __DIR__ . '/../..' . '/kirby/src/Cms/License.php',
+        'Kirby\\Cms\\LicenseStatus' => __DIR__ . '/../..' . '/kirby/src/Cms/LicenseStatus.php',
+        'Kirby\\Cms\\LicenseType' => __DIR__ . '/../..' . '/kirby/src/Cms/LicenseType.php',
         'Kirby\\Cms\\Loader' => __DIR__ . '/../..' . '/kirby/src/Cms/Loader.php',
         'Kirby\\Cms\\Media' => __DIR__ . '/../..' . '/kirby/src/Cms/Media.php',
         'Kirby\\Cms\\Model' => __DIR__ . '/../..' . '/kirby/src/Cms/Model.php',
@@ -568,6 +322,7 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\Cms\\Permissions' => __DIR__ . '/../..' . '/kirby/src/Cms/Permissions.php',
         'Kirby\\Cms\\Picker' => __DIR__ . '/../..' . '/kirby/src/Cms/Picker.php',
         'Kirby\\Cms\\Plugin' => __DIR__ . '/../..' . '/kirby/src/Cms/Plugin.php',
+        'Kirby\\Cms\\PluginAsset' => __DIR__ . '/../..' . '/kirby/src/Cms/PluginAsset.php',
         'Kirby\\Cms\\PluginAssets' => __DIR__ . '/../..' . '/kirby/src/Cms/PluginAssets.php',
         'Kirby\\Cms\\R' => __DIR__ . '/../..' . '/kirby/src/Cms/R.php',
         'Kirby\\Cms\\Responder' => __DIR__ . '/../..' . '/kirby/src/Cms/Responder.php',
@@ -601,6 +356,12 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\ComposerInstaller\\Installer' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Installer.php',
         'Kirby\\ComposerInstaller\\Plugin' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Plugin.php',
         'Kirby\\ComposerInstaller\\PluginInstaller' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/PluginInstaller.php',
+        'Kirby\\Content\\Content' => __DIR__ . '/../..' . '/kirby/src/Content/Content.php',
+        'Kirby\\Content\\ContentStorage' => __DIR__ . '/../..' . '/kirby/src/Content/ContentStorage.php',
+        'Kirby\\Content\\ContentStorageHandler' => __DIR__ . '/../..' . '/kirby/src/Content/ContentStorageHandler.php',
+        'Kirby\\Content\\ContentTranslation' => __DIR__ . '/../..' . '/kirby/src/Content/ContentTranslation.php',
+        'Kirby\\Content\\Field' => __DIR__ . '/../..' . '/kirby/src/Content/Field.php',
+        'Kirby\\Content\\PlainTextContentStorageHandler' => __DIR__ . '/../..' . '/kirby/src/Content/PlainTextContentStorageHandler.php',
         'Kirby\\Data\\Data' => __DIR__ . '/../..' . '/kirby/src/Data/Data.php',
         'Kirby\\Data\\Handler' => __DIR__ . '/../..' . '/kirby/src/Data/Handler.php',
         'Kirby\\Data\\Json' => __DIR__ . '/../..' . '/kirby/src/Data/Json.php',
@@ -619,6 +380,7 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\Email\\Body' => __DIR__ . '/../..' . '/kirby/src/Email/Body.php',
         'Kirby\\Email\\Email' => __DIR__ . '/../..' . '/kirby/src/Email/Email.php',
         'Kirby\\Email\\PHPMailer' => __DIR__ . '/../..' . '/kirby/src/Email/PHPMailer.php',
+        'Kirby\\Exception\\AuthException' => __DIR__ . '/../..' . '/kirby/src/Exception/AuthException.php',
         'Kirby\\Exception\\BadMethodCallException' => __DIR__ . '/../..' . '/kirby/src/Exception/BadMethodCallException.php',
         'Kirby\\Exception\\DuplicateException' => __DIR__ . '/../..' . '/kirby/src/Exception/DuplicateException.php',
         'Kirby\\Exception\\ErrorPageException' => __DIR__ . '/../..' . '/kirby/src/Exception/ErrorPageException.php',
@@ -644,9 +406,6 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\Form\\Mixin\\EmptyState' => __DIR__ . '/../..' . '/kirby/src/Form/Mixin/EmptyState.php',
         'Kirby\\Form\\Mixin\\Max' => __DIR__ . '/../..' . '/kirby/src/Form/Mixin/Max.php',
         'Kirby\\Form\\Mixin\\Min' => __DIR__ . '/../..' . '/kirby/src/Form/Mixin/Min.php',
-        'Kirby\\Form\\Options' => __DIR__ . '/../..' . '/kirby/src/Form/Options.php',
-        'Kirby\\Form\\OptionsApi' => __DIR__ . '/../..' . '/kirby/src/Form/OptionsApi.php',
-        'Kirby\\Form\\OptionsQuery' => __DIR__ . '/../..' . '/kirby/src/Form/OptionsQuery.php',
         'Kirby\\Form\\Validations' => __DIR__ . '/../..' . '/kirby/src/Form/Validations.php',
         'Kirby\\Http\\Cookie' => __DIR__ . '/../..' . '/kirby/src/Http/Cookie.php',
         'Kirby\\Http\\Environment' => __DIR__ . '/../..' . '/kirby/src/Http/Environment.php',
@@ -678,28 +437,43 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\Image\\Darkroom\\ImageMagick' => __DIR__ . '/../..' . '/kirby/src/Image/Darkroom/ImageMagick.php',
         'Kirby\\Image\\Dimensions' => __DIR__ . '/../..' . '/kirby/src/Image/Dimensions.php',
         'Kirby\\Image\\Exif' => __DIR__ . '/../..' . '/kirby/src/Image/Exif.php',
+        'Kirby\\Image\\Focus' => __DIR__ . '/../..' . '/kirby/src/Image/Focus.php',
         'Kirby\\Image\\Image' => __DIR__ . '/../..' . '/kirby/src/Image/Image.php',
         'Kirby\\Image\\Location' => __DIR__ . '/../..' . '/kirby/src/Image/Location.php',
+        'Kirby\\Image\\QrCode' => __DIR__ . '/../..' . '/kirby/src/Image/QrCode.php',
         'Kirby\\Option\\Option' => __DIR__ . '/../..' . '/kirby/src/Option/Option.php',
         'Kirby\\Option\\Options' => __DIR__ . '/../..' . '/kirby/src/Option/Options.php',
         'Kirby\\Option\\OptionsApi' => __DIR__ . '/../..' . '/kirby/src/Option/OptionsApi.php',
         'Kirby\\Option\\OptionsProvider' => __DIR__ . '/../..' . '/kirby/src/Option/OptionsProvider.php',
         'Kirby\\Option\\OptionsQuery' => __DIR__ . '/../..' . '/kirby/src/Option/OptionsQuery.php',
+        'Kirby\\Panel\\Assets' => __DIR__ . '/../..' . '/kirby/src/Panel/Assets.php',
+        'Kirby\\Panel\\ChangesDialog' => __DIR__ . '/../..' . '/kirby/src/Panel/ChangesDialog.php',
         'Kirby\\Panel\\Dialog' => __DIR__ . '/../..' . '/kirby/src/Panel/Dialog.php',
         'Kirby\\Panel\\Document' => __DIR__ . '/../..' . '/kirby/src/Panel/Document.php',
+        'Kirby\\Panel\\Drawer' => __DIR__ . '/../..' . '/kirby/src/Panel/Drawer.php',
         'Kirby\\Panel\\Dropdown' => __DIR__ . '/../..' . '/kirby/src/Panel/Dropdown.php',
         'Kirby\\Panel\\Field' => __DIR__ . '/../..' . '/kirby/src/Panel/Field.php',
         'Kirby\\Panel\\File' => __DIR__ . '/../..' . '/kirby/src/Panel/File.php',
         'Kirby\\Panel\\Home' => __DIR__ . '/../..' . '/kirby/src/Panel/Home.php',
         'Kirby\\Panel\\Json' => __DIR__ . '/../..' . '/kirby/src/Panel/Json.php',
+        'Kirby\\Panel\\Lab\\Category' => __DIR__ . '/../..' . '/kirby/src/Panel/Lab/Category.php',
+        'Kirby\\Panel\\Lab\\Docs' => __DIR__ . '/../..' . '/kirby/src/Panel/Lab/Docs.php',
+        'Kirby\\Panel\\Lab\\Example' => __DIR__ . '/../..' . '/kirby/src/Panel/Lab/Example.php',
+        'Kirby\\Panel\\Lab\\Snippet' => __DIR__ . '/../..' . '/kirby/src/Panel/Lab/Snippet.php',
+        'Kirby\\Panel\\Lab\\Template' => __DIR__ . '/../..' . '/kirby/src/Panel/Lab/Template.php',
+        'Kirby\\Panel\\Menu' => __DIR__ . '/../..' . '/kirby/src/Panel/Menu.php',
         'Kirby\\Panel\\Model' => __DIR__ . '/../..' . '/kirby/src/Panel/Model.php',
         'Kirby\\Panel\\Page' => __DIR__ . '/../..' . '/kirby/src/Panel/Page.php',
+        'Kirby\\Panel\\PageCreateDialog' => __DIR__ . '/../..' . '/kirby/src/Panel/PageCreateDialog.php',
         'Kirby\\Panel\\Panel' => __DIR__ . '/../..' . '/kirby/src/Panel/Panel.php',
         'Kirby\\Panel\\Plugins' => __DIR__ . '/../..' . '/kirby/src/Panel/Plugins.php',
         'Kirby\\Panel\\Redirect' => __DIR__ . '/../..' . '/kirby/src/Panel/Redirect.php',
+        'Kirby\\Panel\\Request' => __DIR__ . '/../..' . '/kirby/src/Panel/Request.php',
         'Kirby\\Panel\\Search' => __DIR__ . '/../..' . '/kirby/src/Panel/Search.php',
         'Kirby\\Panel\\Site' => __DIR__ . '/../..' . '/kirby/src/Panel/Site.php',
         'Kirby\\Panel\\User' => __DIR__ . '/../..' . '/kirby/src/Panel/User.php',
+        'Kirby\\Panel\\UserTotpDisableDialog' => __DIR__ . '/../..' . '/kirby/src/Panel/UserTotpDisableDialog.php',
+        'Kirby\\Panel\\UserTotpEnableDialog' => __DIR__ . '/../..' . '/kirby/src/Panel/UserTotpEnableDialog.php',
         'Kirby\\Panel\\View' => __DIR__ . '/../..' . '/kirby/src/Panel/View.php',
         'Kirby\\Parsley\\Element' => __DIR__ . '/../..' . '/kirby/src/Parsley/Element.php',
         'Kirby\\Parsley\\Inline' => __DIR__ . '/../..' . '/kirby/src/Parsley/Inline.php',
@@ -735,6 +509,7 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\Text\\Markdown' => __DIR__ . '/../..' . '/kirby/src/Text/Markdown.php',
         'Kirby\\Text\\SmartyPants' => __DIR__ . '/../..' . '/kirby/src/Text/SmartyPants.php',
         'Kirby\\Toolkit\\A' => __DIR__ . '/../..' . '/kirby/src/Toolkit/A.php',
+        'Kirby\\Toolkit\\BlockCollectionAccess' => __DIR__ . '/../..' . '/kirby/src/Toolkit/BlockCollectionAccess.php',
         'Kirby\\Toolkit\\Collection' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Collection.php',
         'Kirby\\Toolkit\\Component' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Component.php',
         'Kirby\\Toolkit\\Config' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Config.php',
@@ -746,13 +521,15 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\Toolkit\\Html' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Html.php',
         'Kirby\\Toolkit\\I18n' => __DIR__ . '/../..' . '/kirby/src/Toolkit/I18n.php',
         'Kirby\\Toolkit\\Iterator' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Iterator.php',
+        'Kirby\\Toolkit\\LazyValue' => __DIR__ . '/../..' . '/kirby/src/Toolkit/LazyValue.php',
         'Kirby\\Toolkit\\Locale' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Locale.php',
         'Kirby\\Toolkit\\Obj' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Obj.php',
         'Kirby\\Toolkit\\Pagination' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Pagination.php',
         'Kirby\\Toolkit\\Properties' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Properties.php',
-        'Kirby\\Toolkit\\Query' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Query.php',
         'Kirby\\Toolkit\\Silo' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Silo.php',
         'Kirby\\Toolkit\\Str' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Str.php',
+        'Kirby\\Toolkit\\SymmetricCrypto' => __DIR__ . '/../..' . '/kirby/src/Toolkit/SymmetricCrypto.php',
+        'Kirby\\Toolkit\\Totp' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Totp.php',
         'Kirby\\Toolkit\\Tpl' => __DIR__ . '/../..' . '/kirby/src/Toolkit/Tpl.php',
         'Kirby\\Toolkit\\V' => __DIR__ . '/../..' . '/kirby/src/Toolkit/V.php',
         'Kirby\\Toolkit\\View' => __DIR__ . '/../..' . '/kirby/src/Toolkit/View.php',
@@ -771,32 +548,13 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Kirby\\Uuid\\Uuid' => __DIR__ . '/../..' . '/kirby/src/Uuid/Uuid.php',
         'Kirby\\Uuid\\Uuids' => __DIR__ . '/../..' . '/kirby/src/Uuid/Uuids.php',
         'Laminas\\Escaper\\Escaper' => __DIR__ . '/..' . '/laminas/laminas-escaper/src/Escaper.php',
+        'Laminas\\Escaper\\EscaperInterface' => __DIR__ . '/..' . '/laminas/laminas-escaper/src/EscaperInterface.php',
         'Laminas\\Escaper\\Exception\\ExceptionInterface' => __DIR__ . '/..' . '/laminas/laminas-escaper/src/Exception/ExceptionInterface.php',
         'Laminas\\Escaper\\Exception\\InvalidArgumentException' => __DIR__ . '/..' . '/laminas/laminas-escaper/src/Exception/InvalidArgumentException.php',
         'Laminas\\Escaper\\Exception\\RuntimeException' => __DIR__ . '/..' . '/laminas/laminas-escaper/src/Exception/RuntimeException.php',
         'League\\ColorExtractor\\Color' => __DIR__ . '/..' . '/league/color-extractor/src/Color.php',
         'League\\ColorExtractor\\ColorExtractor' => __DIR__ . '/..' . '/league/color-extractor/src/ColorExtractor.php',
         'League\\ColorExtractor\\Palette' => __DIR__ . '/..' . '/league/color-extractor/src/Palette.php',
-        'Masterminds\\HTML5' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5.php',
-        'Masterminds\\HTML5\\Elements' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Elements.php',
-        'Masterminds\\HTML5\\Entities' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Entities.php',
-        'Masterminds\\HTML5\\Exception' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Exception.php',
-        'Masterminds\\HTML5\\InstructionProcessor' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/InstructionProcessor.php',
-        'Masterminds\\HTML5\\Parser\\CharacterReference' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/CharacterReference.php',
-        'Masterminds\\HTML5\\Parser\\DOMTreeBuilder' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/DOMTreeBuilder.php',
-        'Masterminds\\HTML5\\Parser\\EventHandler' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/EventHandler.php',
-        'Masterminds\\HTML5\\Parser\\FileInputStream' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/FileInputStream.php',
-        'Masterminds\\HTML5\\Parser\\InputStream' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/InputStream.php',
-        'Masterminds\\HTML5\\Parser\\ParseError' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/ParseError.php',
-        'Masterminds\\HTML5\\Parser\\Scanner' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/Scanner.php',
-        'Masterminds\\HTML5\\Parser\\StringInputStream' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/StringInputStream.php',
-        'Masterminds\\HTML5\\Parser\\Tokenizer' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/Tokenizer.php',
-        'Masterminds\\HTML5\\Parser\\TreeBuildingRules' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/TreeBuildingRules.php',
-        'Masterminds\\HTML5\\Parser\\UTF8Utils' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Parser/UTF8Utils.php',
-        'Masterminds\\HTML5\\Serializer\\HTML5Entities' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Serializer/HTML5Entities.php',
-        'Masterminds\\HTML5\\Serializer\\OutputRules' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Serializer/OutputRules.php',
-        'Masterminds\\HTML5\\Serializer\\RulesInterface' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Serializer/RulesInterface.php',
-        'Masterminds\\HTML5\\Serializer\\Traverser' => __DIR__ . '/..' . '/masterminds/html5/src/HTML5/Serializer/Traverser.php',
         'Michelf\\SmartyPants' => __DIR__ . '/..' . '/michelf/php-smartypants/Michelf/SmartyPants.php',
         'Michelf\\SmartyPantsTypographer' => __DIR__ . '/..' . '/michelf/php-smartypants/Michelf/SmartyPantsTypographer.php',
         'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
@@ -833,6 +591,7 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Symfony\\Component\\Yaml\\Exception\\RuntimeException' => __DIR__ . '/..' . '/symfony/yaml/Exception/RuntimeException.php',
         'Symfony\\Component\\Yaml\\Inline' => __DIR__ . '/..' . '/symfony/yaml/Inline.php',
         'Symfony\\Component\\Yaml\\Parser' => __DIR__ . '/..' . '/symfony/yaml/Parser.php',
+        'Symfony\\Component\\Yaml\\ParserState' => __DIR__ . '/..' . '/symfony/yaml/ParserState.php',
         'Symfony\\Component\\Yaml\\Tag\\TaggedValue' => __DIR__ . '/..' . '/symfony/yaml/Tag/TaggedValue.php',
         'Symfony\\Component\\Yaml\\Unescaper' => __DIR__ . '/..' . '/symfony/yaml/Unescaper.php',
         'Symfony\\Component\\Yaml\\Yaml' => __DIR__ . '/..' . '/symfony/yaml/Yaml.php',
@@ -869,19 +628,6 @@ class ComposerStaticInite04b2bcc9e655e9c9f0db71ff4e47a55
         'Whoops\\Util\\SystemFacade' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/SystemFacade.php',
         'Whoops\\Util\\TemplateHelper' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/TemplateHelper.php',
         'claviska\\SimpleImage' => __DIR__ . '/..' . '/claviska/simpleimage/src/claviska/SimpleImage.php',
-        'sgkirby\\Commentions\\Commention' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Commention.php',
-        'sgkirby\\Commentions\\Commentions' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Commentions.php',
-        'sgkirby\\Commentions\\Cron' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Cron.php',
-        'sgkirby\\Commentions\\Endpoint' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Endpoint.php',
-        'sgkirby\\Commentions\\Formatter' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Formatter.php',
-        'sgkirby\\Commentions\\Formatter\\CacheAdapter' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Formatter/CacheAdapter.php',
-        'sgkirby\\Commentions\\Formatter\\CodeClassAttrDef' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Formatter/CodeClassAttrDef.php',
-        'sgkirby\\Commentions\\Formatter\\LinkTransformer' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Formatter/LinkTransformer.php',
-        'sgkirby\\Commentions\\Formatter\\RemoveEmptyLinksInjector' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Formatter/RemoveEmptyLinksInjector.php',
-        'sgkirby\\Commentions\\Frontend' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Frontend.php',
-        'sgkirby\\Commentions\\Migration' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Migration.php',
-        'sgkirby\\Commentions\\Storage' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Storage.php',
-        'sgkirby\\Commentions\\Structure' => __DIR__ . '/../..' . '/site/plugins/commentions/lib/Structure.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

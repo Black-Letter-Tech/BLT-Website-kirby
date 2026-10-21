@@ -19,8 +19,6 @@ class UserPicker extends Picker
 {
 	/**
 	 * Extends the basic defaults
-	 *
-	 * @return array
 	 */
 	public function defaults(): array
 	{
@@ -33,21 +31,21 @@ class UserPicker extends Picker
 	/**
 	 * Search all users for the picker
 	 *
-	 * @return \Kirby\Cms\Users|null
 	 * @throws \Kirby\Exception\InvalidArgumentException
 	 */
-	public function items()
+	public function items(): Users|null
 	{
 		$model = $this->options['model'];
 
 		// find the right default query
-		if (empty($this->options['query']) === false) {
-			$query = $this->options['query'];
-		} elseif ($model instanceof User) {
-			$query = 'user.siblings';
-		} else {
-			$query = 'kirby.users';
-		}
+		$query = match (true) {
+			empty($this->options['query']) === false
+				=> $this->options['query'],
+			$model instanceof User
+				=> 'user.siblings',
+			default
+			=> 'kirby.users'
+		};
 
 		// fetch all users for the picker
 		$users = $model->query($query);
@@ -56,6 +54,9 @@ class UserPicker extends Picker
 		if ($users instanceof Users === false) {
 			throw new InvalidArgumentException('Your query must return a set of users');
 		}
+
+		// filter protected and hidden users
+		$users = $users->filter('isListable', true);
 
 		// search
 		$users = $this->search($users);

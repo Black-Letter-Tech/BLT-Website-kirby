@@ -20,23 +20,25 @@ class Roles extends Collection
 {
 	/**
 	 * All registered roles methods
-	 *
-	 * @var array
 	 */
-	public static $methods = [];
+	public static array $methods = [];
 
 	/**
 	 * Returns a filtered list of all
-	 * roles that can be created by the
+	 * roles that can be changed by the
 	 * current user
+	 *
+	 * Use with `$kirby->roles()`. For retrieving
+	 * which roles are available for a specific user,
+	 * use `$user->roles()` without additional filters.
 	 *
 	 * @return $this|static
 	 * @throws \Exception
 	 */
-	public function canBeChanged()
+	public function canBeChanged(): static
 	{
-		if (App::instance()->user()) {
-			return $this->filter(function ($role) {
+		if (App::instance()->user()?->isAdmin() !== true) {
+			return $this->filter('isAccessible', true)->filter(function ($role) {
 				$newUser = new User([
 					'email' => 'test@getkirby.com',
 					'role'  => $role->id()
@@ -52,15 +54,17 @@ class Roles extends Collection
 	/**
 	 * Returns a filtered list of all
 	 * roles that can be created by the
-	 * current user
+	 * current user.
+	 *
+	 * Use with `$kirby->roles()`.
 	 *
 	 * @return $this|static
 	 * @throws \Exception
 	 */
-	public function canBeCreated()
+	public function canBeCreated(): static
 	{
-		if (App::instance()->user()) {
-			return $this->filter(function ($role) {
+		if (App::instance()->user()?->isAdmin() !== true) {
+			return $this->filter('isAccessible', true)->filter(function ($role) {
 				$newUser = new User([
 					'email' => 'test@getkirby.com',
 					'role'  => $role->id()
@@ -73,12 +77,7 @@ class Roles extends Collection
 		return $this;
 	}
 
-	/**
-	 * @param array $roles
-	 * @param array $inject
-	 * @return static
-	 */
-	public static function factory(array $roles, array $inject = [])
+	public static function factory(array $roles, array $inject = []): static
 	{
 		$collection = new static();
 
@@ -97,12 +96,7 @@ class Roles extends Collection
 		return $collection->sort('name', 'asc');
 	}
 
-	/**
-	 * @param string|null $root
-	 * @param array $inject
-	 * @return static
-	 */
-	public static function load(string $root = null, array $inject = [])
+	public static function load(string|null $root = null, array $inject = []): static
 	{
 		$kirby = App::instance();
 		$roles = new static();

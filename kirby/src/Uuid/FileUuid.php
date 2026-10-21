@@ -3,6 +3,7 @@
 namespace Kirby\Uuid;
 
 use Generator;
+use Kirby\Cms\App;
 use Kirby\Cms\File;
 
 /**
@@ -22,7 +23,7 @@ class FileUuid extends ModelUuid
 	/**
 	 * @var \Kirby\Cms\File|null
 	 */
-	public Identifiable|null $model;
+	public Identifiable|null $model = null;
 
 	/**
 	 * Looks up UUID in cache and resolves to file object;
@@ -33,17 +34,16 @@ class FileUuid extends ModelUuid
 	protected function findByCache(): File|null
 	{
 		// get mixed Uri from cache
-		$key   = $this->key();
-		$value = Uuids::cache()->get($key);
-
-		if ($value === null) {
-			return null;
+		if ($key = $this->key()) {
+			if ($value = Uuids::cache()->get($key)) {
+				// value is an array containing
+				// the UUID for the parent and the filename
+				$parent = Uuid::for($value['parent'])->model();
+				return $parent?->file($value['filename']);
+			}
 		}
 
-		// value is an array containing
-		// the UUID for the parent and the filename
-		$parent = Uuid::for($value['parent'])->model();
-		return $parent?->file($value['filename']);
+		return null;
 	}
 
 	/**
@@ -83,5 +83,19 @@ class FileUuid extends ModelUuid
 			'parent'   => $parent->toString(),
 			'filename' => $model->filename()
 		];
+	}
+
+	/**
+	 * Returns permalink url
+	 */
+	public function url(): string
+	{
+		// make sure UUID is cached because the permalink
+		// route only looks up UUIDs from cache
+		if ($this->isCached() === false) {
+			$this->populate();
+		}
+
+		return App::instance()->url() . '/@/' . static::TYPE . '/' . $this->id();
 	}
 }

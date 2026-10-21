@@ -3,7 +3,6 @@
 namespace Kirby\Cms;
 
 use Kirby\Toolkit\I18n;
-use Kirby\Toolkit\Locale;
 use Kirby\Toolkit\Str;
 
 /**
@@ -17,26 +16,60 @@ use Kirby\Toolkit\Str;
  */
 trait AppTranslations
 {
-	protected $translations;
+	protected array $i18nStrings = [];
+	protected Translations|null $translations = null;
+
+	/**
+	 * Returns the translation strings that Kirby itself defines for
+	 * the given code. Every shipped translation is generated from the
+	 * English one, so that is always the complete set, plus whatever
+	 * plugins register for English and for the code itself.
+	 * @since 4.9.6
+	 */
+	public function coreI18nStrings(string $code): array
+	{
+		return $this->i18nStrings[$code] ??= [
+			...Translation::load(
+				'en',
+				$this->root('i18n:translations') . '/en.json',
+				$this->extensions['translations']['en'] ?? []
+			)->data(),
+			...$this->extensions['translations'][$code] ?? []
+		];
+	}
+
+	/**
+	 * Returns the translation strings that the custom variables of a
+	 * language contribute. A variable must never shadow one of Kirby's
+	 * own strings, as the Panel renders some of them as HTML.
+	 */
+	protected function customI18nStrings(Language $language): array
+	{
+		if (($strings = $language->translations()) === []) {
+			return [];
+		}
+
+		return array_diff_key(
+			$strings,
+			$this->coreI18nStrings($language->code())
+		);
+	}
 
 	/**
 	 * Setup internationalization
-	 *
-	 * @return void
 	 */
 	protected function i18n(): void
 	{
 		I18n::$load = function ($locale): array {
 			$data = $this->translation($locale)?->data() ?? [];
 
-			// inject translations from the current language
+			// inject the custom variables of the current language
 			if (
 				$this->multilang() === true &&
 				$language = $this->languages()->find($locale)
 			) {
-				$data = array_merge($data, $language->translations());
+				$data = array_merge($data, $this->customI18nStrings($language));
 			}
-
 
 			return $data;
 		};
@@ -88,8 +121,6 @@ trait AppTranslations
 	 * Returns the language code that will be used
 	 * for the Panel if no user is logged in or if
 	 * no language is configured for the user
-	 *
-	 * @return string
 	 */
 	public function panelLanguage(): string
 	{
@@ -109,41 +140,11 @@ trait AppTranslations
 	}
 
 	/**
-	 * Load and set the current language if it exists
-	 * Otherwise fall back to the default language
-	 *
-	 * @internal
-	 * @param string|null $languageCode
-	 * @return \Kirby\Cms\Language|null
-	 */
-	public function setCurrentLanguage(string $languageCode = null)
-	{
-		if ($this->multilang() === false) {
-			Locale::set($this->option('locale', 'en_US.utf-8'));
-			return $this->language = null;
-		}
-
-		$this->language   = $this->language($languageCode);
-		$this->language ??= $this->defaultLanguage();
-
-		if ($this->language) {
-			Locale::set($this->language->locale());
-		}
-
-		// add language slug rules to Str class
-		Str::$language = $this->language->rules();
-
-		return $this->language;
-	}
-
-	/**
 	 * Set the current translation
 	 *
 	 * @internal
-	 * @param string|null $translationCode
-	 * @return void
 	 */
-	public function setCurrentTranslation(string $translationCode = null): void
+	public function setCurrentTranslation(string|null $translationCode = null): void
 	{
 		I18n::$locale = $translationCode ?? 'en';
 	}
@@ -152,11 +153,10 @@ trait AppTranslations
 	 * Load a specific translation by locale
 	 *
 	 * @param string|null $locale Locale name or `null` for the current locale
-	 * @return \Kirby\Cms\Translation
 	 */
-	public function translation(string|null $locale = null)
+	public function translation(string|null $locale = null): Translation
 	{
-		$locale = $locale ?? I18n::locale();
+		$locale ??= I18n::locale();
 		$locale = basename($locale);
 
 		// prefer loading them from the translations collection
@@ -169,9 +169,9 @@ trait AppTranslations
 		// get injected translation data from plugins etc.
 		$inject = $this->extensions['translations'][$locale] ?? [];
 
-		// inject current language translations
+		// inject the strings of the current language's custom variables
 		if ($language = $this->language($locale)) {
-			$inject = array_merge($inject, $language->translations());
+			$inject = [...$inject, ...$this->customI18nStrings($language)];
 		}
 
 		// load from disk instead
@@ -180,10 +180,8 @@ trait AppTranslations
 
 	/**
 	 * Returns all available translations
-	 *
-	 * @return \Kirby\Cms\Translations
 	 */
-	public function translations()
+	public function translations(): Translations
 	{
 		if ($this->translations instanceof Translations) {
 			return $this->translations;
@@ -194,21 +192,19 @@ trait AppTranslations
 		// injects languages translations
 		if ($languages = $this->languages()) {
 			foreach ($languages as $language) {
-				$languageCode         = $language->code();
-				$languageTranslations = $language->translations();
+				$code    = $language->code();
+				$strings = $this->customI18nStrings($language);
 
-				// merges language translations with extensions translations
-				if (empty($languageTranslations) === false) {
-					$translations[$languageCode] = array_merge(
-						$translations[$languageCode] ?? [],
-						$languageTranslations
-					);
+				// merges the custom variables with the extension translations
+				if ($strings !== []) {
+					$translations[$code] = [
+						...$translations[$code] ?? [],
+						...$strings
+					];
 				}
 			}
 		}
 
-		$this->translations = Translations::load($this->root('i18n:translations'), $translations);
-
-		return $this->translations;
+		return $this->translations = Translations::load($this->root('i18n:translations'), $translations);
 	}
 }

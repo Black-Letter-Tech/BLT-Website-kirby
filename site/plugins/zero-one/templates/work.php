@@ -14,7 +14,7 @@
     <span class="tm-hover-img">
       <picture>
         <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $cover_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $cover_width, 'height' => $cover_height, 'format' => 'webp'])->url()) ?>" />
-        <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->clip(null, $cover_height)->url(), $img->crop($cover_width, $cover_height)->url()) ?>" alt="<?= $project->title()->html() ?>" width="<?= $img->clip()->width() ?>" height="<?= $img->clip()->height() ?>" loading="lazy">
+        <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->resize(null, $cover_height)->url(), $img->crop($cover_width, $cover_height)->url()) ?>" alt="<?= $project->title()->html() ?>" width="<?= $img->resize()->width() ?>" height="<?= $img->resize()->height() ?>" loading="lazy">
       </picture>
     </span>
     </a>
@@ -41,7 +41,7 @@
   <div class="tm-projects uk-inline-clip uk-transition-toggle" tabindex="0">
     <picture>
       <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $cover_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $cover_width, 'height' => $cover_height, 'format' => 'webp'])->url()) ?>" />
-      <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->clip(null, $cover_height)->url(), $img->crop($cover_width, $cover_height)->url()) ?>" alt="<?= $project->title()->html() ?>" width="<?= $img->clip()->width() ?>" height="<?= $img->clip()->height() ?>" loading="lazy">
+      <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->resize(null, $cover_height)->url(), $img->crop($cover_width, $cover_height)->url()) ?>" alt="<?= $project->title()->html() ?>" width="<?= $img->resize()->width() ?>" height="<?= $img->resize()->height() ?>" loading="lazy">
     </picture>
     <div class="uk-overlay-gradient uk-position-cover"></div>
     <div class="uk-overlay uk-position-bottom uk-light<?php e($page->projectsStyle() == "grid" && $page->pageWidth() != "small" && $page->pageWidth() != "xsmall", ' uk-position-large', ' uk-position-small') ?>">

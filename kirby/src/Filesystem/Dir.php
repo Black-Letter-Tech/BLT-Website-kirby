@@ -114,9 +114,14 @@ class Dir
 	/**
 	 * Checks if the directory exists on disk
 	 */
-	public static function exists(string $dir): bool
+	public static function exists(string $dir, string|null $in = null): bool
 	{
-		return is_dir($dir) === true;
+		try {
+			static::realpath($dir, $in);
+			return true;
+		} catch (Exception) {
+			return false;
+		}
 	}
 
 	/**
@@ -149,7 +154,7 @@ class Dir
 		string $dir,
 		bool $recursive = false,
 		array|false|null $ignore = [],
-		string $path = null
+		string|null $path = null
 	): array {
 		$result = [];
 		$dir    = realpath($dir);
@@ -169,7 +174,10 @@ class Dir
 			$result[] = $entry;
 
 			if ($recursive === true && is_dir($root) === true) {
-				$result = array_merge($result, static::index($root, true, $ignore, $entry));
+				$result = [
+					...$result,
+					...static::index($root, true, $ignore, $entry)
+				];
 			}
 		}
 
@@ -217,143 +225,145 @@ class Dir
 		array|null $contentIgnore = null,
 		bool $multilang = false
 	): array {
-		$dir = realpath($dir);
-
 		$inventory = [
 			'children' => [],
 			'files'    => [],
 			'template' => 'default',
 		];
 
+		$dir = realpath($dir);
+
 		if ($dir === false) {
 			return $inventory;
 		}
 
-		$items = static::read($dir, $contentIgnore);
-
 		// a temporary store for all content files
 		$content = [];
 
-		// sort all items naturally to avoid sorting issues later
+		// read and sort all items naturally to avoid sorting issues later
+		$items = static::read($dir, $contentIgnore);
 		natsort($items);
 
+		// loop through all directory items and collect all relevant information
 		foreach ($items as $item) {
-			// ignore all items with a leading dot
+			// ignore all items with a leading dot or underscore
 			if (in_array(substr($item, 0, 1), ['.', '_']) === true) {
 				continue;
 			}
 
 			$root = $dir . '/' . $item;
 
+			// collect all directories as children
 			if (is_dir($root) === true) {
-				// extract the slug and num of the directory
-				if (preg_match('/^([0-9]+)' . static::$numSeparator . '(.*)$/', $item, $match)) {
-					$num  = (int)$match[1];
-					$slug = $match[2];
-				} else {
-					$num  = null;
-					$slug = $item;
-				}
-
-				$inventory['children'][] = [
-					'dirname' => $item,
-					'model'   => null,
-					'num'     => $num,
-					'root'    => $root,
-					'slug'    => $slug,
-				];
-			} else {
-				$extension = pathinfo($item, PATHINFO_EXTENSION);
-
-				switch ($extension) {
-					case 'htm':
-					case 'html':
-					case 'php':
-						// don't track those files
-						break;
-					case $contentExtension:
-						$content[] = pathinfo($item, PATHINFO_FILENAME);
-						break;
-					default:
-						$inventory['files'][$item] = [
-							'filename'  => $item,
-							'extension' => $extension,
-							'root'      => $root,
-						];
-				}
-			}
-		}
-
-		// remove the language codes from all content filenames
-		if ($multilang === true) {
-			foreach ($content as $key => $filename) {
-				$content[$key] = pathinfo($filename, PATHINFO_FILENAME);
+				$inventory['children'][] = static::inventoryChild(
+					$item,
+					$root,
+					$contentExtension,
+					$multilang
+				);
+				continue;
 			}
 
-			$content = array_unique($content);
+			$extension = pathinfo($item, PATHINFO_EXTENSION);
+
+			// don't track files with these extensions
+			if (in_array($extension, ['htm', 'html', 'php']) === true) {
+				continue;
+			}
+
+			// collect all content files separately,
+			// not as inventory entries
+			if ($extension === $contentExtension) {
+				$filename = pathinfo($item, PATHINFO_FILENAME);
+
+				// remove the language codes from all content filenames
+				if ($multilang === true) {
+					$filename = pathinfo($filename, PATHINFO_FILENAME);
+				}
+
+				$content[] = $filename;
+				continue;
+			}
+
+			// collect all other files
+			$inventory['files'][$item] = [
+				'filename'  => $item,
+				'extension' => $extension,
+				'root'      => $root,
+			];
 		}
 
-		$inventory = static::inventoryContent($inventory, $content);
-		$inventory = static::inventoryModels($inventory, $contentExtension, $multilang);
+		$content = array_unique($content);
+
+		$inventory['template'] = static::inventoryTemplate(
+			$content,
+			$inventory['files']
+		);
 
 		return $inventory;
 	}
 
 	/**
-	 * Take all content files,
-	 * remove those who are meta files and
-	 * detect the main content file
+	 * Collect information for a child for the inventory
 	 */
-	protected static function inventoryContent(array $inventory, array $content): array
-	{
-		// filter meta files from the content file
-		if (empty($content) === true) {
-			$inventory['template'] = 'default';
-			return $inventory;
+	protected static function inventoryChild(
+		string $item,
+		string $root,
+		string $contentExtension = 'txt',
+		bool $multilang = false
+	): array {
+		// extract the slug and num of the directory
+		if ($separator = strpos($item, static::$numSeparator)) {
+			$num  = (int)substr($item, 0, $separator);
+			$slug = substr($item, $separator + 1);
 		}
 
-		foreach ($content as $contentName) {
-			// could be a meta file. i.e. cover.jpg
-			if (isset($inventory['files'][$contentName]) === true) {
+		// determine the model
+		if (empty(Page::$models) === false) {
+			if ($multilang === true) {
+				$code = App::instance()->defaultLanguage()->code();
+				$contentExtension = $code . '.' . $contentExtension;
+			}
+
+			// look if a content file can be found
+			// for any of the available models
+			foreach (Page::$models as $modelName => $modelClass) {
+				if (is_file($root . '/' . $modelName . '.' . $contentExtension) === true) {
+					$model = $modelName;
+					break;
+				}
+			}
+		}
+
+		return [
+			'dirname' => $item,
+			'model'   => $model ?? null,
+			'num'     => $num ?? null,
+			'root'    => $root,
+			'slug'    => $slug ?? $item,
+		];
+	}
+
+	/**
+	 * Determines the main template for the inventory
+	 * from all collected content files, ignore file meta files
+	 */
+	protected static function inventoryTemplate(
+		array $content,
+		array $files,
+	): string {
+		foreach ($content as $name) {
+			// is a meta file corresponding to an actual file, i.e. cover.jpg
+			if (isset($files[$name]) === true) {
 				continue;
 			}
 
 			// it's most likely the template
-			$inventory['template'] = $contentName;
+			// (will overwrite and use the last match for historic reasons)
+			$template = $name;
 		}
 
-		return $inventory;
-	}
-
-	/**
-	 * Go through all inventory children
-	 * and inject a model for each
-	 */
-	protected static function inventoryModels(
-		array $inventory,
-		string $contentExtension,
-		bool $multilang = false
-	): array {
-		// inject models
-		if (
-			empty($inventory['children']) === false &&
-			empty(Page::$models) === false
-		) {
-			if ($multilang === true) {
-				$contentExtension = App::instance()->defaultLanguage()->code() . '.' . $contentExtension;
-			}
-
-			foreach ($inventory['children'] as $key => $child) {
-				foreach (Page::$models as $modelName => $modelClass) {
-					if (file_exists($child['root'] . '/' . $modelName . '.' . $contentExtension) === true) {
-						$inventory['children'][$key]['model'] = $modelName;
-						break;
-					}
-				}
-			}
-		}
-
-		return $inventory;
+		return $template ?? 'default';
 	}
 
 	/**
@@ -402,10 +412,8 @@ class Dir
 
 		$parent = dirname($dir);
 
-		if ($recursive === true) {
-			if (is_dir($parent) === false) {
-				static::make($parent, true);
-			}
+		if ($recursive === true && is_dir($parent) === false) {
+			static::make($parent, true);
 		}
 
 		if (is_writable($parent) === false) {
@@ -426,19 +434,22 @@ class Dir
 	 * subfolders have been modified for the last time.
 	 *
 	 * @param string $dir The path of the directory
+	 * @param 'date'|'intl'|'strftime'|null $handler Custom date handler or `null`
+	 *                                               for the globally configured one
 	 */
-	public static function modified(string $dir, string $format = null, string $handler = 'date'): int|string
-	{
+	public static function modified(
+		string $dir,
+		string|null $format = null,
+		string|null $handler = null
+	): int|string {
 		$modified = filemtime($dir);
 		$items    = static::read($dir);
 
 		foreach ($items as $item) {
-			if (is_file($dir . '/' . $item) === true) {
-				$newModified = filemtime($dir . '/' . $item);
-			} else {
-				$newModified = static::modified($dir . '/' . $item);
-			}
-
+			$newModified = match (is_file($dir . '/' . $item)) {
+				true  => filemtime($dir . '/' . $item),
+				false => static::modified($dir . '/' . $item)
+			};
 			$modified = ($newModified > $modified) ? $newModified : $modified;
 		}
 
@@ -518,6 +529,42 @@ class Dir
 	}
 
 	/**
+	 * Returns the absolute path to the directory if the directory can be found.
+	 * @since 4.7.1
+	 */
+	public static function realpath(string $dir, string|null $in = null): string
+	{
+		$realpath = realpath($dir);
+
+		if ($realpath === false || is_dir($realpath) === false) {
+			throw new Exception(sprintf('The directory does not exist at the given path: "%s"', $dir));
+		}
+
+		if ($in !== null) {
+			$parent = realpath($in);
+
+			if ($parent === false || is_dir($parent) === false) {
+				throw new Exception(sprintf('The parent directory does not exist: "%s"', $in));
+			}
+
+			// require a path separator boundary so that
+			// a sibling directory sharing the same name prefix
+			// (e.g. `/site2` for the parent `/site`)
+			// cannot pass the containment check
+			$parent = rtrim($parent, '/\\');
+
+			if (
+				$realpath !== $parent &&
+				str_starts_with($realpath, $parent . DIRECTORY_SEPARATOR) === false
+			) {
+				throw new Exception('The directory is not within the parent directory');
+			}
+		}
+
+		return $realpath;
+	}
+
+	/**
 	 * Removes a folder including all containing files and folders
 	 */
 	public static function remove(string $dir): bool
@@ -593,7 +640,10 @@ class Dir
 				return true;
 			}
 
-			if (is_dir($subdir) === true && static::wasModifiedAfter($subdir, $time) === true) {
+			if (
+				is_dir($subdir) === true &&
+				static::wasModifiedAfter($subdir, $time) === true
+			) {
 				return true;
 			}
 		}

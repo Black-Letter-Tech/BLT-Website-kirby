@@ -5,6 +5,8 @@ namespace Kirby\Filesystem;
 use Kirby\Cms\FileModifications;
 use Kirby\Cms\HasMethods;
 use Kirby\Exception\BadMethodCallException;
+use Kirby\Exception\InvalidArgumentException;
+use Kirby\Toolkit\Str;
 
 /**
  * Anything in your public path can be converted
@@ -27,18 +29,29 @@ class Asset
 	/**
 	 * Relative file path
 	 */
-	protected string|null $path = null;
+	protected string|null $path;
+
 
 	/**
 	 * Creates a new Asset object for the given path.
 	 */
 	public function __construct(string $path)
 	{
-		$this->setProperties([
-			'path' => dirname($path),
-			'root' => $this->kirby()->root('index') . '/' . $path,
-			'url'  => $this->kirby()->url('base') . '/' . $path
-		]);
+		// protect against path traversal outside the index root:
+		// we cannot use `F::realpath(in: $indexRoot)` because the asset file
+		// may not actually exist; we also cannot make the check depend on the
+		// existence of the file because that would leak information about
+		// whether the requested file exists on the server;
+		// `../` and `..\` sequences are fishy enough to to prevent them entirely
+		if (Str::contains(Str::replace($path, '\\', '/'), '../') === true) {
+			throw new InvalidArgumentException('Received unexpected asset path');
+		}
+
+		$this->root = $this->kirby()->root('index') . '/' . $path;
+		$this->url  = $this->kirby()->url('base') . '/' . $path;
+
+		$path = dirname($path);
+		$this->path = $path === '.' ? '' : $path;
 	}
 
 	/**
@@ -46,7 +59,7 @@ class Asset
 	 *
 	 * @throws \Kirby\Exception\BadMethodCallException
 	 */
-	public function __call(string $method, array $arguments = [])
+	public function __call(string $method, array $arguments = []): mixed
 	{
 		// public property access
 		if (isset($this->$method) === true) {
@@ -113,16 +126,5 @@ class Asset
 	public function path(): string
 	{
 		return $this->path;
-	}
-
-	/**
-	 * Setter for the path
-	 *
-	 * @return $this
-	 */
-	protected function setPath(string $path): static
-	{
-		$this->path = $path === '.' ? '' : $path;
-		return $this;
 	}
 }

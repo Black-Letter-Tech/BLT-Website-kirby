@@ -3,9 +3,12 @@
 namespace Kirby\Database;
 
 use Closure;
-use Exception;
+use Kirby\Database\Sql\Mysql;
+use Kirby\Database\Sql\Sqlite;
 use Kirby\Exception\InvalidArgumentException;
 use Kirby\Toolkit\A;
+use Kirby\Toolkit\Collection;
+use Kirby\Toolkit\Obj;
 use Kirby\Toolkit\Str;
 use PDO;
 use PDOStatement;
@@ -302,7 +305,23 @@ class Database
 		// try to prepare and execute the sql
 		try {
 			$this->statement = $this->connection->prepare($query);
-			$this->statement->execute($bindings);
+			// bind parameters to statement
+			foreach ($bindings as $parameter => $value) {
+				// positional parameters start at 1
+				if (is_int($parameter)) {
+					$parameter++;
+				}
+
+				$type = match (gettype($value)) {
+					'integer' => PDO::PARAM_INT,
+					'boolean' => PDO::PARAM_BOOL,
+					'NULL'    => PDO::PARAM_NULL,
+					default   => PDO::PARAM_STR
+				};
+
+				$this->statement->bindValue($parameter, $value, $type);
+			}
+			$this->statement->execute();
 
 			$this->affected  = $this->statement->rowCount();
 			$this->lastId    = Str::startsWith($query, 'insert ', true) ? $this->connection->lastInsertId() : null;
@@ -337,13 +356,16 @@ class Database
 	/**
 	 * Executes a sql query, which is expected to return a set of results
 	 */
-	public function query(string $query, array $bindings = [], array $params = [])
-	{
+	public function query(
+		string $query,
+		array $bindings = [],
+		array $params = []
+	) {
 		$defaults = [
 			'flag'     => null,
 			'method'   => 'fetchAll',
-			'fetch'    => 'Kirby\Toolkit\Obj',
-			'iterator' => 'Kirby\Toolkit\Collection',
+			'fetch'    => Obj::class,
+			'iterator' => Collection::class,
 		];
 
 		$options = array_merge($defaults, $params);
@@ -359,7 +381,7 @@ class Database
 		) {
 			$flags = PDO::FETCH_ASSOC;
 		} else {
-			$flags = PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE;
+			$flags = PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE;
 		}
 
 		// add optional flags
@@ -368,7 +390,10 @@ class Database
 		}
 
 		// set the fetch mode
-		if ($options['fetch'] instanceof Closure || $options['fetch'] === 'array') {
+		if (
+			$options['fetch'] instanceof Closure ||
+			$options['fetch'] === 'array'
+		) {
 			$this->statement->setFetchMode($flags);
 		} else {
 			$this->statement->setFetchMode($flags, $options['fetch']);
@@ -379,8 +404,14 @@ class Database
 
 		// apply the fetch closure to all results if given
 		if ($options['fetch'] instanceof Closure) {
-			foreach ($results as $key => $result) {
-				$results[$key] = $options['fetch']($result, $key);
+			if ($options['method'] === 'fetchAll') {
+				// fetching multiple records
+				foreach ($results as $key => $result) {
+					$results[$key] = $options['fetch']($result, $key);
+				}
+			} elseif ($options['method'] === 'fetch' && $results !== false) {
+				// fetching a single record
+				$results = $options['fetch']($results, null);
 			}
 		}
 
@@ -523,7 +554,7 @@ class Database
  * MySQL database connector
  */
 Database::$types['mysql'] = [
-	'sql' => 'Kirby\Database\Sql\Mysql',
+	'sql' => Mysql::class,
 	'dsn' => function (array $params): string {
 		if (isset($params['host']) === false && isset($params['socket']) === false) {
 			throw new InvalidArgumentException('The mysql connection requires either a "host" or a "socket" parameter');
@@ -551,7 +582,7 @@ Database::$types['mysql'] = [
 			$parts[] = 'dbname=' . $params['database'];
 		}
 
-		$parts[] = 'charset=' . ($params['charset'] ?? 'utf8');
+		$parts[] = 'charset=' . ($params['charset'] ?? 'utf8mb4');
 
 		return 'mysql:' . implode(';', $parts);
 	}
@@ -561,7 +592,7 @@ Database::$types['mysql'] = [
  * SQLite database connector
  */
 Database::$types['sqlite'] = [
-	'sql' => 'Kirby\Database\Sql\Sqlite',
+	'sql' => Sqlite::class,
 	'dsn' => function (array $params): string {
 		if (isset($params['database']) === false) {
 			throw new InvalidArgumentException('The sqlite connection requires a "database" parameter');

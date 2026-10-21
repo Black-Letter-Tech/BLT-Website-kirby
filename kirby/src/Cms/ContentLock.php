@@ -2,9 +2,9 @@
 
 namespace Kirby\Cms;
 
+use Kirby\Exception\AuthException;
 use Kirby\Exception\DuplicateException;
 use Kirby\Exception\LogicException;
-use Kirby\Exception\PermissionException;
 
 /**
  * Takes care of content lock and unlock information
@@ -17,33 +17,16 @@ use Kirby\Exception\PermissionException;
  */
 class ContentLock
 {
-	/**
-	 * Lock data
-	 *
-	 * @var array
-	 */
-	protected $data;
+	protected array $data;
 
-	/**
-	 * The model to manage locking/unlocking for
-	 *
-	 * @var ModelWithContent
-	 */
-	protected $model;
-
-	/**
-	 * @param \Kirby\Cms\ModelWithContent $model
-	 */
-	public function __construct(ModelWithContent $model)
-	{
-		$this->model = $model;
-		$this->data  = $this->kirby()->locks()->get($model);
+	public function __construct(
+		protected ModelWithContent $model
+	) {
+		$this->data = $this->kirby()->locks()->get($model);
 	}
 
 	/**
 	 * Clears the lock unconditionally
-	 *
-	 * @return bool
 	 */
 	protected function clearLock(): bool
 	{
@@ -61,7 +44,6 @@ class ContentLock
 	/**
 	 * Sets lock with the current user
 	 *
-	 * @return bool
 	 * @throws \Kirby\Exception\DuplicateException
 	 */
 	public function create(): bool
@@ -86,20 +68,19 @@ class ContentLock
 	/**
 	 * Returns either `false` or array  with `user`, `email`,
 	 * `time` and `unlockable` keys
-	 *
-	 * @return array|bool
 	 */
-	public function get()
+	public function get(): array|bool
 	{
 		$data = $this->data['lock'] ?? [];
 
 		if (empty($data) === false && $data['user'] !== $this->user()->id()) {
 			if ($user = $this->kirby()->user($data['user'])) {
 				$time = (int)($data['time']);
+				$user = $user->isListable() === true ? $user : null;
 
 				return [
-					'user'       => $user->id(),
-					'email'      => $user->email(),
+					'user'       => $user?->id(),
+					'email'      => $user?->email(),
 					'time'       => $time,
 					'unlockable' => ($time + 60) <= time()
 				];
@@ -114,8 +95,6 @@ class ContentLock
 
 	/**
 	 * Returns if the model is locked by another user
-	 *
-	 * @return bool
 	 */
 	public function isLocked(): bool
 	{
@@ -130,8 +109,6 @@ class ContentLock
 
 	/**
 	 * Returns if the current user's lock has been removed by another user
-	 *
-	 * @return bool
 	 */
 	public function isUnlocked(): bool
 	{
@@ -142,8 +119,6 @@ class ContentLock
 
 	/**
 	 * Returns the app instance
-	 *
-	 * @return \Kirby\Cms\App
 	 */
 	protected function kirby(): App
 	{
@@ -153,7 +128,6 @@ class ContentLock
 	/**
 	 * Removes lock of current user
 	 *
-	 * @return bool
 	 * @throws \Kirby\Exception\LogicException
 	 */
 	public function remove(): bool
@@ -176,8 +150,6 @@ class ContentLock
 
 	/**
 	 * Removes unlock information for current user
-	 *
-	 * @return bool
 	 */
 	public function resolve(): bool
 	{
@@ -199,7 +171,7 @@ class ContentLock
 	 * Returns the state for the
 	 * form buttons in the frontend
 	 */
-	public function state(): ?string
+	public function state(): string|null
 	{
 		return match (true) {
 			$this->isUnlocked() => 'unlock',
@@ -211,8 +183,6 @@ class ContentLock
 	/**
 	 * Returns a usable lock array
 	 * for the frontend
-	 *
-	 * @return array
 	 */
 	public function toArray(): array
 	{
@@ -224,8 +194,6 @@ class ContentLock
 
 	/**
 	 * Removes current lock and adds lock user to unlock data
-	 *
-	 * @return bool
 	 */
 	public function unlock(): bool
 	{
@@ -245,12 +213,11 @@ class ContentLock
 	 * Returns currently authenticated user;
 	 * throws exception if none is authenticated
 	 *
-	 * @return \Kirby\Cms\User
 	 * @throws \Kirby\Exception\PermissionException
 	 */
 	protected function user(): User
 	{
 		return $this->kirby()->user() ??
-			throw new PermissionException('No user authenticated.');
+			throw new AuthException('No user authenticated.');
 	}
 }

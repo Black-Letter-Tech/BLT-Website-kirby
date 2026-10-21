@@ -4,14 +4,18 @@ use Kirby\Cms\App;
 use Kirby\Cms\File;
 use Kirby\Cms\Helpers;
 use Kirby\Cms\Html;
+use Kirby\Cms\ModelWithContent;
 use Kirby\Cms\Page;
 use Kirby\Cms\Pages;
+use Kirby\Cms\Plugin;
+use Kirby\Cms\PluginAssets;
 use Kirby\Cms\Response;
 use Kirby\Cms\Site;
 use Kirby\Cms\Url;
 use Kirby\Filesystem\Asset;
 use Kirby\Filesystem\F;
 use Kirby\Http\Router;
+use Kirby\Image\QrCode;
 use Kirby\Template\Slot;
 use Kirby\Template\Snippet;
 use Kirby\Toolkit\Date;
@@ -53,9 +57,9 @@ if (Helpers::hasOverride('collection') === false) { // @codeCoverageIgnore
 	 * @return \Kirby\Toolkit\Collection|null
 	 * @todo 5.0 Add return type declaration
 	 */
-	function collection(string $name)
+	function collection(string $name, array $options = [])
 	{
-		return App::instance()->collection($name);
+		return App::instance()->collection($name, $options);
 	}
 }
 
@@ -87,7 +91,7 @@ if (Helpers::hasOverride('css') === false) { // @codeCoverageIgnore
 	 * @param string|array|null $options Pass an array of attributes for the link tag or a media attribute string
 	 */
 	function css(
-		string|array $url,
+		string|array|Plugin|PluginAssets $url,
 		string|array|null $options = null
 	): string|null {
 		return Html::css($url, $options);
@@ -107,7 +111,7 @@ if (Helpers::hasOverride('deprecated') === false) { // @codeCoverageIgnore
 	}
 }
 
-if (Helpers::hasOverride('dump') === false) { // @codeCoverageIgnore
+if (Helpers::hasOverride('dump') === false && function_exists('dump') === false) { // @codeCoverageIgnore
 	/**
 	 * Simple object and variable dumper
 	 * to help with debugging.
@@ -195,10 +199,8 @@ if (Helpers::hasOverride('go') === false) { // @codeCoverageIgnore
 	/**
 	 * Redirects to the given Urls
 	 * Urls can be relative or absolute.
-	 *
-	 * @todo Change return type to `never` once support for PHP 8.0 is dropped
 	 */
-	function go(string $url = '/', int $code = 302): void
+	function go(string $url = '/', int $code = 302): never
 	{
 		Response::go($url, $code);
 	}
@@ -260,7 +262,7 @@ if (Helpers::hasOverride('js') === false) { // @codeCoverageIgnore
 	 * Creates a script tag to load a javascript file
 	 */
 	function js(
-		string|array $url,
+		string|array|Plugin|PluginAssets $url,
 		string|array|bool|null $options = null
 	): string|null {
 		return Html::js($url, $options);
@@ -434,6 +436,20 @@ if (Helpers::hasOverride('params') === false) { // @codeCoverageIgnore
 	}
 }
 
+if (Helpers::hasOverride('qr') === false) { // @codeCoverageIgnore
+	/**
+	 * Creates a QR code object
+	 */
+	function qr(string|ModelWithContent $data): QrCode
+	{
+		if ($data instanceof ModelWithContent) {
+			$data = $data->url();
+		}
+
+		return new QrCode($data);
+	}
+}
+
 if (Helpers::hasOverride('r') === false) { // @codeCoverageIgnore
 	/**
 	 * Smart version of return with an if condition as first argument
@@ -588,25 +604,6 @@ if (Helpers::hasOverride('tt') === false) { // @codeCoverageIgnore
 	}
 }
 
-if (Helpers::hasOverride('twitter') === false) { // @codeCoverageIgnore
-	/**
-	 * Builds a Twitter link
-	 */
-	function twitter(
-		string $username,
-		string|null $text = null,
-		string|null $title = null,
-		string|null $class = null
-	): string {
-		return App::instance()->kirbytag([
-			'twitter' => $username,
-			'text'    => $text,
-			'title'   => $title,
-			'class'   => $class
-		]);
-	}
-}
-
 if (Helpers::hasOverride('u') === false) { // @codeCoverageIgnore
 	/**
 	 * Shortcut for url()
@@ -647,8 +644,11 @@ if (Helpers::hasOverride('video') === false) { // @codeCoverageIgnore
 	 * videos. The embed Urls are automatically detected from
 	 * the given Url.
 	 */
-	function video(string $url, array $options = [], array $attr = []): string|null
-	{
+	function video(
+		string $url,
+		array $options = [],
+		array $attr = []
+	): string|null {
 		return Html::video($url, $options, $attr);
 	}
 }
@@ -657,8 +657,11 @@ if (Helpers::hasOverride('vimeo') === false) { // @codeCoverageIgnore
 	/**
 	 * Embeds a Vimeo video by URL in an iframe
 	 */
-	function vimeo(string $url, array $options = [], array $attr = []): string|null
-	{
+	function vimeo(
+		string $url,
+		array $options = [],
+		array $attr = []
+	): string|null {
 		return Html::vimeo($url, $options, $attr);
 	}
 }
@@ -679,8 +682,11 @@ if (Helpers::hasOverride('youtube') === false) { // @codeCoverageIgnore
 	/**
 	 * Embeds a Youtube video by URL in an iframe
 	 */
-	function youtube(string $url, array $options = [], array $attr = []): string|null
-	{
+	function youtube(
+		string $url,
+		array $options = [],
+		array $attr = []
+	): string|null {
 		return Html::youtube($url, $options, $attr);
 	}
 }

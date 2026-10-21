@@ -6,7 +6,6 @@ use Closure;
 use Exception;
 use Kirby\Exception\LogicException;
 use Kirby\Filesystem\F;
-use Throwable;
 
 /**
  * Representation of an Http response,
@@ -82,6 +81,7 @@ class Response
 
 	/**
 	 * Improved `var_dump` output
+	 * @codeCoverageIgnore
 	 */
 	public function __debugInfo(): array
 	{
@@ -95,11 +95,7 @@ class Response
 	 */
 	public function __toString(): string
 	{
-		try {
-			return $this->send();
-		} catch (Throwable) {
-			return '';
-		}
+		return $this->send();
 	}
 
 	/**
@@ -176,6 +172,18 @@ class Response
 			'type' => F::extensionToMime(F::extension($file))
 		], $props);
 
+		// if we couldn't serve a correct MIME type, force
+		// the browser to display the file as plain text to
+		// harden against attacks from malicious file uploads
+		if ($props['type'] === null) {
+			if (isset($props['headers']) !== true) {
+				$props['headers'] = [];
+			}
+
+			$props['type'] = 'text/plain';
+			$props['headers']['X-Content-Type-Options'] = 'nosniff';
+		}
+
 		return new static($props);
 	}
 
@@ -186,9 +194,8 @@ class Response
 	 * @since 3.7.0
 	 *
 	 * @codeCoverageIgnore
-	 * @todo Change return type to `never` once support for PHP 8.0 is dropped
 	 */
-	public static function go(string $url = '/', int $code = 302): void
+	public static function go(string $url = '/', int $code = 302): never
 	{
 		die(static::redirect($url, $code));
 	}
@@ -239,7 +246,7 @@ class Response
 		array $headers = []
 	): static {
 		if (is_array($body) === true) {
-			$body = json_encode($body, $pretty === true ? JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES : 0);
+			$body = json_encode($body, $pretty === true ? JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES : 0);
 		}
 
 		return new static([
@@ -280,7 +287,7 @@ class Response
 		}
 
 		// send the content type header
-		header('Content-Type:' . $this->type() . '; charset=' . $this->charset());
+		header('Content-Type: ' . $this->type() . '; charset=' . $this->charset());
 
 		// print the response body
 		return $this->body();

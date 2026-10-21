@@ -3,12 +3,12 @@
 namespace Kirby\Option;
 
 use Kirby\Cms\Block;
-use Kirby\Cms\Field;
 use Kirby\Cms\File;
 use Kirby\Cms\ModelWithContent;
 use Kirby\Cms\Page;
 use Kirby\Cms\StructureObject;
 use Kirby\Cms\User;
+use Kirby\Content\Field;
 use Kirby\Exception\InvalidArgumentException;
 use Kirby\Toolkit\Collection;
 use Kirby\Toolkit\Obj;
@@ -30,7 +30,9 @@ class OptionsQuery extends OptionsProvider
 	public function __construct(
 		public string $query,
 		public string|null $text = null,
-		public string|null $value = null
+		public string|null $value = null,
+		public string|null $icon = null,
+		public string|null $info = null
 	) {
 	}
 
@@ -56,8 +58,10 @@ class OptionsQuery extends OptionsProvider
 
 		return new static(
 			query: $props['query'] ?? $props['fetch'],
-			text: $props['text'] ?? null,
-			value: $props['value'] ?? null
+			text : $props['text'] ?? null,
+			value: $props['value'] ?? null,
+			icon : $props['icon'] ?? null,
+			info : $props['info'] ?? null
 		);
 	}
 
@@ -159,7 +163,9 @@ class OptionsQuery extends OptionsProvider
 		}
 
 		if ($result instanceof Collection === false) {
-			throw new InvalidArgumentException('Invalid query result data: ' . get_class($result));
+			$type = is_object($result) === true ? get_class($result) : gettype($result);
+
+			throw new InvalidArgumentException('Invalid query result data: ' . $type);
 		}
 
 		// create options array
@@ -176,9 +182,13 @@ class OptionsQuery extends OptionsProvider
 			$safeMethod = $safeMode === true ? 'toSafeString' : 'toString';
 			$text = $model->$safeMethod($this->text ?? $text, $data);
 
-			return compact('text', 'value');
+			// additional data
+			$icon = $this->icon !== null ? $model->toString($this->icon, $data) : null;
+			$info = $this->info !== null ? $model->$safeMethod($this->info, $data) : null;
+
+			return compact('text', 'value', 'icon', 'info');
 		});
 
-		return $this->options = Options::factory($options);
+		return $this->options = Options::factory($options, resolve: false);
 	}
 }

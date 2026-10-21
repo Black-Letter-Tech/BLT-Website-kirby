@@ -5,6 +5,10 @@ namespace Kirby\Toolkit;
 use Closure;
 use Countable;
 use Exception;
+use InvalidArgumentException;
+use Kirby\Cms\App;
+use ReflectionFunction;
+use ReflectionMethod;
 
 /**
  * The collection class provides a nicer
@@ -29,6 +33,9 @@ class Collection extends Iterator implements Countable
 	/**
 	 * Whether the collection keys should be
 	 * treated as case-sensitive
+	 *
+	 * @todo 5.0 Check if case-sensitive can become the
+	 * default mode, see https://github.com/getkirby/kirby/pull/5635
 	 *
 	 * @var bool
 	 */
@@ -67,8 +74,7 @@ class Collection extends Iterator implements Countable
 
 	/**
 	 * Improve var_dump() output
-	 *
-	 * @return array
+	 * @codeCoverageIgnore
 	 */
 	public function __debugInfo(): array
 	{
@@ -94,8 +100,6 @@ class Collection extends Iterator implements Countable
 	 * Low-level setter for elements
 	 *
 	 * @param string $key string or array
-	 * @param mixed $value
-	 * @return void
 	 */
 	public function __set(string $key, $value): void
 	{
@@ -123,6 +127,10 @@ class Collection extends Iterator implements Countable
 	 */
 	public function __unset($key)
 	{
+		if ($this->caseSensitive !== true) {
+			$key = strtolower($key);
+		}
+
 		unset($this->data[$key]);
 	}
 
@@ -194,7 +202,7 @@ class Collection extends Iterator implements Countable
 	 * @param array|null $data
 	 * @return array|$this
 	 */
-	public function data(array $data = null)
+	public function data(array|null $data = null)
 	{
 		if ($data === null) {
 			return $this->data;
@@ -504,12 +512,53 @@ class Collection extends Iterator implements Countable
 	}
 
 	/**
-	 * @param object $object
-	 * @param string $attribute
-	 * @return mixed
+	 * Blocks access to methods that are marked with the
+	 * #[BlockCollectionAccess] attribute to prevent sensitive data
+	 * exposure (e.g. password hashes) or unintended write actions
+	 * through collection operations driven by user input.
+	 *
+	 * This applies to both explicit PHP methods and closures registered
+	 * via HasMethods::$methods. Attributes resolved via __call() that
+	 * have no matching PHP method or registered closure (i.e. content
+	 * fields) are always allowed through.
 	 */
 	protected function getAttributeFromObject($object, string $attribute)
 	{
+		static $cache = [];
+		$key = $object::class . '::' . strtolower($attribute);
+
+		if (isset($cache[$key]) === false) {
+			if (method_exists($object, $attribute) === true) {
+				// explicit PHP method: check for #[BlockCollectionAccess] via reflection
+				$cache[$key] = (new ReflectionMethod($object, $attribute))
+					->getAttributes(BlockCollectionAccess::class) === [];
+			} elseif (method_exists($object, 'hasMethod') === true && $object->hasMethod($attribute) === true) {
+				// closure registered via HasMethods::$methods: check the closure's attributes
+				$closure = $object->getMethod($attribute);
+				$cache[$key] = $closure === null ||
+					(new ReflectionFunction($closure))
+						->getAttributes(BlockCollectionAccess::class) === [];
+			} else {
+				// no PHP method and no registered closure (e.g. a CMS content field
+				// resolved via __call()): always allow through
+				$cache[$key] = true;
+			}
+		}
+
+		if ($cache[$key] === false) {
+			// throw in debug mode so developers get a clear signal instead of a silent null
+			if (
+				class_exists('Kirby\Cms\App', false) === true &&
+				App::instance(lazy: true)?->option('debug') === true
+			) {
+				throw new InvalidArgumentException(
+					'The "' . $attribute . '" method is not accessible in collection operations.'
+				);
+			}
+
+			return null;
+		}
+
 		return $object->{$attribute}();
 	}
 
@@ -517,21 +566,24 @@ class Collection extends Iterator implements Countable
 	 * Groups the elements by a given field or callback function
 	 *
 	 * @param string|Closure $field
-	 * @param bool $i
 	 * @return \Kirby\Toolkit\Collection A new collection with an element for
 	 *                                   each group and a subcollection in
 	 *                                   each group
 	 * @throws \Exception if $field is not a string nor a callback function
 	 */
-	public function group($field, bool $i = true)
+	public function group($field, bool $caseInsensitive = true)
 	{
 		// group by field name
 		if (is_string($field) === true) {
-			return $this->group(function ($item) use ($field, $i) {
+			return $this->group(function ($item) use ($field, $caseInsensitive) {
 				$value = $this->getAttribute($item, $field);
 
 				// ignore upper/lowercase for group names
-				return $i === true ? Str::lower($value) : $value;
+				if ($caseInsensitive === true) {
+					return Str::lower($value);
+				}
+
+				return (string)$value;
 			});
 		}
 
@@ -736,14 +788,17 @@ class Collection extends Iterator implements Countable
 	 * Add pagination
 	 *
 	 * @param array ...$arguments
-	 * @return static a sliced set of data
+	 * @return $this|static a sliced set of data
 	 */
 	public function paginate(...$arguments)
 	{
 		$this->pagination = Pagination::for($this, ...$arguments);
 
 		// slice and clone the collection according to the pagination
-		return $this->slice($this->pagination->offset(), $this->pagination->limit());
+		return $this->slice(
+			$this->pagination->offset(),
+			$this->pagination->limit()
+		);
 	}
 
 	/**
@@ -765,7 +820,7 @@ class Collection extends Iterator implements Countable
 	 * @param bool $unique
 	 * @return array
 	 */
-	public function pluck(string $field, string $split = null, bool $unique = false): array
+	public function pluck(string $field, string|null $split = null, bool $unique = false): array
 	{
 		$result = [];
 
@@ -946,7 +1001,7 @@ class Collection extends Iterator implements Countable
 	 * @param int|null $limit The optional number of elements to return
 	 * @return $this|static
 	 */
-	public function slice(int $offset = 0, int $limit = null)
+	public function slice(int $offset = 0, int|null $limit = null)
 	{
 		if ($offset === 0 && $limit === null) {
 			return $this;
@@ -1017,7 +1072,7 @@ class Collection extends Iterator implements Countable
 			} elseif ($arg === SORT_DESC || $argLower === 'desc') {
 				$fields[$currentField]['direction'] = SORT_DESC;
 
-			// other string: the field name
+				// other string: the field name
 			} elseif (is_string($arg) === true) {
 				$values = [];
 
@@ -1031,7 +1086,7 @@ class Collection extends Iterator implements Countable
 
 				$fields[] = ['field' => $arg, 'values' => $values];
 
-			// callable: custom field values
+				// callable: custom field values
 			} elseif (is_callable($arg) === true) {
 				$values = [];
 
@@ -1045,7 +1100,7 @@ class Collection extends Iterator implements Countable
 
 				$fields[] = ['field' => null, 'values' => $values];
 
-			// flags
+				// flags
 			} else {
 				$fields[$currentField]['flags'] = $arg;
 			}
@@ -1116,7 +1171,7 @@ class Collection extends Iterator implements Countable
 	 * @param \Closure|null $map
 	 * @return array
 	 */
-	public function toArray(Closure $map = null): array
+	public function toArray(Closure|null $map = null): array
 	{
 		if ($map !== null) {
 			return array_map($map, $this->data);
@@ -1153,7 +1208,7 @@ class Collection extends Iterator implements Countable
 	 * @param Closure|null $map
 	 * @return array
 	 */
-	public function values(Closure $map = null): array
+	public function values(Closure|null $map = null): array
 	{
 		$data = $map === null ? $this->data : array_map($map, $this->data);
 		return array_values($data);
@@ -1171,7 +1226,7 @@ class Collection extends Iterator implements Countable
 	 * @param \Closure|null $fallback
 	 * @return mixed
 	 */
-	public function when($condition, Closure $callback, Closure $fallback = null)
+	public function when($condition, Closure $callback, Closure|null $fallback = null)
 	{
 		if ($condition) {
 			return $callback->call($this, $condition);
@@ -1246,74 +1301,58 @@ Collection::$filters['!='] = function ($collection, $field, $test, $split = fals
  * In Filter
  */
 Collection::$filters['in'] = [
-	'validator' => function ($value, $test) {
-		return in_array($value, $test) === true;
-	},
-	'strict' => false
+	'validator' => fn ($value, $test) => in_array($value, $test) === true,
+	'strict'    => false
 ];
 
 /**
  * Not In Filter
  */
 Collection::$filters['not in'] = [
-	'validator' => function ($value, $test) {
-		return in_array($value, $test) === false;
-	},
+	'validator' => fn ($value, $test) => in_array($value, $test) === false
 ];
 
 /**
  * Contains Filter
  */
 Collection::$filters['*='] = [
-	'validator' => function ($value, $test) {
-		return strpos($value, $test) !== false;
-	},
-	'strict' => false
+	'validator' => fn ($value, $test) => $value !== null && str_contains($value, $test) === true,
+	'strict'    => false
 ];
 
 /**
  * Not Contains Filter
  */
 Collection::$filters['!*='] = [
-	'validator' => function ($value, $test) {
-		return strpos($value, $test) === false;
-	},
+	'validator' => fn ($value, $test) => $value === null || str_contains($value, $test) === false
 ];
 
 /**
  * More Filter
  */
 Collection::$filters['>'] = [
-	'validator' => function ($value, $test) {
-		return $value > $test;
-	}
+	'validator' => fn ($value, $test) => $value > $test
 ];
 
 /**
  * Min Filter
  */
 Collection::$filters['>='] = [
-	'validator' => function ($value, $test) {
-		return $value >= $test;
-	}
+	'validator' => fn ($value, $test) => $value >= $test
 ];
 
 /**
  * Less Filter
  */
 Collection::$filters['<'] = [
-	'validator' => function ($value, $test) {
-		return $value < $test;
-	}
+	'validator' => fn ($value, $test) => $value < $test
 ];
 
 /**
  * Max Filter
  */
 Collection::$filters['<='] = [
-	'validator' => function ($value, $test) {
-		return $value <= $test;
-	}
+	'validator' => fn ($value, $test) => $value <= $test
 ];
 
 /**
@@ -1328,9 +1367,7 @@ Collection::$filters['$='] = [
  * Not Ends With Filter
  */
 Collection::$filters['!$='] = [
-	'validator' => function ($value, $test) {
-		return V::endsWith($value, $test) === false;
-	}
+	'validator' => fn ($value, $test) => V::endsWith($value, $test) === false
 ];
 
 /**
@@ -1345,19 +1382,15 @@ Collection::$filters['^='] = [
  * Not Starts With Filter
  */
 Collection::$filters['!^='] = [
-	'validator' => function ($value, $test) {
-		return V::startsWith($value, $test) === false;
-	}
+	'validator' => fn ($value, $test) => V::startsWith($value, $test) === false
 ];
 
 /**
  * Between Filter
  */
 Collection::$filters['between'] = Collection::$filters['..'] = [
-	'validator' => function ($value, $test) {
-		return V::between($value, ...$test) === true;
-	},
-	'strict' => false
+	'validator' => fn ($value, $test) => V::between($value, ...$test) === true,
+	'strict'    => false
 ];
 
 /**
@@ -1372,9 +1405,7 @@ Collection::$filters['*'] = [
  * Not Match Filter
  */
 Collection::$filters['!*'] = [
-	'validator' => function ($value, $test) {
-		return V::match($value, $test) === false;
-	}
+	'validator' => fn ($value, $test) => V::match($value, $test) === false
 ];
 
 /**
@@ -1409,63 +1440,49 @@ Collection::$filters['minwords'] = [
  * Date Equals Filter
  */
 Collection::$filters['date =='] = [
-	'validator' => function ($value, $test) {
-		return V::date($value, '==', $test);
-	}
+	'validator' => fn ($value, $test) => V::date($value, '==', $test)
 ];
 
 /**
  * Date Not Equals Filter
  */
 Collection::$filters['date !='] = [
-	'validator' => function ($value, $test) {
-		return V::date($value, '!=', $test);
-	}
+	'validator' => fn ($value, $test) => V::date($value, '!=', $test)
 ];
 
 /**
  * Date More Filter
  */
 Collection::$filters['date >'] = [
-	'validator' => function ($value, $test) {
-		return V::date($value, '>', $test);
-	}
+	'validator' => fn ($value, $test) => V::date($value, '>', $test)
 ];
 
 /**
  * Date Min Filter
  */
 Collection::$filters['date >='] = [
-	'validator' => function ($value, $test) {
-		return V::date($value, '>=', $test);
-	}
+	'validator' => fn ($value, $test) => V::date($value, '>=', $test)
 ];
 
 /**
  * Date Less Filter
  */
 Collection::$filters['date <'] = [
-	'validator' => function ($value, $test) {
-		return V::date($value, '<', $test);
-	}
+	'validator' => fn ($value, $test) => V::date($value, '<', $test)
 ];
 
 /**
  * Date Max Filter
  */
 Collection::$filters['date <='] = [
-	'validator' => function ($value, $test) {
-		return V::date($value, '<=', $test);
-	}
+	'validator' => fn ($value, $test) => V::date($value, '<=', $test)
 ];
 
 /**
  * Date Between Filter
  */
 Collection::$filters['date between'] = Collection::$filters['date ..'] = [
-	'validator' => function ($value, $test) {
-		return
+	'validator' => fn ($value, $test) =>
 			V::date($value, '>=', $test[0]) &&
-			V::date($value, '<=', $test[1]);
-	}
+			V::date($value, '<=', $test[1])
 ];

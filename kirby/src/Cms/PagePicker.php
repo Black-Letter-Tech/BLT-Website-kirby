@@ -3,6 +3,7 @@
 namespace Kirby\Cms;
 
 use Kirby\Exception\InvalidArgumentException;
+use Kirby\Exception\PermissionException;
 
 /**
  * The PagePicker class helps to
@@ -18,25 +19,14 @@ use Kirby\Exception\InvalidArgumentException;
  */
 class PagePicker extends Picker
 {
-	/**
-	 * @var \Kirby\Cms\Pages
-	 */
-	protected $items;
-
-	/**
-	 * @var \Kirby\Cms\Pages
-	 */
-	protected $itemsForQuery;
-
-	/**
-	 * @var \Kirby\Cms\Page|\Kirby\Cms\Site|null
-	 */
-	protected $parent;
+	// TODO: null only due to our Properties setters,
+	// remove once our implementation is better
+	protected Pages|null $items = null;
+	protected Pages|null $itemsForQuery = null;
+	protected Page|Site|null $parent = null;
 
 	/**
 	 * Extends the basic defaults
-	 *
-	 * @return array
 	 */
 	public function defaults(): array
 	{
@@ -55,10 +45,8 @@ class PagePicker extends Picker
 	 * also be any subpage. When a query is given
 	 * and subpage navigation is deactivated,
 	 * there will be no model available at all.
-	 *
-	 * @return \Kirby\Cms\Page|\Kirby\Cms\Site|null
 	 */
-	public function model()
+	public function model(): Page|Site|null
 	{
 		// no subpages navigation = no model
 		if ($this->options['subpages'] === false) {
@@ -77,10 +65,8 @@ class PagePicker extends Picker
 	 * Returns a model object for the given
 	 * query, depending on the parent and subpages
 	 * options.
-	 *
-	 * @return \Kirby\Cms\Page|\Kirby\Cms\Site|null
 	 */
-	public function modelForQuery()
+	public function modelForQuery(): Page|Site|null
 	{
 		if ($this->options['subpages'] === true && empty($this->options['parent']) === false) {
 			return $this->parent();
@@ -93,11 +79,8 @@ class PagePicker extends Picker
 	 * Returns basic information about the
 	 * parent model that is currently selected
 	 * in the page picker.
-	 *
-	 * @param \Kirby\Cms\Site|\Kirby\Cms\Page|null
-	 * @return array|null
 	 */
-	public function modelToArray($model = null): array|null
+	public function modelToArray(Page|Site|null $model = null): array|null
 	{
 		if ($model === null) {
 			return null;
@@ -132,10 +115,8 @@ class PagePicker extends Picker
 
 	/**
 	 * Search all pages for the picker
-	 *
-	 * @return \Kirby\Cms\Pages|null
 	 */
-	public function items()
+	public function items(): Pages|null
 	{
 		// cache
 		if ($this->items !== null) {
@@ -146,19 +127,19 @@ class PagePicker extends Picker
 		if (empty($this->options['query']) === true) {
 			$items = $this->itemsForParent();
 
-		// when subpage navigation is enabled, a parent
-		// might be passed in addition to the query.
-		// The parent then takes priority.
+			// when subpage navigation is enabled, a parent
+			// might be passed in addition to the query.
+			// The parent then takes priority.
 		} elseif ($this->options['subpages'] === true && empty($this->options['parent']) === false) {
 			$items = $this->itemsForParent();
 
-		// search by query
+			// search by query
 		} else {
 			$items = $this->itemsForQuery();
 		}
 
-		// filter protected pages
-		$items = $items->filter('isReadable', true);
+		// filter protected and hidden pages
+		$items = $items->filter('isListable', true);
 
 		// search
 		$items = $this->search($items);
@@ -169,10 +150,8 @@ class PagePicker extends Picker
 
 	/**
 	 * Search for pages by parent
-	 *
-	 * @return \Kirby\Cms\Pages
 	 */
-	public function itemsForParent()
+	public function itemsForParent(): Pages
 	{
 		return $this->parent()->children();
 	}
@@ -180,10 +159,9 @@ class PagePicker extends Picker
 	/**
 	 * Search for pages by query string
 	 *
-	 * @return \Kirby\Cms\Pages
 	 * @throws \Kirby\Exception\InvalidArgumentException
 	 */
-	public function itemsForQuery()
+	public function itemsForQuery(): Pages
 	{
 		// cache
 		if ($this->itemsForQuery !== null) {
@@ -209,29 +187,41 @@ class PagePicker extends Picker
 
 	/**
 	 * Returns the parent model.
-	 * The model will be used to fetch
-	 * subpages unless there's a specific
-	 * query to find pages instead.
+	 * The model will be used to fetch subpages unless there's
+	 * a specific query to find pages instead. Falls back to the
+	 * site root when the requested parent is missing or not
+	 * accessible for the current user.
 	 *
-	 * @return \Kirby\Cms\Page|\Kirby\Cms\Site
+	 * @throws \Kirby\Exception\PermissionException if neither the requested parent
+	 *                                              nor the site are accessible
 	 */
-	public function parent()
+	public function parent(): Page|Site
 	{
 		if ($this->parent !== null) {
 			return $this->parent;
 		}
 
-		return $this->parent = $this->kirby->page($this->options['parent']) ?? $this->site;
+		$page = $this->kirby->page($this->options['parent']);
+
+		if ($page?->isAccessible() === true) {
+			return $this->parent = $page;
+		}
+
+		if ($this->site->isAccessible() === true) {
+			return $this->parent = $this->site;
+		}
+
+		throw new PermissionException([
+			'key' => 'page.undefined'
+		]);
 	}
 
 	/**
 	 * Calculates the top-most model (page or site)
 	 * that can be accessed when navigating
 	 * through pages.
-	 *
-	 * @return \Kirby\Cms\Page|\Kirby\Cms\Site
 	 */
-	public function start()
+	public function start(): Page|Site
 	{
 		if (empty($this->options['query']) === false) {
 			return $this->itemsForQuery()?->parent() ?? $this->site;
@@ -244,8 +234,6 @@ class PagePicker extends Picker
 	 * Returns an associative array
 	 * with all information for the picker.
 	 * This will be passed directly to the API.
-	 *
-	 * @return array
 	 */
 	public function toArray(): array
 	{

@@ -103,14 +103,16 @@ class Environment
 	 *
 	 * @param array|null $info Optional override for `$_SERVER`
 	 */
-	public function __construct(array|null $options = null, array|null $info = null)
-	{
+	public function __construct(
+		array|null $options = null,
+		array|null $info = null
+	) {
 		$this->detect($options, $info);
 	}
 
 	/**
 	 * Returns the server's IP address
-	 * @see static::ip
+	 * @see ::ip
 	 */
 	public function address(): string|null
 	{
@@ -150,13 +152,17 @@ class Environment
 	 *
 	 * @param array|null $info Optional override for `$_SERVER`
 	 */
-	public function detect(array $options = null, array $info = null): array
-	{
-		$info  ??= $_SERVER;
-		$options = array_merge([
+	public function detect(
+		array|null $options = null,
+		array|null $info = null
+	): array {
+		$defaults = [
 			'cli'     => null,
 			'allowed' => null
-		], $options ?? []);
+		];
+
+		$info  ??= $_SERVER;
+		$options = array_merge($defaults, $options ?? []);
 
 		$this->info          = static::sanitize($info);
 		$this->cli           = $this->detectCli($options['cli']);
@@ -172,11 +178,11 @@ class Environment
 		if ($options['allowed'] === '*' || $options['allowed'] === ['*']) {
 			$this->detectAuto(true);
 
-		// fixed environments
+			// fixed environments
 		} elseif (empty($options['allowed']) === false) {
 			$this->detectAllowed($options['allowed']);
 
-		// secure auto-detection
+			// secure auto-detection
 		} else {
 			$this->detectAuto();
 		}
@@ -235,9 +241,9 @@ class Environment
 
 			$uri = new Uri($url, ['slash' => false]);
 
+			// the current environment is allowed,
+			// stop before the exception below is thrown
 			if ($uri->toString() === $this->baseUrl) {
-				// the current environment is allowed,
-				// stop before the exception below is thrown
 				return;
 			}
 		}
@@ -316,9 +322,18 @@ class Environment
 		}
 
 		// @codeCoverageIgnoreStart
+		$sapi = php_sapi_name();
+		if ($sapi === 'cli') {
+			return true;
+		}
+
 		$term = getenv('TERM');
 
-		if (substr(PHP_SAPI, 0, 3) === 'cgi' && $term && $term !== 'unknown') {
+		if (
+			substr($sapi, 0, 3) === 'cgi' &&
+			$term &&
+			$term !== 'unknown'
+		) {
 			return true;
 		}
 
@@ -340,10 +355,10 @@ class Environment
 		];
 
 		// prefer the standardized `Forwarded` header if defined
-		$forwarded = $this->get('HTTP_FORWARDED');
-		if ($forwarded) {
-			// only use the first (outermost) proxy by using the first set of values
-			// before the first comma (but only a comma outside of quotes)
+		if ($forwarded = $this->get('HTTP_FORWARDED')) {
+			// only use the first (outermost) proxy by using
+			// the first set of values before the first comma
+			// (but only a comma outside of quotes)
 			if (Str::contains($forwarded, ',') === true) {
 				$forwarded = preg_split('/"[^"]*"(*SKIP)(*F)|,/', $forwarded)[0];
 			}
@@ -354,6 +369,7 @@ class Environment
 
 			// split key and value into an associative array
 			$fields = [];
+
 			foreach ($rawFields as $field) {
 				$key   = Str::lower(Str::before($field, '='));
 				$value = Str::after($field, '=');
@@ -381,7 +397,7 @@ class Environment
 				$data['port'] ??= 443;
 			}
 
-			$data['for'] = $parts['for'] ?? null;
+			$data['for'] = $fields['for'] ?? null;
 
 			return $data;
 		}
@@ -513,7 +529,9 @@ class Environment
 			return false;
 		}
 
-		return in_array(strtolower($protocol), ['https', 'https, http']) === true;
+		$protocols = ['https', 'https, http'];
+
+		return in_array(strtolower($protocol), $protocols) === true;
 	}
 
 	/**
@@ -586,13 +604,7 @@ class Environment
 	 */
 	protected function detectRequestUri(string|null $requestUri = null): Uri
 	{
-		// make sure the URL parser works properly when there's a
-		// colon in the request URI but the URI is relative
-		if (Url::isAbsolute($requestUri) === false) {
-			$requestUri = 'https://getkirby.com' . $requestUri;
-		}
-
-		$uri = new Uri($requestUri);
+		$uri = new Uri($requestUri ?? '');
 
 		// create the URI object as a combination of base uri parts
 		// and the parts from REQUEST_URI
@@ -660,11 +672,12 @@ class Environment
 	 * @param mixed $default Optional default value, which should be
 	 *                       returned if no element has been found
 	 */
-	public static function getGlobally(string|false|null $key = null, $default = null)
-	{
+	public static function getGlobally(
+		string|false|null $key = null,
+		$default = null
+	) {
 		// first try the global `Environment` object if the CMS is running
-		$app = App::instance(null, true);
-		if ($app) {
+		if ($app = App::instance(null, true)) {
 			return $app->environment()->get($key, $default);
 		}
 
@@ -741,11 +754,17 @@ class Environment
 			return true;
 		}
 
+		if (Str::endsWith($host, '.ddev.site') === true) {
+			return true;
+		}
+
 		// collect all possible visitor ips
 		$ips = [
 			$this->get('REMOTE_ADDR'),
 			$this->get('HTTP_X_FORWARDED_FOR'),
-			$this->get('HTTP_CLIENT_IP')
+			$this->get('HTTP_CLIENT_IP'),
+			$this->get('HTTP_X_CLIENT_IP'),
+			$this->get('HTTP_X_REAL_IP'),
 		];
 
 		if ($this->get('HTTP_FORWARDED')) {
@@ -772,37 +791,53 @@ class Environment
 
 	/**
 	 * Loads and returns options from environment-specific
-	 * PHP files (by host name and server IP address)
+	 * PHP files (by host name and server IP address or CLI)
 	 *
 	 * @param string $root Root directory to load configs from
 	 */
 	public function options(string $root): array
 	{
+		$configCli  = [];
 		$configHost = [];
 		$configAddr = [];
 
 		$host = $this->host();
 		$addr = $this->ip();
 
+		// load the config for the cli
+		if ($this->cli() === true) {
+			$configCli = F::load(
+				file: $root . '/config.cli.php',
+				fallback: [],
+				allowOutput: false
+			);
+		}
+
 		// load the config for the host
-		if (empty($host) === false) {
+		if (
+			empty($host) === false &&
+			F::exists($path = $root . '/config.' . $host . '.php', $root) === true
+		) {
 			$configHost = F::load(
-				file: $root . '/config.' . $host . '.php',
+				file: $path,
 				fallback: [],
 				allowOutput: false
 			);
 		}
 
 		// load the config for the server IP
-		if (empty($addr) === false) {
+		if (
+			empty($addr) === false &&
+			F::exists($path = $root . '/config.' . $addr . '.php', $root) === true
+		) {
 			$configAddr = F::load(
-				file: $root . '/config.' . $addr . '.php',
+				file: $path,
 				fallback: [],
 				allowOutput: false
 			);
 		}
 
-		return array_replace_recursive($configHost, $configAddr);
+		return array_replace_recursive($configCli, $configHost, $configAddr);
 	}
 
 	/**
@@ -841,8 +876,10 @@ class Environment
 	/**
 	 * Sanitizes some `$_SERVER` keys
 	 */
-	public static function sanitize(string|array $key, $value = null)
-	{
+	public static function sanitize(
+		string|array $key,
+		$value = null
+	) {
 		if (is_array($key) === true) {
 			foreach ($key as $k => $v) {
 				$key[$k] = static::sanitize($k, $v);
@@ -867,8 +904,9 @@ class Environment
 	/**
 	 * Sanitizes the given host name
 	 */
-	protected static function sanitizeHost(string|null $host = null): string|null
-	{
+	protected static function sanitizeHost(
+		string|null $host = null
+	): string|null {
 		if (empty($host) === true) {
 			return null;
 		}
@@ -892,8 +930,9 @@ class Environment
 	/**
 	 * Sanitizes the given port number
 	 */
-	protected static function sanitizePort(string|int|false|null $port = null): int|null
-	{
+	protected static function sanitizePort(
+		string|int|false|null $port = null
+	): int|null {
 		// already fine
 		if (is_int($port) === true) {
 			return $port;

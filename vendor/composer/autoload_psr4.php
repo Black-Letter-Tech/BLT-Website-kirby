@@ -6,7 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'sgkirby\\Commentions\\' => array($baseDir . '/site/plugins/commentions/lib'),
     'Whoops\\' => array($vendorDir . '/filp/whoops/src/Whoops'),
     'Symfony\\Polyfill\\Php80\\' => array($vendorDir . '/symfony/polyfill-php80'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
@@ -17,12 +16,12 @@ return array(
     'Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
     'PhpOption\\' => array($vendorDir . '/phpoption/phpoption/src/PhpOption'),
     'PHPMailer\\PHPMailer\\' => array($vendorDir . '/phpmailer/phpmailer/src'),
-    'Masterminds\\' => array($vendorDir . '/masterminds/html5/src'),
     'League\\ColorExtractor\\' => array($vendorDir . '/league/color-extractor/src'),
     'Laminas\\Escaper\\' => array($vendorDir . '/laminas/laminas-escaper/src'),
     'Kirby\\' => array($baseDir . '/kirby/src', $vendorDir . '/getkirby/composer-installer/src'),
     'GrahamCampbell\\ResultType\\' => array($vendorDir . '/graham-campbell/result-type/src'),
     'Dotenv\\' => array($vendorDir . '/vlucas/phpdotenv/src'),
     'Composer\\Semver\\' => array($vendorDir . '/composer/semver/src'),
-    'Bnomei\\' => array($baseDir . '/site/plugins/kirby3-fingerprint/classes', $baseDir . '/site/plugins/kirby3-robots-txt/classes', $baseDir . '/site/plugins/kirby3-dotenv/classes'),
+    'Bnomei\\' => array($baseDir . '/site/plugins/kirby3-robots-txt/classes', $baseDir . '/site/plugins/kirby3-fingerprint/classes', $baseDir . '/site/plugins/kirby3-dotenv/classes'),
+    'Base32\\' => array($vendorDir . '/christian-riesen/base32/src'),
 );

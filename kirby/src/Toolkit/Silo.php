@@ -15,7 +15,7 @@ namespace Kirby\Toolkit;
  */
 class Silo
 {
-	public static $data = [];
+	public static array $data = [];
 
 	/**
 	 * Setter for new data
@@ -30,7 +30,7 @@ class Silo
 		return static::$data;
 	}
 
-	public static function get(string|array $key = null, $default = null)
+	public static function get(string|array|null $key = null, $default = null)
 	{
 		if ($key === null) {
 			return static::$data;
@@ -42,7 +42,7 @@ class Silo
 	/**
 	 * Removes an item from the data array
 	 */
-	public static function remove(string $key = null): array
+	public static function remove(string|null $key = null): array
 	{
 		// reset the entire array
 		if ($key === null) {

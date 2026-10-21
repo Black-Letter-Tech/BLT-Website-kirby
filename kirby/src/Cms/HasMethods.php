@@ -2,7 +2,9 @@
 
 namespace Kirby\Cms;
 
+use Closure;
 use Kirby\Exception\BadMethodCallException;
+use Kirby\Toolkit\BlockCollectionAccess;
 
 /**
  * HasMethods
@@ -17,22 +19,18 @@ trait HasMethods
 {
 	/**
 	 * All registered methods
-	 *
-	 * @var array
 	 */
-	public static $methods = [];
+	public static array $methods = [];
 
 	/**
 	 * Calls a registered method class with the
 	 * passed arguments
-	 *
 	 * @internal
-	 * @param string $method
-	 * @param array $args
-	 * @return mixed
+	 *
 	 * @throws \Kirby\Exception\BadMethodCallException
 	 */
-	public function callMethod(string $method, array $args = [])
+	#[BlockCollectionAccess]
+	public function callMethod(string $method, array $args = []): mixed
 	{
 		$closure = $this->getMethod($method);
 
@@ -45,11 +43,9 @@ trait HasMethods
 
 	/**
 	 * Checks if the object has a registered method
-	 *
 	 * @internal
-	 * @param string $method
-	 * @return bool
 	 */
+	#[BlockCollectionAccess]
 	public function hasMethod(string $method): bool
 	{
 		return $this->getMethod($method) !== null;
@@ -59,11 +55,9 @@ trait HasMethods
 	 * Returns a registered method by name, either from
 	 * the current class or from a parent class ordered by
 	 * inheritance order (top to bottom)
-	 *
-	 * @param string $method
-	 * @return \Closure|null
 	 */
-	protected function getMethod(string $method)
+	#[BlockCollectionAccess]
+	public function getMethod(string $method): Closure|null
 	{
 		if (isset(static::$methods[$method]) === true) {
 			return static::$methods[$method];

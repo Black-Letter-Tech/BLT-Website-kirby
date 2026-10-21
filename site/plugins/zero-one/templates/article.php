@@ -80,7 +80,7 @@
     <?php snippet('article/prevnext') ?>
   </div>
   
-  <div class="uk-width-1-1 <?php e($page->parent()->commentsOptionSelect() == "embed" || $page->parent()->commentsOptionSelect() == "commentions", 'uk-margin-bottom', 'uk-margin-large-bottom') ?>">
+  <div class="uk-width-1-1 <?php e($page->parent()->commentsOptionSelect() == "embed", 'uk-margin-bottom', 'uk-margin-large-bottom') ?>">
       <?php snippet('article/related') ?>
   </div>
 
@@ -89,12 +89,6 @@
   <h3><?= $site->labelCommentsHeading()->html() ?></h3>
   <div class="uk-margin-large-bottom">
   <?= $page->parent()->commentsCode()->value() ?>
-  </div>
-  <?php endif ?>
-  <?php if($page->parent()->commentsOptionSelect() == "commentions"): ?>
-  <hr>
-  <div class="uk-margin-large-bottom">
-  <?php commentions(); ?>
   </div>
   <?php endif ?>
 

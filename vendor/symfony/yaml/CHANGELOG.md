@@ -1,9 +1,28 @@
 CHANGELOG
 =========
 
+6.3
+---
+
+ * Add support to dump int keys as strings by using the `Yaml::DUMP_NUMERIC_KEY_AS_STRING` flag
+
+6.2
+---
+
+ * Add support for `!php/enum` and `!php/enum *->value`
+ * Deprecate the `!php/const:` tag in key which will be replaced by the `!php/const` tag (without the colon) since 3.4
+
+6.1
+---
+
+ * In cases where it will likely improve readability, strings containing single quotes will be double-quoted
+
 5.4
 ---
 
+ * Add a `$maxNestingLevel` argument to `Parser::__construct()`, `Yaml::parse()` and `Yaml::parseFile()` to bound recursion depth (default 128)
+ * Add a `$maxAliasesForCollections` argument to `Parser::__construct()`, `Yaml::parse()` and `Yaml::parseFile()` to bound alias expansion of collection values (default 128)
+ * Add `Yaml::PARSE_EXCEPTION_ON_ALIAS` to reject YAML aliases while parsing untrusted input
  * Add new `lint:yaml dirname --exclude=/dirname/foo.yaml --exclude=/dirname/bar.yaml`
    option to exclude one or more specific files from multiple file list
  * Allow negatable for the parse tags option with `--no-parse-tags`

@@ -20,7 +20,7 @@ class Html extends Xml
 	/**
 	 * An internal store for an HTML entities translation table
 	 */
-	public static array|null $entities;
+	public static array|null $entities = null;
 
 	/**
 	 * List of HTML tags that can be used inline
@@ -323,7 +323,7 @@ class Html extends Xml
 	{
 		$attr = array_merge([
 			'src' => $src,
-			'alt' => ' '
+			'alt' => ''
 		], $attr);
 
 		return static::tag('img', '', $attr);
@@ -350,6 +350,10 @@ class Html extends Xml
 		string|array|null $text = null,
 		array $attr = []
 	): string {
+		if (Url::hasDangerousScheme($href) === true) {
+			$href = '';
+		}
+
 		$attr = array_merge(['href' => $href], $attr);
 
 		if (empty($text) === true) {
@@ -405,7 +409,7 @@ class Html extends Xml
 		string $name,
 		array|string|null $content = '',
 		array $attr = [],
-		string $indent = null,
+		string|null $indent = null,
 		int $level = 0
 	): string {
 		// treat an explicit `null` value as an empty tag
@@ -597,7 +601,7 @@ class Html extends Xml
 				return false;
 			}
 
-			return preg_match('!^[a-zA-Z0-9_-]+$!', $id);
+			return preg_match('!^[a-zA-Z0-9_-]+$!', $id) === 1;
 		};
 
 		switch ($path->toString()) {

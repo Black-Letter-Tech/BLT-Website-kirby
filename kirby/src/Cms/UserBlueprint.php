@@ -17,7 +17,6 @@ class UserBlueprint extends Blueprint
 	/**
 	 * UserBlueprint constructor.
 	 *
-	 * @param array $props
 	 * @throws \Kirby\Exception\InvalidArgumentException
 	 */
 	public function __construct(array $props)
@@ -33,6 +32,7 @@ class UserBlueprint extends Blueprint
 			$this->props['options'] ?? true,
 			// defaults
 			[
+				'access'         => null,
 				'create'         => null,
 				'changeEmail'    => null,
 				'changeLanguage' => null,
@@ -40,6 +40,7 @@ class UserBlueprint extends Blueprint
 				'changePassword' => null,
 				'changeRole'     => null,
 				'delete'         => null,
+				'list'           => null,
 				'update'         => null,
 			]
 		);

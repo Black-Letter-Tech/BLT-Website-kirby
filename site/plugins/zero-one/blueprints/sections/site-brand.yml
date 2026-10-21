@@ -33,20 +33,14 @@ fields:
     width: 1/2
   favicon:
     label: Favicon
-    type: image-clip
+    type: files
     translate: false
     uploads: image
-    help: 
+    help:
       en: Must be PNG file. Should be square, max 512px, min 256px.
       de: Muss eine PNG-Datei sein. Sollte quadratisch sein, max. 512px, min. 256px.
     multiple: false
     query: site.images.filterBy('extension', 'png')
-    clip:
-      minwidth: 256
-      minheight: 256
-      maxwidth: 512
-      maxheight: 512
-      ratio: fixed
     width: 1/2
 
   lineLogo:

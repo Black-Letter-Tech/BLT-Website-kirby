@@ -7,10 +7,13 @@ return [
 		'headline',
 	],
 	'props' => [
+		'icon' => function (string|null $icon = null) {
+			return $icon;
+		},
 		'text' => function ($text = null) {
 			return I18n::translate($text, $text);
 		},
-		'theme' => function (string $theme = null) {
+		'theme' => function (string|null $theme = null) {
 			return $theme;
 		}
 	],
@@ -25,6 +28,7 @@ return [
 	],
 	'toArray' => function () {
 		return [
+			'icon'  => $this->icon,
 			'label' => $this->headline,
 			'text'  => $this->text,
 			'theme' => $this->theme

@@ -31,7 +31,7 @@ return [
 		/**
 		 * Optional query to select a specific set of pages
 		 */
-		'query' => function (string $query = null) {
+		'query' => function (string|null $query = null) {
 			return $query;
 		},
 
@@ -71,7 +71,12 @@ return [
 				}
 
 				if ($id !== null && ($page = $kirby->page($id))) {
-					$pages[] = $this->pageResponse($page);
+					// never disclose a page the current user must not list,
+					// but keep its ID to not drop it from the value on save
+					$pages[] = match ($page->isListable()) {
+						true  => $this->pageResponse($page),
+						false => $this->protectedResponse($id)
+					};
 				}
 			}
 

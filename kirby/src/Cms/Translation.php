@@ -4,6 +4,7 @@ namespace Kirby\Cms;
 
 use Exception;
 use Kirby\Data\Data;
+use Kirby\Toolkit\BlockCollectionAccess;
 use Kirby\Toolkit\Str;
 
 /**
@@ -18,30 +19,15 @@ use Kirby\Toolkit\Str;
  */
 class Translation
 {
-	/**
-	 * @var string
-	 */
-	protected $code;
-
-	/**
-	 * @var array
-	 */
-	protected $data = [];
-
-	/**
-	 * @param string $code
-	 * @param array $data
-	 */
-	public function __construct(string $code, array $data)
-	{
-		$this->code = $code;
-		$this->data = $data;
+	public function __construct(
+		protected string $code,
+		protected array $data
+	) {
 	}
 
 	/**
 	 * Improved `var_dump` output
-	 *
-	 * @return array
+	 * @codeCoverageIgnore
 	 */
 	public function __debugInfo(): array
 	{
@@ -50,8 +36,6 @@ class Translation
 
 	/**
 	 * Returns the translation author
-	 *
-	 * @return string
 	 */
 	public function author(): string
 	{
@@ -60,8 +44,6 @@ class Translation
 
 	/**
 	 * Returns the official translation code
-	 *
-	 * @return string
 	 */
 	public function code(): string
 	{
@@ -71,8 +53,6 @@ class Translation
 	/**
 	 * Returns an array with all
 	 * translation strings
-	 *
-	 * @return array
 	 */
 	public function data(): array
 	{
@@ -82,8 +62,6 @@ class Translation
 	/**
 	 * Returns the translation data and merges
 	 * it with the data from the default translation
-	 *
-	 * @return array
 	 */
 	public function dataWithFallback(): array
 	{
@@ -100,8 +78,6 @@ class Translation
 	/**
 	 * Returns the writing direction
 	 * (ltr or rtl)
-	 *
-	 * @return string
 	 */
 	public function direction(): string
 	{
@@ -111,12 +87,8 @@ class Translation
 	/**
 	 * Returns a single translation
 	 * string by key
-	 *
-	 * @param string $key
-	 * @param string|null $default
-	 * @return string|null
 	 */
-	public function get(string $key, string $default = null): string|null
+	public function get(string $key, string|null $default = null): string|null
 	{
 		return $this->data[$key] ?? $default;
 	}
@@ -124,8 +96,6 @@ class Translation
 	/**
 	 * Returns the translation id,
 	 * which is also the code
-	 *
-	 * @return string
 	 */
 	public function id(): string
 	{
@@ -135,14 +105,13 @@ class Translation
 	/**
 	 * Loads the translation from the
 	 * json file in Kirby's translations folder
-	 *
-	 * @param string $code
-	 * @param string $root
-	 * @param array $inject
-	 * @return static
 	 */
-	public static function load(string $code, string $root, array $inject = [])
-	{
+	#[BlockCollectionAccess]
+	public static function load(
+		string $code,
+		string $root,
+		array $inject = []
+	): static {
 		try {
 			$data = array_merge(Data::read($root), $inject);
 		} catch (Exception) {
@@ -154,8 +123,6 @@ class Translation
 
 	/**
 	 * Returns the PHP locale of the translation
-	 *
-	 * @return string
 	 */
 	public function locale(): string
 	{
@@ -169,8 +136,6 @@ class Translation
 
 	/**
 	 * Returns the human-readable translation name.
-	 *
-	 * @return string
 	 */
 	public function name(): string
 	{
@@ -180,8 +145,6 @@ class Translation
 	/**
 	 * Converts the most important
 	 * properties to an array
-	 *
-	 * @return array
 	 */
 	public function toArray(): array
 	{
