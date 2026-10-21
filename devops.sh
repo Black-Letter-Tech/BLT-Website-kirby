@@ -183,6 +183,7 @@ fn_pushcontent_atomic() {
         docker start "${SLD}-stg" >/dev/null
         docker rm -f "$sync_container" >/dev/null
         docker exec "${SLD}-stg" test -f /app/public/assets/css/site.css || return 1
+        fn_verify_staging_https || return 1
         greenprint "Local content is live on staging and custom CSS was regenerated."
     else
         redprint "Replacement failed; restoring the previous staging content."
@@ -195,6 +196,47 @@ fn_pushcontent_atomic() {
         docker rm -f "$sync_container" >/dev/null
         return 1
     fi
+}
+
+fn_verify_staging_https() {
+    local staging_host="stg.${SLD}.${TLD}"
+    local staging_url="https://${staging_host}/"
+    local html
+    local http_media_count
+    local https_media_count
+    local attempt=1
+
+    eval $(docker-machine env ${DOCKER_MACHINE}) || return 1
+
+    # The staging page cache stores absolute media URLs. Remove the homepage
+    # entry before verification so an internal HTTP request cannot persist
+    # mixed-content URLs.
+    docker exec "${SLD}-stg" sh -c \
+        "find '/app/storage/cache/${staging_host}/pages' -maxdepth 1 -type f -name 'home-en-html_*.cache' -delete" \
+        || return 1
+
+    while [ "$attempt" -le 10 ]; do
+        if html=$(curl -fsS -u "${BASIC_AUTH_USER}:${BASIC_AUTH_PASSWORD}" "$staging_url"); then
+            break
+        fi
+        attempt=$((attempt + 1))
+        sleep 2
+    done
+
+    if [ -z "${html:-}" ]; then
+        redprint "Staging did not respond over HTTPS."
+        return 1
+    fi
+
+    http_media_count=$(printf '%s' "$html" | grep -o "http://${staging_host}/media/" | wc -l | tr -d ' ')
+    https_media_count=$(printf '%s' "$html" | grep -o "https://${staging_host}/media/" | wc -l | tr -d ' ')
+
+    if [ "$http_media_count" -ne 0 ] || [ "$https_media_count" -eq 0 ]; then
+        redprint "Staging homepage media URL verification failed: HTTP=${http_media_count}, HTTPS=${https_media_count}."
+        return 1
+    fi
+
+    greenprint "Staging homepage verified over HTTPS with ${https_media_count} media URLs."
 }
 
 fn_pullcontent() {
@@ -454,12 +496,15 @@ case "${1:-}" in
             redprint "Canceling content push to staging."
         fi
         ;;
+    verify-stg)
+        fn_verify_staging_https
+        ;;
     "")
         menu_mainmenu
         ;;
     *)
         redprint "Unknown command: $1"
-        echo "Usage: $0 [sync-stg|push-stg]"
+        echo "Usage: $0 [sync-stg|push-stg|verify-stg]"
         exit 1
         ;;
 esac

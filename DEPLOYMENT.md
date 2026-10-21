@@ -91,6 +91,21 @@ This command performs these operations:
 Do not copy content into the container manually. The scripted workflow adds
 validation, backup, downtime control, and rollback.
 
+Verify staging after a container restart or deployment:
+
+```sh
+./devops.sh verify-stg
+```
+
+The command removes the cached homepage, requests it through the public HTTPS
+endpoint, and rejects HTTP media URLs. Do not prime the staging homepage cache
+with an internal HTTP request. Kirby page caching stores absolute media URLs,
+which causes browsers to block images as mixed content.
+
+The staging host config also fixes Kirby's canonical URL to
+`https://stg.blackletter.tech`. This prevents direct internal HTTP requests
+from generating mixed-content URLs before the cache is populated.
+
 ## Custom CSS
 
 The Panel field **Site > Styling > Custom CSS** is stored as `Customcss` in
