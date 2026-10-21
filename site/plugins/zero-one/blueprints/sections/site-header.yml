@@ -220,7 +220,7 @@ fields:
     label: 
       en: Image overlay color
       de: Bildüberlagerungsfarbe
-    type: colors
+    type: color
     alpha: true
     default: 'rgba(0,0,0,0.3)'
     width: 1/3
@@ -305,7 +305,7 @@ fields:
     label: 
       en: Shape divider color
       de: Farbe des Formteilers
-    type: colors
+    type: color
     default: '#ffffff'
     width: 1/3
     when:

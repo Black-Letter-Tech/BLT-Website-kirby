@@ -259,7 +259,7 @@ fields:
     label: 
       en: Shape divider color
       de: Farbe des Formteilers
-    type: colors
+    type: color
     default: '#ffffff'
     width: 1/3
     when:

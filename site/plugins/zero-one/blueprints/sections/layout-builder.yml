@@ -62,7 +62,6 @@ fields:
           - accordion
           - z-description
           - info
-          - z-table
           - markdown
           - code
           - z-html

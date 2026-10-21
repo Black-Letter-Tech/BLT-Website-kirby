@@ -24,7 +24,9 @@
         "bnomei/kirby3-robots-txt": "v1.5.0",
         "medienbaecker/autoresize": "^2.1",
         "bnomei/kirby3-dotenv": "^2.2",
-        "bvdputte/kirby-bettersearch": "^2.1"
+        "bvdputte/kirby-bettersearch": "^2.1",
+        "oblik/kirby-link-field": "^6.0",
+        "sylvainjule/code-editor": "^1.1"
     },
     "scripts": {
         "start": [

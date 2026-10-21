@@ -85,7 +85,6 @@ columns:
                   - info
                   - accordion
                   - z-description
-                  - z-table
                   - line
                   - table
               media:

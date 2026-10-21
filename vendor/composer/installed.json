@@ -1027,6 +1027,68 @@
             "install-path": "../michelf/php-smartypants"
         },
         {
+            "name": "oblik/kirby-link-field",
+            "version": "6.0.2",
+            "version_normalized": "6.0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/oblik/kirby-link-field.git",
+                "reference": "a4da597ed9f332b722de4da6cd53fbe1fab81a9c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/oblik/kirby-link-field/zipball/a4da597ed9f332b722de4da6cd53fbe1fab81a9c",
+                "reference": "a4da597ed9f332b722de4da6cd53fbe1fab81a9c",
+                "shasum": ""
+            },
+            "require": {
+                "getkirby/cms": "^4",
+                "getkirby/composer-installer": "^1.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "time": "2024-08-04T08:03:46+00:00",
+            "type": "kirby-plugin",
+            "extra": {
+                "installer-name": "link-field"
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Oblik Studio",
+                    "email": "hello@oblik.studio",
+                    "homepage": "https://oblik.studio/"
+                },
+                {
+                    "name": "Hristiyan Dodov",
+                    "email": "hello@dodov.dev",
+                    "homepage": "https://dodov.dev/"
+                }
+            ],
+            "description": "Kirby 4 field for all types of links.",
+            "keywords": [
+                "kirby",
+                "kirby-plugin"
+            ],
+            "support": {
+                "issues": "https://github.com/OblikStudio/kirby-link-field/issues",
+                "source": "https://github.com/OblikStudio/kirby-link-field"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/OblikStudio",
+                    "type": "github"
+                }
+            ],
+            "abandoned": true,
+            "install-path": "../../site/plugins/link-field"
+        },
+        {
             "name": "phpmailer/phpmailer",
             "version": "v6.10.0",
             "version_normalized": "6.10.0.0",
@@ -1240,6 +1302,47 @@
                 "source": "https://github.com/php-fig/log/tree/3.0.2"
             },
             "install-path": "../psr/log"
+        },
+        {
+            "name": "sylvainjule/code-editor",
+            "version": "1.1.0",
+            "version_normalized": "1.1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sylvainjule/kirby-code-editor.git",
+                "reference": "adbc2c8a728994cc57ea72a7f8628f27d202b8df"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sylvainjule/kirby-code-editor/zipball/adbc2c8a728994cc57ea72a7f8628f27d202b8df",
+                "reference": "adbc2c8a728994cc57ea72a7f8628f27d202b8df",
+                "shasum": ""
+            },
+            "require": {
+                "getkirby/composer-installer": "^1.2"
+            },
+            "time": "2025-08-04T17:32:08+00:00",
+            "type": "kirby-plugin",
+            "extra": {
+                "installer-name": "code-editor"
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sylvain Julé",
+                    "email": "contact@sylvain-jule.fr"
+                }
+            ],
+            "description": "Code editor field for Kirby 3, 4 and 5",
+            "support": {
+                "issues": "https://github.com/sylvainjule/kirby-code-editor/issues",
+                "source": "https://github.com/sylvainjule/kirby-code-editor/tree/1.1.0"
+            },
+            "install-path": "../../site/plugins/code-editor"
         },
         {
             "name": "symfony/deprecation-contracts",

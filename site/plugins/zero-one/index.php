@@ -51,7 +51,6 @@ Kirby::plugin('zero/zero-one', [
         'blocks/z-products-list' => __DIR__ . '/blueprints/blocks/z-products-list.yml',
         'blocks/z-products-search' => __DIR__ . '/blueprints/blocks/z-products-search.yml',
         'blocks/z-slideshow' => __DIR__ . '/blueprints/blocks/z-slideshow.yml',
-        'blocks/z-table' => __DIR__ . '/blueprints/blocks/z-table.yml',
         'blocks/z-typed-text' => __DIR__ . '/blueprints/blocks/z-typed-text.yml',
 
         // Fields
@@ -272,7 +271,6 @@ Kirby::plugin('zero/zero-one', [
         'blocks/z-products-list' => __DIR__ . '/snippets/blocks/z-products-list.php',
         'blocks/z-products-search' => __DIR__ . '/snippets/blocks/z-products-search.php',
         'blocks/z-slideshow' => __DIR__ . '/snippets/blocks/z-slideshow.php',
-        'blocks/z-table' => __DIR__ . '/snippets/blocks/z-table.php',
         'blocks/z-typed-text' => __DIR__ . '/snippets/blocks/z-typed-text.php',
 
         // Contact

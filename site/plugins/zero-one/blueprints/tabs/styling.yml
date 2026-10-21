@@ -110,7 +110,7 @@ sections:
         label: 
           en: Text Color
           de: Textfarbe
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -118,7 +118,7 @@ sections:
         label: 
           en: Text Emphasis Color
           de: Text Betonung Farbe
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -126,7 +126,7 @@ sections:
         label: 
           en: Text Muted Color
           de: Text stummgeschaltete Farbe
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -134,7 +134,7 @@ sections:
         label: 
           en: Text Link Color
           de: Text Link Farbe
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -142,7 +142,7 @@ sections:
         label: 
           en: Default Background
           de: Standard Hintergrund
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -150,7 +150,7 @@ sections:
         label: 
           en: Muted Background
           de: Gedämpfter Hintergrund
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -158,7 +158,7 @@ sections:
         label: 
           en: Primary Background
           de: Primärer Hintergrund
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -166,7 +166,7 @@ sections:
         label: 
           en: Secondary Background
           de: Sekundärer Hintergrund
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -174,7 +174,7 @@ sections:
         label: 
           en: Inverse Color
           de: Inverse Farbe
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -182,7 +182,7 @@ sections:
         label: 
           en: Border Color
           de: Randfarbe
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -236,7 +236,7 @@ sections:
         label: 
           en: Navbar background
           de: Navbar-Hintergrund
-        type: colors
+        type: color
         translate: false
         width: 1/4
       gap1Navbar:
@@ -246,7 +246,7 @@ sections:
         label: 
           en: Dropdown background
           de: Dropdown-Hintergrund
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -254,7 +254,7 @@ sections:
         label: 
           en: Dropdown item color
           de: Farbe des Dropdown-Elements
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -262,7 +262,7 @@ sections:
         label: 
           en: Dropdown item hover color
           de: Hover-Farbe für Dropdown-Elemente
-        type: colors
+        type: color
         required: true
         translate: false
         width: 1/4
@@ -327,7 +327,7 @@ sections:
         label: 
           en: Offcanvas Background
           de: Offcanvas-Hintergrund
-        type: colors
+        type: color
         help: Default is secondary background.
         translate: false
         width: 1/4
@@ -413,56 +413,56 @@ sections:
           customizeButtons: true
       defaultButtonBackground:
         label: Default button background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       defaultButtonColor:
         label: Default button color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       defaultButtonHoverBackground:
         label: Default button hover background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       defaultButtonHoverColor:
         label: Default button hover color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       defaultInverseButtonBackground:
         label: Default inverse button background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       defaultInverseButtonColor:
         label: Default inverse button color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       defaultInverseButtonHoverBackground:
         label: Default inverse button hover background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       defaultInverseButtonHoverColor:
         label: Default inverse button hover color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
@@ -474,56 +474,56 @@ sections:
           customizeButtons: true
       primaryButtonBackground:
         label: Primary button background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       primaryButtonColor:
         label: Primary button color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       primaryButtonHoverBackground:
         label: Primary button hover background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       primaryButtonHoverColor:
         label: Primary button hover color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       primaryInverseButtonBackground:
         label: Primary inverse button background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       primaryInverseButtonColor:
         label: Primary inverse button color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       primaryInverseButtonHoverBackground:
         label: Primary inverse button hover background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       primaryInverseButtonHoverColor:
         label: Primary inverse button hover color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
@@ -535,56 +535,56 @@ sections:
           customizeButtons: true
       secondaryButtonBackground:
         label: Secondary button background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       secondaryButtonColor:
         label: Secondary button color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       secondaryButtonHoverBackground:
         label: Secondary button hover background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       secondaryButtonHoverColor:
         label: Secondary button hover color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       secondaryInverseButtonBackground:
         label: Secondary inverse button background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       secondaryInverseButtonColor:
         label: Secondary inverse button color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       secondaryInverseButtonHoverBackground:
         label: Secondary inverse button hover background
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
           customizeButtons: true
       secondaryInverseButtonHoverColor:
         label: Secondary inverse button hover color
-        type: colors
+        type: color
         translate: false
         width: 1/4
         when:
