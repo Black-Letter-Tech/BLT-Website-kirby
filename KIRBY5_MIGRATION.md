@@ -25,8 +25,9 @@ PHP 8.4. Trigger: CVE-2026-109618/109619 (PHP 8.1 receives no fix).
 ## Cutover checklist (staging, then production)
 
 1. Fresh content sync, then re-apply content transforms:
-   - site.en.txt `Favicon:` value from `- \n  id: fav-512.png` to
-     `- fav-512.png` (old image-clip storage shape)
+   `python3 migrate-content.py content --write`
+   (old image-clip file references and rgb()/rgba() color values;
+   dry-run first without --write)
 2. First boot migrates content (UUIDs are written). Take a manual
    B2-independent backup before it.
 3. Re-test the "Deploy content to Production" button end to end.
