@@ -1,41 +1,32 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.4-fpm-bookworm
 LABEL org.opencontainers.image.authors="Paul Wagner <paul@oxfordservicesinc.com>"
 
-# nginx, runtime libraries, and tools
-RUN apk update && \
-    apk upgrade && \
-    apk add --no-cache \
-    nginx \
-    gettext \
-    imagemagick \
-    icu-libs \
-    libzip \
-    freetype \
-    libjpeg-turbo \
-    libwebp \
-    libpng \
-    libgomp \
-    curl \
-    apache2-utils
+# Debian base rather than Alpine: the docker host (Docker 19.03,
+# kernel 4.4) rejects the newer syscalls current Alpine userlands
+# make, which breaks builds and risks runtime failures. Bookworm's
+# glibc predates them.
 
-# PHP extensions Kirby needs beyond the image defaults.
-# The base image already ships ctype, curl, dom, fileinfo, iconv, mbstring,
-# openssl, phar, simplexml and friends.
-RUN apk add --no-cache --virtual .build-deps \
-    $PHPIZE_DEPS \
-    icu-dev \
+# nginx, build and runtime libraries, tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    nginx \
+    gettext-base \
+    curl \
+    apache2-utils \
+    imagemagick \
+    libicu-dev \
     libzip-dev \
-    freetype-dev \
-    libjpeg-turbo-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
     libwebp-dev \
     libpng-dev \
-    imagemagick-dev && \
+    libmagickwand-dev && \
     docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
     docker-php-ext-install -j$(nproc) gd intl zip exif opcache && \
     pecl install imagick && \
     docker-php-ext-enable imagick && \
-    apk del .build-deps && \
-    rm -fr /tmp/pear /var/cache/apk/*
+    rm -f /etc/nginx/sites-enabled/default && \
+    rm -rf /var/lib/apt/lists/* /tmp/pear
 
 # php.ini: production defaults plus Kirby upload sizes
 RUN cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
