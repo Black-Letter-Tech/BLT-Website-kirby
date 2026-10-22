@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# insert values for variables in nginx config; Debian nginx includes conf.d
-envsubst '$SERVER_NAME:$VIRTUAL_HOST:$ENABLE_PW' < /docker/nginx/default.conf > /etc/nginx/conf.d/default.conf
+# insert values for variables in nginx config; Alpine nginx includes http.d
+envsubst '$SERVER_NAME:$VIRTUAL_HOST:$ENABLE_PW' < /docker/nginx/default.conf > /etc/nginx/http.d/default.conf
 
 #set ownership for volumes
 #kirby needs these dirs writeable by the app (php-fpm runs as www-data)

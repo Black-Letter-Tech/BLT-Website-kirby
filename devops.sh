@@ -178,7 +178,7 @@ fn_pushcontent_atomic() {
         cp -a /target/. /rollback/ &&
         find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
         cp -a /incoming/. /target/ &&
-        chown -R 33:33 /target  # www-data in the php:fpm-bookworm image
+        chown -R 82:82 /target  # www-data in the php:fpm-alpine image
     '; then
         docker start "${SLD}-stg" >/dev/null
         docker rm -f "$sync_container" >/dev/null
@@ -190,7 +190,7 @@ fn_pushcontent_atomic() {
         docker exec "$sync_container" sh -c '
             find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
             cp -a /rollback/. /target/ &&
-            chown -R 33:33 /target  # www-data in the php:fpm-bookworm image
+            chown -R 82:82 /target  # www-data in the php:fpm-alpine image
         '
         docker start "${SLD}-stg" >/dev/null
         docker rm -f "$sync_container" >/dev/null
