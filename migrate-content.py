@@ -25,6 +25,8 @@ import sys
 from pathlib import Path
 
 JSON_PAT = re.compile(r'\[\{"id":"([^"]+)"\}\]')
+# the same shape escaped inside a JSON string (blocks nested in layouts)
+JSON_ESC_PAT = re.compile(r'\[\{\\"id\\":\\"([^"\\]+)\\"\}\]')
 YAML_PAT = re.compile(r'^(\s*)- ?\n\s+id: (\S+)$', re.M)
 RGBA_PAT = re.compile(r'rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*([\d.]+)\s*)?\)')
 
@@ -57,7 +59,13 @@ def transform(text: str) -> tuple[str, int]:
         count += 1
         return rgba_to_hex(m)
 
+    def json_esc_sub(m):
+        nonlocal count
+        count += 1
+        return '[\\"' + m.group(1) + '\\"]'
+
     text = JSON_PAT.sub(json_sub, text)
+    text = JSON_ESC_PAT.sub(json_esc_sub, text)
     text = YAML_PAT.sub(yaml_sub, text)
     text = RGBA_PAT.sub(rgba_sub, text)
     return text, count
