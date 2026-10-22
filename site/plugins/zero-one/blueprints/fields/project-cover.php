@@ -6,12 +6,8 @@ $ratio = site()->coverRatio()->isTrue() ? '' : 'fixed';
 $mediaIndex = site()->mediaIndex()->isTrue() ? 'site.index(true).images' : 'model.images';
 
 return [
-    'type' => 'image-clip',
-    'clip' => [
-      'minwidth' => $minwidth,
-      'minheight' => $minheight,
-      'ratio' => $ratio,
-    ],
+    'type' => 'files',
+    'multiple' => false,
     'uploads' => 'image',
     'query' => $mediaIndex,
     'info' => '{{ file.dimensions }} {{ file.niceSize }}',

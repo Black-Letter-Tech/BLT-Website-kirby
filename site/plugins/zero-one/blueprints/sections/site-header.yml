@@ -306,6 +306,7 @@ fields:
       en: Shape divider color
       de: Farbe des Formteilers
     type: color
+    alpha: true
     default: '#ffffff'
     width: 1/3
     when:

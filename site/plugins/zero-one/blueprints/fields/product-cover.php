@@ -5,12 +5,8 @@ $minheight = site()->productImageratio()->isNotEmpty() ? (site()->productImagera
 $mediaIndex = site()->mediaIndex()->isTrue() ? 'site.index(true).images' : 'model.images';
 
 return [
-    'type' => 'image-clip',
-    'clip' => [
-      'minwidth' => $minwidth,
-      'minheight' => $minheight,
-      'ratio' => 'fixed'
-    ],
+    'type' => 'files',
+    'multiple' => false,
     'uploads' => 'image',
     'query' => $mediaIndex,
     'info' => '{{ file.dimensions }} {{ file.niceSize }}',
