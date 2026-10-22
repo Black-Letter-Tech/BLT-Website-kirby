@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7739702ebf2cc9ec403f043b618032b0",
+    "content-hash": "8c0f8898fdfad8f28e2855c1625969b5",
     "packages": [
         {
             "name": "bnomei/kirby3-dotenv",
@@ -1879,6 +1879,50 @@
                 }
             ],
             "time": "2026-09-26T06:31:10+00:00"
+        },
+        {
+            "name": "texnixe/similar",
+            "version": "3.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/texnixe/kirby3-similar.git",
+                "reference": "87ba5364b56be05c7b0bf3d2ca723f7605d62725"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/texnixe/kirby3-similar/zipball/87ba5364b56be05c7b0bf3d2ca723f7605d62725",
+                "reference": "87ba5364b56be05c7b0bf3d2ca723f7605d62725",
+                "shasum": ""
+            },
+            "require": {
+                "getkirby/composer-installer": "^1.1",
+                "php": ">=8.0.0"
+            },
+            "require-dev": {
+                "roave/security-advisories": "dev-latest"
+            },
+            "type": "kirby-plugin",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sonja Broda",
+                    "email": "info@texniq.de"
+                }
+            ],
+            "description": "Find similar pages or files based on similarities between fields",
+            "keywords": [
+                "kirby3",
+                "kirby3-cms",
+                "kirby3-plugin"
+            ],
+            "support": {
+                "issues": "https://github.com/texnixe/kirby3-similar/issues",
+                "source": "https://github.com/texnixe/kirby3-similar/tree/v3.0.1"
+            },
+            "time": "2023-09-03T10:23:26+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

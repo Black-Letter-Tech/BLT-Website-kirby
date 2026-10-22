@@ -1959,6 +1959,53 @@
             "install-path": "../symfony/yaml"
         },
         {
+            "name": "texnixe/similar",
+            "version": "3.0.1",
+            "version_normalized": "3.0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/texnixe/kirby3-similar.git",
+                "reference": "87ba5364b56be05c7b0bf3d2ca723f7605d62725"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/texnixe/kirby3-similar/zipball/87ba5364b56be05c7b0bf3d2ca723f7605d62725",
+                "reference": "87ba5364b56be05c7b0bf3d2ca723f7605d62725",
+                "shasum": ""
+            },
+            "require": {
+                "getkirby/composer-installer": "^1.1",
+                "php": ">=8.0.0"
+            },
+            "require-dev": {
+                "roave/security-advisories": "dev-latest"
+            },
+            "time": "2023-09-03T10:23:26+00:00",
+            "type": "kirby-plugin",
+            "installation-source": "dist",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sonja Broda",
+                    "email": "info@texniq.de"
+                }
+            ],
+            "description": "Find similar pages or files based on similarities between fields",
+            "keywords": [
+                "kirby3",
+                "kirby3-cms",
+                "kirby3-plugin"
+            ],
+            "support": {
+                "issues": "https://github.com/texnixe/kirby3-similar/issues",
+                "source": "https://github.com/texnixe/kirby3-similar/tree/v3.0.1"
+            },
+            "install-path": "../../site/plugins/similar"
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v5.7.0",
             "version_normalized": "5.7.0.0",

@@ -283,6 +283,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'texnixe/similar' => array(
+            'pretty_version' => '3.0.1',
+            'version' => '3.0.1.0',
+            'reference' => '87ba5364b56be05c7b0bf3d2ca723f7605d62725',
+            'type' => 'kirby-plugin',
+            'install_path' => __DIR__ . '/../../site/plugins/similar',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'vlucas/phpdotenv' => array(
             'pretty_version' => 'v5.7.0',
             'version' => '5.7.0.0',
