@@ -111,7 +111,7 @@ This will DELETE AND REPLACE all content on $1. [y/N]"
            -v ${SLD}-prod-content:/to \
            alpine ash -c "cd /from ; cp -av . /to" && \
         echo $(yellowprint "Setting Permissions On $1") && \
-        docker exec -it ${SLD}-${1} sh -c 'chown -R nobody:nobody /app/content' && \
+        docker exec -it ${SLD}-${1} sh -c 'chown -R www-data:www-data /app/content' && \
         echo $(yellowprint "Deleting Cache On $1") && \
         docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/storage/cache/*' && \
         echo $(yellowprint "Finished Content Push to $1")
@@ -178,7 +178,7 @@ fn_pushcontent_atomic() {
         cp -a /target/. /rollback/ &&
         find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
         cp -a /incoming/. /target/ &&
-        chown -R 65534:65534 /target
+        chown -R 82:82 /target  # www-data in the php:fpm-alpine image
     '; then
         docker start "${SLD}-stg" >/dev/null
         docker rm -f "$sync_container" >/dev/null
@@ -190,7 +190,7 @@ fn_pushcontent_atomic() {
         docker exec "$sync_container" sh -c '
             find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
             cp -a /rollback/. /target/ &&
-            chown -R 65534:65534 /target
+            chown -R 82:82 /target  # www-data in the php:fpm-alpine image
         '
         docker start "${SLD}-stg" >/dev/null
         docker rm -f "$sync_container" >/dev/null
