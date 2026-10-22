@@ -19,11 +19,18 @@ Kirby::plugin('blt/sitemap', [
                     ->filter(fn ($p) => $p->sitemap()->isEmpty() || $p->sitemap()->toBool());
 
                 $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-                $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+                $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
                 foreach ($pages as $p) {
                     $xml .= "  <url>\n";
                     $xml .= '    <loc>' . Kirby\Toolkit\Xml::encode($p->url()) . "</loc>\n";
                     $xml .= '    <lastmod>' . date('c', $p->modified()) . "</lastmod>\n";
+                    $images = $p->images()
+                        ->filter(fn ($f) => $f->sitemap()->isEmpty() || $f->sitemap()->toBool());
+                    foreach ($images as $img) {
+                        $xml .= "    <image:image>\n";
+                        $xml .= '      <image:loc>' . Kirby\Toolkit\Xml::encode($img->url()) . "</image:loc>\n";
+                        $xml .= "    </image:image>\n";
+                    }
                     $xml .= "  </url>\n";
                 }
                 $xml .= '</urlset>';
