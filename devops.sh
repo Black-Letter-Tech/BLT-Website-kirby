@@ -212,7 +212,7 @@ fn_verify_staging_https() {
     # entry before verification so an internal HTTP request cannot persist
     # mixed-content URLs.
     docker exec "${SLD}-stg" sh -c \
-        "find '/app/storage/cache/${staging_host}/pages' -maxdepth 1 -type f -name 'home-en-html_*.cache' -delete" \
+        "find '/app/storage/cache/${staging_host}/pages' -maxdepth 1 -type f -name 'home-en-html_*.cache' -delete 2>/dev/null; true" \
         || return 1
 
     while [ "$attempt" -le 10 ]; do
