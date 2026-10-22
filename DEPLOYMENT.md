@@ -125,10 +125,46 @@ Application changes flow in the opposite direction from content:
 1. Change code locally on a feature branch.
 2. Build and test the local image.
 3. Push the branch to GitHub.
-4. Build and deploy the branch image to staging.
+4. Build the staging image locally and ship it to the remote daemon.
 5. Verify staging before promoting the image to production.
 
 Never publish an untested application image directly to production.
+
+## Building images for the remote host
+
+The remote host cannot build current images. Its Docker 19.03 seccomp
+profile rejects syscalls that current Alpine and Debian userlands make,
+so `docker build` against the remote daemon fails inside `apt-get` or
+`tar`. Build on the local machine for amd64 and ship the result:
+
+```sh
+eval "$(docker-machine env -u)"
+unset DOCKER_DEFAULT_PLATFORM
+docker buildx build --platform linux/amd64 \
+  -t "wagnerpaul/${SLD}-main-app:stg" --load .
+docker save -o /tmp/stg-amd64.tar "wagnerpaul/${SLD}-main-app:stg"
+eval "$(docker-machine env "${DOCKER_MACHINE}")"
+docker load -i /tmp/stg-amd64.tar
+```
+
+Then recreate the staging container:
+
+```sh
+unset DOCKER_DEFAULT_PLATFORM
+docker rm -f "${SLD}-stg"
+docker-compose up -d stg
+docker cp ./.env "${SLD}-stg:app"
+docker exec "${SLD}-stg" sh -c 'set -o allexport; . ./.env; set +o allexport; \
+  htpasswd -c -B -b /etc/nginx/.htpasswd "$BASIC_AUTH_USER" "$BASIC_AUTH_PASSWORD"'
+```
+
+`DOCKER_DEFAULT_PLATFORM` must be unset for compose commands against the
+remote: with it set, compose sends a platform spec that needs API 1.41
+and the daemon speaks 1.40.
+
+The image base is php:8.4-fpm-bookworm. The host runs its glibc userland
+fine; only builds break there. A host replacement with a current kernel
+and Docker removes this constraint and is tracked as its own project.
 
 ## Remote Docker access
 
