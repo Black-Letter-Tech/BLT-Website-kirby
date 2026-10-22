@@ -15,9 +15,9 @@ source of truth for content.
 ## Requirements
 
 - Docker Desktop for local development
-- Docker Machine for remote staging and production operations
+- A docker context (`blt-pub02`) over SSH for remote operations
 - A project `.env` file
-- Access to the `docker-ubuntu-4gb-sfo2-01` Docker Machine
+- SSH access to `blt-pub02` (key `SSH blt-pub02` in 1Password)
 
 `SLD` means second-level domain. For this project, it resolves to
 `blackletter`.
@@ -41,7 +41,7 @@ Build the local image:
 set -o allexport
 source .env
 set +o allexport
-eval "$(docker-machine env -u)"
+unset DOCKER_CONTEXT
 docker build -t "wagnerpaul/${SLD}-main-app:local" .
 ```
 
@@ -132,39 +132,33 @@ Never publish an untested application image directly to production.
 
 ## Building images for the remote host
 
-The remote host cannot build current images. Its Docker 19.03 seccomp
-profile rejects syscalls that current Alpine and Debian userlands make,
-so `docker build` against the remote daemon fails inside `apt-get` or
-`tar`. Build on the local machine for amd64 and ship the result:
+The host (blt-pub02, Debian 13, current Docker) runs amd64. Build
+locally for that platform and ship the result; the 2GB host serves
+three sites and should not also compile extensions:
 
 ```sh
-eval "$(docker-machine env -u)"
 unset DOCKER_DEFAULT_PLATFORM
 docker buildx build --platform linux/amd64 \
   -t "wagnerpaul/${SLD}-main-app:stg" --load .
-docker save -o /tmp/stg-amd64.tar "wagnerpaul/${SLD}-main-app:stg"
-eval "$(docker-machine env "${DOCKER_MACHINE}")"
-docker load -i /tmp/stg-amd64.tar
+docker save "wagnerpaul/${SLD}-main-app:stg" | ssh blt-pub02 docker load
 ```
 
-Then recreate the staging container:
+Then recreate the staging container and re-inject the two files that
+live in the container layer by design (images stay secret-free):
 
 ```sh
-unset DOCKER_DEFAULT_PLATFORM
-docker rm -f "${SLD}-stg"
-docker-compose up -d stg
+export DOCKER_CONTEXT=blt-pub02
+docker compose up -d --force-recreate stg
 docker cp ./.env "${SLD}-stg:app"
 docker exec "${SLD}-stg" sh -c 'set -o allexport; . ./.env; set +o allexport; \
   htpasswd -c -B -b /etc/nginx/.htpasswd "$BASIC_AUTH_USER" "$BASIC_AUTH_PASSWORD"'
 ```
 
-`DOCKER_DEFAULT_PLATFORM` must be unset for compose commands against the
-remote: with it set, compose sends a platform spec that needs API 1.41
-and the daemon speaks 1.40.
+Any container recreation, by compose or otherwise, loses `.env` and
+`.htpasswd`; always replay the injection step.
 
-The image base is php:8.4-fpm-bookworm. The host runs its glibc userland
-fine; only builds break there. A host replacement with a current kernel
-and Docker removes this constraint and is tracked as its own project.
+`DOCKER_DEFAULT_PLATFORM` must stay unset for compose and build
+commands; it is set in the login shell and changes build targets.
 
 ## Remote Docker access
 
@@ -174,7 +168,7 @@ Load the project environment and select the remote Docker host:
 set -o allexport
 source .env
 set +o allexport
-eval "$(docker-machine env "${DOCKER_MACHINE}")"
+export DOCKER_CONTEXT=blt-pub02
 ```
 
 Open a staging shell:
@@ -189,10 +183,7 @@ Open a production shell:
 docker exec -it "${SLD}-prod" /bin/sh
 ```
 
-The remote daemon runs Docker 19.03. Current Docker Compose versions can reject
-some recreate operations because the daemon supports API 1.40. Do not use
-`--remove-orphans`. Staging and production share the Compose project and proxy
-network.
+Staging and production share the Compose project and proxy network.
 
 ## Backups
 
@@ -241,21 +232,19 @@ the repository after cleanup.
 
 ## Troubleshooting
 
-### Expired Docker Machine certificates
+### Remote connection failures
 
-If Docker reports an expired TLS certificate, regenerate the CA and client
-certificates:
-
-```sh
-docker-machine regenerate-certs --client-certs -f \
-  docker-ubuntu-4gb-sfo2-01
-```
-
-Confirm access with:
+The context rides plain SSH. If remote Docker commands fail, test the
+transport first:
 
 ```sh
-docker-machine ls
+ssh blt-pub02 docker version
 ```
+
+SSH signing goes through the 1Password agent; an unlocked 1Password and
+an approved `SSH blt-pub02` key are prerequisites. The old
+docker-machine host (docker-ubuntu-4gb-sfo2-01) is retired; its
+certificate tooling no longer applies.
 
 ### Shared proxy network
 

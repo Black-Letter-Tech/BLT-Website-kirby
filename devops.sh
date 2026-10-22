@@ -24,8 +24,8 @@ fn_goodafternoon() { echo; echo "Good afternoon."; }
 
 fn_goodmorning() { 
 
-    eval $(docker-machine env ${DOCKER_MACHINE}) && \
-    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
     docker build -t wagnerpaul/${SLD}-main-app:stg . && \
     docker-compose up -d --force-recreate
 
@@ -52,17 +52,17 @@ fn_fail() { echo "Wrong option." exit 1; }
 
 ### Menu Functions ##
 fn_docker_machine_ssh() {
-    eval $(docker-machine env ${DOCKER_MACHINE}) && \
-    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
-    docker-machine ssh ${DOCKER_MACHINE}
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
+    ssh blt-pub02
 }
 
 
 fn_deployapp() {
     if fn_confirm "Would you really like to deploy the app to $1? [y/N]"
     then
-        eval $(docker-machine env ${DOCKER_MACHINE}) && \
-        echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
+        export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+        echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
         docker build -t wagnerpaul/${SLD}-main-app:${1} . && \
         docker-compose up -d --force-recreate
         echo $(yellowprint "Copying .env File To $1") && \
@@ -78,8 +78,8 @@ fn_deployapp() {
 fn_promoteapp() {
     if fn_confirm "Would you really like to promote staging app to $1? [y/N]"
     then
-        eval $(docker-machine env ${DOCKER_MACHINE}) && \
-        echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
+        export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+        echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
         echo $(yellowprint "Tagging image ${SLD}-main-app:stg as ${SLD}-main-app:latest") && \
         docker tag wagnerpaul/${SLD}-main-app:stg wagnerpaul/${SLD}-main-app:latest && \
         echo $(yellowprint "Pushing image ${SLD}-main-app:latest") && \
@@ -101,8 +101,8 @@ fn_promotecontent() {
     if fn_confirm "Would you really like to promote staging content to $1?
 This will DELETE AND REPLACE all content on $1. [y/N]"
     then
-        eval $(docker-machine env ${DOCKER_MACHINE}) && \
-        echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
+        export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+        echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
         echo $(yellowprint "Deleting Content On $1") && \
         docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/content/*'  && \
         echo $(yellowprint "Copying Content from stg to $1") && \
@@ -147,8 +147,8 @@ fn_pushcontent_atomic() {
         return 1
     fi
 
-    eval $(docker-machine env ${DOCKER_MACHINE}) || return 1
-    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` )
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" || return 1
+    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT})
 
     docker rm -f "$sync_container" >/dev/null 2>&1 || true
     docker create --name "$sync_container" \
@@ -206,7 +206,7 @@ fn_verify_staging_https() {
     local https_media_count
     local attempt=1
 
-    eval $(docker-machine env ${DOCKER_MACHINE}) || return 1
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" || return 1
 
     # The staging page cache stores absolute media URLs. Remove the homepage
     # entry before verification so an internal HTTP request cannot persist
@@ -256,8 +256,8 @@ fn_synccontent() {
     local sync_dir
     sync_dir=$(mktemp -d "${TMPDIR:-/tmp}/blt-content-sync.XXXXXX") || return 1
 
-    eval $(docker-machine env ${DOCKER_MACHINE}) || return 1
-    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` )
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" || return 1
+    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT})
     docker cp "${SLD}-${source}:/app/content" "${sync_dir}/" || return 1
 
     if [ ! -f "${sync_dir}/content/site.en.txt" ]; then
@@ -278,8 +278,8 @@ fn_synccontent() {
 }
 
 fn_backup() {
-    eval $(docker-machine env ${DOCKER_MACHINE}) && \
-    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
     echo $(yellowprint "Backing Up Content On $1") && \
     docker exec ${SLD}-content-backups-${1} backup  && \
     echo $(yellowprint "Backing Up Accounts On $1") && \
@@ -287,8 +287,8 @@ fn_backup() {
 }
 
 fn_listbackups() {
-    eval $(docker-machine env ${DOCKER_MACHINE}) && \
-    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
     echo $(yellowprint "Content Backups On $1") && \
     docker exec ${SLD}-content-backups-${1} list  && \
     echo $(yellowprint "Accounts Backups On $1") && \
@@ -302,7 +302,7 @@ $(greenprint 'Restore time point should be considered carefully.')
 
 $(yellowprint 'Command Example')
 $(blueprint 'set -o allexport; source .env; set +o allexport && \')
-$(blueprint 'eval $(docker-machine env ${DOCKER_MACHINE}) && \')
+$(blueprint 'export DOCKER_CONTEXT=blt-pub02 && \')
 $(blueprint "docker exec ${SLD}-content-backups-${1} restore -t 3D")
 
 $(yellowprint 'Documentation')
@@ -311,15 +311,15 @@ $(cyanprint 'https://github.com/blacklabelops/volumerize')
 }
 
 fn_getshell() {
-    eval $(docker-machine env ${DOCKER_MACHINE}) && \
-    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` ) && \
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
     echo $(yellowprint "Getting shell for:") $(blueprint ${1} ) && \
     docker exec -it ${SLD}-${1} /bin/sh
 }
 
 fn_buildimage(){
-    eval $(docker-machine env ${DOCKER_MACHINE}) && \
-    echo $(yellowprint 'Active Docker Machine: ') $(blueprint `docker-machine active` )
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT})
    docker build -t wagnerpaul/${SLD}-main-app:${1} .
 }
 
