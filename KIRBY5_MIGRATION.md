@@ -13,6 +13,10 @@ PHP 8.4. Trigger: CVE-2026-109618/109619 (PHP 8.1 receives no fix).
       alias toFile/toFiles in zero-one
 - [x] colors fields swapped to the core color field
 - [x] link-field and code-editor moved to composer (Kirby 4 releases)
+- [x] sitemapper replaced with blt-sitemap (its route broke on Kirby 4);
+      URL set verified identical to the live sitemap
+- [x] verify-vs-prod.py reports 18 pages, 0 differences against
+      production on Kirby 4 (fresh staging content, transforms applied)
 - [ ] Panel walkthrough on Kirby 4 (fields, blocks, deploy button)
 - [ ] Core upgrade to Kirby 5.6, bnomei plugins to 5.x
 - [ ] Decide link-field on Kirby 5 (its release constraint stops at
@@ -31,8 +35,9 @@ PHP 8.4. Trigger: CVE-2026-109618/109619 (PHP 8.1 receives no fix).
 2. First boot migrates content (UUIDs are written). Take a manual
    B2-independent backup before it.
 3. Re-test the "Deploy content to Production" button end to end.
-4. Verify with `./devops.sh verify-stg`; check favicon markup and
-   custom CSS generation.
+4. Verify with `./devops.sh verify-stg`, then run
+   `python3 verify-vs-prod.py --local https://stg.blackletter.tech`
+   against production; check favicon markup and custom CSS generation.
 5. Never run push-stg from this worktree before cutover: migrated
    content must not land on the Kirby 3 staging site.
 

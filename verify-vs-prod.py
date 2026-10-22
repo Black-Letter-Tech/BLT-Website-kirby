@@ -23,10 +23,14 @@ import sys
 import urllib.request
 
 UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
+LOCAL_AUTH = None  # set from --auth for a basic-auth protected local/staging side
 
 
-def fetch(url, timeout=30):
+def fetch(url, timeout=30, auth=None):
     req = urllib.request.Request(url, headers=UA)
+    if auth:
+        import base64
+        req.add_header("Authorization", "Basic " + base64.b64encode(auth.encode()).decode())
     try:
         r = urllib.request.urlopen(req, timeout=timeout)
         return r.status, r.read().decode(errors="ignore")
@@ -78,9 +82,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--local", default="http://localhost:8081")
     ap.add_argument("--prod", default="https://blackletter.tech")
+    ap.add_argument("--auth", help="user:pass for the --local side (staging)")
     args = ap.parse_args()
 
-    status, sitemap = fetch(args.local + "/sitemap.xml")
+    status, sitemap = fetch(args.local + "/sitemap.xml", auth=args.auth)
     if status != 200:
         sys.exit(f"local sitemap failed: {status}")
     paths = sorted(
@@ -91,7 +96,7 @@ def main():
     problems = 0
     for p in paths:
         issues = []
-        ls, lbody = fetch(args.local + p)
+        ls, lbody = fetch(args.local + p, auth=args.auth)
         ps, pbody = fetch(args.prod + p)
         if ls != ps:
             issues.append(f"status local={ls} prod={ps}")
@@ -106,7 +111,7 @@ def main():
                 issues.append(f"images missing locally: {sorted(pi - li)[:4]}")
             dead = []
             for u in sorted(asset_urls(lbody, args.local)):
-                s, _ = fetch(u)
+                s, _ = fetch(u, auth=args.auth)
                 if s != 200:
                     dead.append(f"{s} {u[len(args.local):][:80]}")
             if dead:
