@@ -24,7 +24,7 @@ use Symfony\Component\Yaml\Tag\TaggedValue;
 class Parser
 {
     public const TAG_PATTERN = '(?P<tag>![\w!.\/:-]+)';
-    public const BLOCK_SCALAR_HEADER_PATTERN = '(?P<separator>\||>)(?P<modifiers>\+|\-|\d+|\+\d+|\-\d+|\d+\+|\d+\-)?(?P<comments> +#.*)?';
+    public const BLOCK_SCALAR_HEADER_PATTERN = '(?P<separator>\||>)(?P<modifiers>\+|\-|\d+|\+\d+|\-\d+|\d+\+|\d+\-)?(?P<comments>[ \t]+#.*)?';
     public const REFERENCE_PATTERN = '#^&(?P<ref>[^ ]++) *+(?P<value>.*)#u';
     public const DEFAULT_MAX_NESTING_LEVEL = 128;
     public const DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = 128;
@@ -59,8 +59,8 @@ class Parser
     /**
      * Parses a YAML file into a PHP value.
      *
-     * @param string $filename The path to the YAML file to be parsed
-     * @param int    $flags    A bit field of Yaml::PARSE_* constants to customize the YAML parser behavior
+     * @param string                     $filename The path to the YAML file to be parsed
+     * @param int-mask-of<Yaml::PARSE_*> $flags    A bit field of Yaml::PARSE_* constants to customize the YAML parser behavior
      *
      * @throws ParseException If the file could not be read or the YAML is not valid
      */
@@ -86,8 +86,8 @@ class Parser
     /**
      * Parses a YAML string to a PHP value.
      *
-     * @param string $value A YAML string
-     * @param int    $flags A bit field of Yaml::PARSE_* constants to customize the YAML parser behavior
+     * @param string                     $value A YAML string
+     * @param int-mask-of<Yaml::PARSE_*> $flags A bit field of Yaml::PARSE_* constants to customize the YAML parser behavior
      *
      * @throws ParseException If the YAML is not valid
      */
@@ -129,7 +129,7 @@ class Parser
     {
         $this->currentLineNb = -1;
         $this->currentLine = '';
-        $value = $this->cleanup($value);
+        $value = $this->cleanup($value, $hasContentOnStartMarkerLine);
         $this->lines = explode("\n", $value);
         $this->numberOfParsedLines = \count($this->lines);
         $this->locallySkippedLineNumbers = [];
@@ -150,8 +150,12 @@ class Parser
         }
 
         // Resolves the tag and returns if end of the document
-        if (null !== ($tag = $this->getLineTag($this->currentLine, $flags, false)) && !$this->moveToNextLine()) {
-            return new TaggedValue($tag, '');
+        if (null !== $tag = $this->getLineTag($this->currentLine, $flags, false)) {
+            do {
+                if (!$this->moveToNextLine()) {
+                    return new TaggedValue($tag, '');
+                }
+            } while ($this->isCurrentLineEmpty());
         }
 
         do {
@@ -173,6 +177,14 @@ class Parser
                 }
                 $context = 'sequence';
 
+                if ($hasContentOnStartMarkerLine && 0 === $this->currentLineNb) {
+                    throw new ParseException('A block collection cannot start on the line of the document start marker (---).', $this->getRealCurrentLineNb() + 1, $this->currentLine, $this->filename);
+                }
+
+                if (isset($values['value']) && '!' === $values['value'][0]) {
+                    $values['value'] = $this->moveAnchorBeforeTag($values['value']);
+                }
+
                 if (isset($values['value']) && '&' === $values['value'][0] && self::preg_match(self::REFERENCE_PATTERN, $values['value'], $matches)) {
                     $isRef = $matches['ref'];
                     $this->refsBeingParsed[] = $isRef;
@@ -190,9 +202,14 @@ class Parser
 
                     $sequenceIndentation = \strlen($values['leadspaces']) + 1;
                     $sequenceYaml = substr($this->currentLine, $sequenceIndentation);
-                    $sequenceYaml .= "\n".$this->getNextEmbedBlock($sequenceIndentation, true);
+                    $embedBlock = $this->getNextEmbedBlock($sequenceIndentation, true);
 
-                    $data[] = $this->parseBlock($currentLineNumber, rtrim($sequenceYaml), $flags);
+                    // keep trailing empty lines, they can be part of a block scalar
+                    if ($currentLineNumber !== $this->getRealCurrentLineNb()) {
+                        $sequenceYaml .= "\n".$embedBlock;
+                    }
+
+                    $data[] = $this->parseBlock($currentLineNumber, $sequenceYaml, $flags);
                 } elseif (!isset($values['value']) || '' == trim($values['value'], ' ') || str_starts_with(ltrim($values['value'], ' '), '#')) {
                     $data[] = $this->parseBlock($this->getRealCurrentLineNb() + 1, $this->getNextEmbedBlock(null, true) ?? '', $flags);
                 } elseif (null !== $subTag = $this->getLineTag(ltrim($values['value'], ' '), $flags)) {
@@ -200,7 +217,7 @@ class Parser
                         $subTag,
                         $this->parseBlock($this->getRealCurrentLineNb() + 1, $this->getNextEmbedBlock(null, true), $flags)
                     );
-                } elseif (self::preg_match('/^'.self::TAG_PATTERN.' +'.self::BLOCK_SCALAR_HEADER_PATTERN.'$/', $values['value'])) {
+                } elseif (self::preg_match('/^'.self::TAG_PATTERN.'[ \t]+'.self::BLOCK_SCALAR_HEADER_PATTERN.'$/', $values['value'])) {
                     $data[] = $this->parseValue($values['value'], $flags, $context);
                 } else {
                     if (
@@ -210,12 +227,14 @@ class Parser
                             || self::preg_match('#^(?P<key>'.Inline::REGEX_QUOTED_STRING.'|[^ \'"\{\[].*?) *\:(\s+(?P<value>.+?))?\s*$#u', $this->trimTag($values['value']), $matches)
                         )
                     ) {
+                        $currentLineNumber = $this->getRealCurrentLineNb();
+
                         $block = $values['value'];
-                        if ($this->isNextLineIndented() || isset($matches['value']) && '>-' === $matches['value']) {
+                        if ($this->isNextLineIndented() || $this->isNextLineInBlockScalar($block)) {
                             $block .= "\n".$this->getNextEmbedBlock($this->getCurrentLineIndentation() + \strlen($values['leadspaces']) + 1);
                         }
 
-                        $data[] = $this->parseBlock($this->getRealCurrentLineNb(), $block, $flags);
+                        $data[] = $this->parseBlock($currentLineNumber, $block, $flags);
                     } else {
                         $data[] = $this->parseValue($values['value'], $flags, $context);
                     }
@@ -225,18 +244,21 @@ class Parser
                     array_pop($this->refsBeingParsed);
                 }
             } elseif (
-                // @todo in 7.0 remove legacy "(?:!?!php/const:)?"
-                self::preg_match('#^(?P<key>(?:![^\s]++\s++)?(?:'.Inline::REGEX_QUOTED_STRING.'|(?:!?!php/const:)?[^ \'"\[\{!].*?)) *\:(( |\t)++(?P<value>.+))?$#u', rtrim($this->currentLine), $values)
-                && (!str_contains($values['key'], ' #') || \in_array($values['key'][0], ['"', "'"]))
+                self::preg_match('#^(?P<key>(?:![^\s]++\s++)?(?:'.Inline::REGEX_QUOTED_STRING.'|[^ \'"\[\{!].*?)|![^\s]++(?= +\:)) *\:(( |\t)++(?P<value>.+))?$#u', rtrim($this->currentLine), $values)
+                && (!str_contains($values['key'], ' #') || \in_array($values['key'][0], ['"', "'"], true))
             ) {
-                if (str_starts_with($values['key'], '!php/const:')) {
-                    trigger_deprecation('symfony/yaml', '6.2', 'YAML syntax for key "%s" is deprecated and replaced by "!php/const %s".', $values['key'], substr($values['key'], 11));
-                }
-
                 if ($context && 'sequence' == $context) {
                     throw new ParseException('You cannot define a mapping item when in a sequence.', $this->currentLineNb + 1, $this->currentLine, $this->filename);
                 }
                 $context = 'mapping';
+
+                if ($hasContentOnStartMarkerLine && 0 === $this->currentLineNb) {
+                    throw new ParseException('A block collection cannot start on the line of the document start marker (---).', $this->getRealCurrentLineNb() + 1, $this->currentLine, $this->filename);
+                }
+
+                if (isset($values['value'][0]) && '!' === $values['value'][0]) {
+                    $values['value'] = $this->moveAnchorBeforeTag($values['value']);
+                }
 
                 try {
                     $key = Inline::parseScalar($values['key']);
@@ -289,12 +311,14 @@ class Parser
 
                         $data += $refValue; // array union
                     } else {
+                        $currentLineNumber = $this->getRealCurrentLineNb();
+
                         if (isset($values['value']) && '' !== $values['value']) {
                             $value = $values['value'];
                         } else {
                             $value = $this->getNextEmbedBlock();
                         }
-                        $parsed = $this->parseBlock($this->getRealCurrentLineNb() + 1, $value, $flags);
+                        $parsed = $this->parseBlock($currentLineNumber + 1, $value, $flags);
 
                         if (Yaml::PARSE_OBJECT_FOR_MAP & $flags && $parsed instanceof \stdClass) {
                             $parsed = (array) $parsed;
@@ -341,6 +365,10 @@ class Parser
                         // Spec: Keys MUST be unique; first one wins.
                         // But overwriting is allowed when a merge node is used in current block.
                         if ($allowOverwrite || !isset($data[$key])) {
+                            if (!$allowOverwrite && \array_key_exists($key, $data)) {
+                                trigger_deprecation('symfony/yaml', '7.2', 'Duplicate key "%s" detected on line %d whilst parsing YAML. Silent handling of duplicate mapping keys in YAML is deprecated and will throw a ParseException in 8.0.', $key, $this->getRealCurrentLineNb() + 1);
+                            }
+
                             if (null !== $subTag) {
                                 $data[$key] = new TaggedValue($subTag, '');
                             } else {
@@ -362,6 +390,10 @@ class Parser
 
                             $data += $value;
                         } elseif ($allowOverwrite || !isset($data[$key])) {
+                            if (!$allowOverwrite && \array_key_exists($key, $data)) {
+                                trigger_deprecation('symfony/yaml', '7.2', 'Duplicate key "%s" detected on line %d whilst parsing YAML. Silent handling of duplicate mapping keys in YAML is deprecated and will throw a ParseException in 8.0.', $key, $this->getRealCurrentLineNb() + 1);
+                            }
+
                             // Spec: Keys MUST be unique; first one wins.
                             // But overwriting is allowed when a merge node is used in current block.
                             if (null !== $subTag) {
@@ -378,6 +410,10 @@ class Parser
                     // Spec: Keys MUST be unique; first one wins.
                     // But overwriting is allowed when a merge node is used in current block.
                     if ($allowOverwrite || !isset($data[$key])) {
+                        if (!$allowOverwrite && \array_key_exists($key, $data)) {
+                            trigger_deprecation('symfony/yaml', '7.2', 'Duplicate key "%s" detected on line %d whilst parsing YAML. Silent handling of duplicate mapping keys in YAML is deprecated and will throw a ParseException in 8.0.', $key, $this->getRealCurrentLineNb() + 1);
+                        }
+
                         $data[$key] = $value;
                     } else {
                         throw new ParseException(\sprintf('Duplicate key "%s" detected.', $key), $this->getRealCurrentLineNb() + 1, $this->currentLine);
@@ -443,12 +479,7 @@ class Parser
                     throw $e;
                 }
             } else {
-                // multiple documents are not supported
-                if ('---' === $this->currentLine) {
-                    throw new ParseException('Multiple documents are not supported.', $this->currentLineNb + 1, $this->currentLine, $this->filename);
-                }
-
-                if ($deprecatedUsage = (isset($this->currentLine[1]) && '?' === $this->currentLine[0] && ' ' === $this->currentLine[1])) {
+                if (isset($this->currentLine[1]) && '?' === $this->currentLine[0] && ' ' === $this->currentLine[1]) {
                     throw new ParseException('Complex mappings are not supported.', $this->getRealCurrentLineNb() + 1, $this->currentLine);
                 }
 
@@ -478,7 +509,7 @@ class Parser
                             continue;
                         }
                         // If the indentation is not consistent at offset 0, it is to be considered as a ParseError
-                        if (0 === $this->offset && !$deprecatedUsage && isset($line[0]) && ' ' === $line[0]) {
+                        if (0 === $this->offset && isset($line[0]) && ' ' === $line[0]) {
                             throw new ParseException('Unable to parse.', $this->getRealCurrentLineNb() + 1, $this->currentLine, $this->filename);
                         }
 
@@ -535,7 +566,7 @@ class Parser
             $data = $object;
         }
 
-        return empty($data) ? null : $data;
+        return $data ?: null;
     }
 
     private function parseBlock(int $offset, string $yaml, int $flags): mixed
@@ -766,17 +797,18 @@ class Parser
             return $this->refs[$value];
         }
 
-        if (\in_array($value[0], ['!', '|', '>'], true) && self::preg_match('/^(?:'.self::TAG_PATTERN.' +)?'.self::BLOCK_SCALAR_HEADER_PATTERN.'$/', $value, $matches)) {
+        if (\in_array($value[0], ['!', '|', '>'], true) && self::preg_match('/^(?:'.self::TAG_PATTERN.'[ \t]+)?'.self::BLOCK_SCALAR_HEADER_PATTERN.'$/', $value, $matches)) {
             $modifiers = $matches['modifiers'] ?? '';
 
             $data = $this->parseBlockScalar($matches['separator'], preg_replace('#\d+#', '', $modifiers), abs((int) $modifiers));
 
             if ('' !== $matches['tag'] && '!' !== $matches['tag']) {
-                if ('!!binary' === $matches['tag']) {
-                    return Inline::evaluateBinaryScalar($data);
-                }
-
-                return new TaggedValue(substr($matches['tag'], 1), $data);
+                return match ($matches['tag']) {
+                    '!!binary' => Inline::evaluateBinaryScalar($data),
+                    '!!str' => $data,
+                    '!!float' => (float) $data,
+                    default => new TaggedValue(substr($matches['tag'], 1), $data),
+                };
             }
 
             return $data;
@@ -873,9 +905,12 @@ class Parser
 
         $isCurrentLineBlank = $this->isCurrentLineBlank();
         $blockLines = [];
+        $longestBlankLine = 0;
 
         // leading blank lines are consumed before determining indentation
-        while ($notEOF && $isCurrentLineBlank) {
+        while ($notEOF && $isCurrentLineBlank && (!$indentation || \strlen($this->currentLine) <= $indentation)) {
+            $longestBlankLine = max($longestBlankLine, \strlen($this->currentLine));
+
             // newline only if not EOF
             if ($notEOF = $this->moveToNextLine()) {
                 $blockLines[] = '';
@@ -890,54 +925,65 @@ class Parser
             for ($i = 0; $i < $currentLineLength && ' ' === $this->currentLine[$i]; ++$i) {
                 ++$indentation;
             }
+
+            // a comment less indented than the leading empty lines is not content, the indentation is then the one of the longest empty line
+            if ($indentation < $longestBlankLine && $this->isCurrentLineComment()) {
+                $indentation = $longestBlankLine;
+            }
         }
 
-        if ($indentation > 0) {
-            $pattern = \sprintf('/^ {%d}(.*)$/', $indentation);
-
-            while (
-                $notEOF && (
-                    $isCurrentLineBlank
-                    || self::preg_match($pattern, $this->currentLine, $matches)
-                )
-            ) {
-                if ($isCurrentLineBlank && \strlen($this->currentLine) > $indentation) {
-                    $blockLines[] = substr($this->currentLine, $indentation);
-                } elseif ($isCurrentLineBlank) {
-                    $blockLines[] = '';
-                } else {
-                    $blockLines[] = $matches[1];
-                }
-
-                // newline only if not EOF
-                if ($notEOF = $this->moveToNextLine()) {
-                    $isCurrentLineBlank = $this->isCurrentLineBlank();
-                }
+        if (!$notEOF || !$indentation || strspn($this->currentLine, ' ') < $indentation) {
+            if ($notEOF) {
+                $this->moveToPreviousLine();
+            } elseif (!$this->isCurrentLineLastLineInDocument()) {
+                $blockLines[] = '';
             }
-        } elseif ($notEOF) {
-            $blockLines[] = '';
+
+            // without content, the line breaks of the empty lines are only kept with the "+" chomping indicator
+            return '+' === $chomping ? str_repeat("\n", \count($blockLines)) : '';
+        }
+
+        $pattern = \sprintf('/^ {%d}(.*)$/', $indentation);
+
+        while (
+            $notEOF && (
+                $isCurrentLineBlank
+                || self::preg_match($pattern, $this->currentLine, $matches)
+            )
+        ) {
+            if ($isCurrentLineBlank && \strlen($this->currentLine) > $indentation) {
+                $blockLines[] = substr($this->currentLine, $indentation);
+            } elseif ($isCurrentLineBlank) {
+                $blockLines[] = '';
+            } else {
+                $blockLines[] = $matches[1];
+            }
+
+            // newline only if not EOF
+            if ($notEOF = $this->moveToNextLine()) {
+                $isCurrentLineBlank = $this->isCurrentLineBlank();
+            }
         }
 
         if ($notEOF) {
             $blockLines[] = '';
             $this->moveToPreviousLine();
-        } elseif (!$notEOF && !$this->isCurrentLineLastLineInDocument()) {
+        } elseif (!$this->isCurrentLineLastLineInDocument()) {
             $blockLines[] = '';
         }
 
         // folded style
         if ('>' === $style) {
             $text = '';
-            $previousLineIndented = false;
+            $previousLineIndented = null;
             $previousLineBlank = false;
 
             for ($i = 0, $blockLinesCount = \count($blockLines); $i < $blockLinesCount; ++$i) {
                 if ('' === $blockLines[$i]) {
                     $text .= "\n";
-                    $previousLineIndented = false;
                     $previousLineBlank = true;
-                } elseif (' ' === $blockLines[$i][0]) {
-                    $text .= "\n".$blockLines[$i];
+                } elseif (' ' === $blockLines[$i][0] || "\t" === $blockLines[$i][0]) {
+                    $text .= (null === $previousLineIndented ? '' : "\n").$blockLines[$i];
                     $previousLineIndented = true;
                     $previousLineBlank = false;
                 } elseif ($previousLineIndented) {
@@ -1024,35 +1070,79 @@ class Parser
         return ($this->offset + $this->currentLineNb) >= ($this->totalNumberOfLines - 1);
     }
 
-    private function cleanup(string $value): string
+    private function cleanup(string $value, ?bool &$hasContentOnStartMarkerLine = null): string
     {
+        $hasContentOnStartMarkerLine = false;
+
         $value = str_replace(["\r\n", "\r"], "\n", $value);
 
-        // strip YAML header
-        $count = 0;
-        $value = preg_replace('#^%YAML[: ][\d.]++[^\n]*+\n#u', '', $value, -1, $count);
-        $this->offset += $count;
+        // remove the YAML header, and the comments and empty lines before the content
+        $value = $this->removeLeadingLines('#^(?:[ \t]*+(?:\#[^\n]*+)?+\n)*+(?:%YAML[: ][\d.]++[^\n]*+\n(?:[ \t]*+(?:\#[^\n]*+)?+\n)*+)?+#', $value);
 
-        // remove leading comments
-        $trimmedValue = preg_replace('#^(?:\#[^\n]*+\n)++#', '', $value, -1, $count);
-        if (1 === $count) {
-            // items have been removed, update the offset
-            $this->offset += substr_count($value, "\n") - substr_count($trimmedValue, "\n");
-            $value = $trimmedValue;
+        // document markers and the properties of the root node are only found at the top level, not in nested blocks
+        if (null !== $this->totalNumberOfLines) {
+            return $value;
         }
 
-        // remove start of the document marker (---)
-        $trimmedValue = preg_replace('#^---[^\n]*+\n#', '', $value, -1, $count);
-        if (1 === $count) {
-            // items have been removed, update the offset
-            $this->offset += substr_count($value, "\n") - substr_count($trimmedValue, "\n");
-            $value = $trimmedValue;
+        // remove start of the document marker (---), with the YAML 1.0 directives, or the node properties and block scalar header that can follow it alone, as they were always ignored
+        $value = preg_replace('#^---(?:[ \t]++(?:%[^\n]*+|(?:(?:[!&][^ \t\n]*+|[|>][-+0-9]*+)[ \t]*+)++(?=(?:\#[^\n]*+)?+(?:\n|\z)))?+|(?=\n)|\z)#', '', $value, -1, $count);
 
-            // remove end of the document marker (...)
-            $value = preg_replace('#\.\.\.\s*+$#', '', $value);
+        // remove the anchor of the root node, as nothing can refer to it
+        $value = preg_replace('#^((?:![^! \t\n][^ \t\n]*+[ \t]++)?+)&[^ \t\n]++(?:[ \t]++|(?=\n)|\z)#', '$1', $value);
+
+        // remove the lines left without content
+        $offset = $this->offset;
+        $value = $this->removeLeadingLines('#^(?:[ \t]*+(?:\#[^\n]*+)?+\n)++#', $value);
+        $hasContentOnStartMarkerLine = 1 === $count && $offset === $this->offset;
+
+        // remove end of the document marker (...), which can only be followed by comments
+        $value = preg_replace('#^\.\.\.(?:[ \t]++(?:\#[^\n]*+)?+)?+(?:\n[ \t]*+(?:\#[^\n]*+)?+)*+\z#m', '', $value);
+
+        if (self::preg_match('#^(?:---|\.\.\.)(?:[ \t][^\n]*+)?+$#m', $value, $matches, \PREG_OFFSET_CAPTURE)) {
+            throw new ParseException('Multiple documents are not supported.', $this->offset + substr_count($value, "\n", 0, $matches[0][1]) + 1, $matches[0][0], $this->filename);
         }
 
         return $value;
+    }
+
+    /**
+     * Tells whether the next line belongs to a block scalar whose header ends the given value.
+     *
+     * Unlike isNextLineIndented(), empty and comment-like lines are not skipped, as they can be part of the block scalar.
+     */
+    private function isNextLineInBlockScalar(string $value): bool
+    {
+        if (!isset($this->lines[$this->currentLineNb + 1]) || !self::preg_match('/:[ \t]+(?:'.self::TAG_PATTERN.'[ \t]+)?'.self::BLOCK_SCALAR_HEADER_PATTERN.'$/', $value)) {
+            return false;
+        }
+
+        $nextLine = $this->lines[$this->currentLineNb + 1];
+
+        return '' === trim($nextLine, ' ') || strspn($nextLine, ' ') > $this->getCurrentLineIndentation();
+    }
+
+    /**
+     * Turns "!tag &anchor value" into "&anchor !tag value", as both orders are allowed.
+     *
+     * Built-in tags are left alone: "!!str &foo" is the "&foo" string, as in flow collections.
+     */
+    private function moveAnchorBeforeTag(string $value): string
+    {
+        if (str_starts_with($value, '!!')) {
+            return $value;
+        }
+
+        return preg_replace('#^'.self::TAG_PATTERN.' ++(&[^ ]++)#u', '$2 $1', $value);
+    }
+
+    private function removeLeadingLines(string $pattern, string $value): string
+    {
+        $trimmedValue = preg_replace($pattern, '', $value);
+
+        // items have been removed, update the offset
+        $this->offset += substr_count($value, "\n") - substr_count($trimmedValue, "\n");
+
+        return $trimmedValue;
     }
 
     private function isNextLineUnIndentedCollection(): bool
@@ -1068,11 +1158,7 @@ class Parser
             }
         } while (!$EOF && ($this->isCurrentLineEmpty() || $this->isCurrentLineComment()));
 
-        if ($EOF) {
-            return false;
-        }
-
-        $ret = $this->getCurrentLineIndentation() === $currentIndentation && $this->isStringUnIndentedCollectionItem();
+        $ret = !$EOF && $this->getCurrentLineIndentation() === $currentIndentation && $this->isStringUnIndentedCollectionItem();
 
         for ($i = 0; $i < $movements; ++$i) {
             $this->moveToPreviousLine();
@@ -1127,7 +1213,8 @@ class Parser
             return null;
         }
 
-        if ($nextLineCheck && !$this->isNextLineIndented()) {
+        // unlike a sequence item, the value of a mapping key can also be a sequence that is not indented
+        if ($nextLineCheck && !$this->isNextLineIndented() && ($this->isStringUnIndentedCollectionItem() || !$this->isNextLineUnIndentedCollection())) {
             return null;
         }
 
@@ -1135,6 +1222,11 @@ class Parser
 
         // Built-in tags
         if ($tag && '!' === $tag[0]) {
+            // "!!str" and "!!binary" can be resolved as inline scalars when they don't apply to a nested block
+            if (!$nextLineCheck && \in_array($tag, ['!str', '!binary'], true) && !$this->isNextLineIndented()) {
+                return null;
+            }
+
             throw new ParseException(\sprintf('The built-in tag "!%s" is not implemented.', $tag), $this->getRealCurrentLineNb() + 1, $value, $this->filename);
         }
 

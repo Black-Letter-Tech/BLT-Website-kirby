@@ -24,7 +24,7 @@ trait AppTranslations
 	 * the given code. Every shipped translation is generated from the
 	 * English one, so that is always the complete set, plus whatever
 	 * plugins register for English and for the code itself.
-	 * @since 4.9.6
+	 * @since 5.6.0
 	 */
 	public function coreI18nStrings(string $code): array
 	{
@@ -60,19 +60,8 @@ trait AppTranslations
 	 */
 	protected function i18n(): void
 	{
-		I18n::$load = function ($locale): array {
-			$data = $this->translation($locale)?->data() ?? [];
-
-			// inject the custom variables of the current language
-			if (
-				$this->multilang() === true &&
-				$language = $this->languages()->find($locale)
-			) {
-				$data = array_merge($data, $this->customI18nStrings($language));
-			}
-
-			return $data;
-		};
+		I18n::$load = fn ($locale): array =>
+			$this->translation($locale)->data();
 
 		// the actual locale is set using $app->setCurrentTranslation()
 		I18n::$locale = function (): string {
@@ -87,7 +76,7 @@ trait AppTranslations
 			if ($this->multilang() === true) {
 				// first try to fall back to the configured default language
 				$defaultCode = $this->defaultLanguage()->code();
-				$fallback = [$defaultCode];
+				$fallback    = [$defaultCode];
 
 				// if the default language is specified with a country code
 				// (e.g. `en-us`), also try with just the language code
@@ -111,9 +100,7 @@ trait AppTranslations
 		if ($slugs = $this->option('slugs')) {
 			// two ways that the option can be defined:
 			// "slugs" => "de" or "slugs" => ["language" => "de"]
-			if ($slugs = $slugs['language'] ?? $slugs ?? null) {
-				Str::$language = Language::loadRules($slugs);
-			}
+			Str::$language = Language::loadRules($slugs['language'] ?? $slugs);
 		}
 	}
 
@@ -124,6 +111,12 @@ trait AppTranslations
 	 */
 	public function panelLanguage(): string
 	{
+		$translation = $this->request()->get('translation');
+
+		if ($translation !== null && $this->translations()->find($translation)) {
+			return $translation;
+		}
+
 		if ($this->multilang() === true) {
 			$defaultCode = $this->defaultLanguage()->code();
 
@@ -141,8 +134,6 @@ trait AppTranslations
 
 	/**
 	 * Set the current translation
-	 *
-	 * @internal
 	 */
 	public function setCurrentTranslation(string|null $translationCode = null): void
 	{
@@ -157,7 +148,7 @@ trait AppTranslations
 	public function translation(string|null $locale = null): Translation
 	{
 		$locale ??= I18n::locale();
-		$locale = basename($locale);
+		$locale   = basename($locale);
 
 		// prefer loading them from the translations collection
 		if ($this->translations instanceof Translations) {
@@ -175,7 +166,11 @@ trait AppTranslations
 		}
 
 		// load from disk instead
-		return Translation::load($locale, $this->root('i18n:translations') . '/' . $locale . '.json', $inject);
+		return Translation::load(
+			$locale,
+			$this->root('i18n:translations') . '/' . $locale . '.json',
+			$inject
+		);
 	}
 
 	/**
@@ -205,6 +200,9 @@ trait AppTranslations
 			}
 		}
 
-		return $this->translations = Translations::load($this->root('i18n:translations'), $translations);
+		return $this->translations = Translations::load(
+			$this->root('i18n:translations'),
+			$translations
+		);
 	}
 }

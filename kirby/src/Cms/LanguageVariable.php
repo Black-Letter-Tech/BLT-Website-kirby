@@ -34,18 +34,18 @@ class LanguageVariable
 	 */
 	public static function create(
 		string $key,
-		string|null $value = null
+		string|array|null $value = null
 	): static {
 		if (is_numeric($key) === true) {
-			throw new InvalidArgumentException([
-				'key' => 'language.variable.numeric'
-			]);
+			throw new InvalidArgumentException(
+				key: 'language.variable.numeric'
+			);
 		}
 
 		if ($key === '') {
-			throw new InvalidArgumentException([
-				'key' => 'language.variable.key'
-			]);
+			throw new InvalidArgumentException(
+				key: 'language.variable.key'
+			);
 		}
 
 		$kirby        = App::instance();
@@ -53,26 +53,22 @@ class LanguageVariable
 		$translations = $language->translations();
 
 		if (isset($translations[$key]) === true) {
-			throw new DuplicateException([
-				'key'  => 'language.variable.duplicate',
-				'data' => [
-					'key' => $key
-				]
-			]);
+			throw new DuplicateException(
+				key: 'language.variable.duplicate',
+				data: ['key' => $key]
+			);
 		}
 
 		if (isset($kirby->coreI18nStrings($language->code())[$key]) === true) {
-			throw new DuplicateException([
-				'key'  => 'language.variable.core',
-				'data' => [
-					'key' => $key
-				]
-			]);
+			throw new DuplicateException(
+				key: 'language.variable.core',
+				data: ['key' => $key]
+			);
 		}
 
 		$translations[$key] = $value ?? '';
 
-		$language->update(['translations' => $translations]);
+		$language = $language->update(['translations' => $translations]);
 
 		return $language->variable($key);
 	}
@@ -106,6 +102,15 @@ class LanguageVariable
 	}
 
 	/**
+	 * Checks if the value is an array
+	 * @since 5.0.0
+	 */
+	public function hasMultipleValues(): bool
+	{
+		return is_array($this->value()) === true;
+	}
+
+	/**
 	 * Returns the unique key for the variable
 	 */
 	public function key(): string
@@ -114,9 +119,18 @@ class LanguageVariable
 	}
 
 	/**
+	 * Returns the parent language
+	 * @since 5.1.0
+	 */
+	public function language(): Language
+	{
+		return $this->language;
+	}
+
+	/**
 	 * Sets a new value for the language variable
 	 */
-	public function update(string|null $value = null): static
+	public function update(string|array|null $value = null): static
 	{
 		$translations             = $this->language->translations();
 		$translations[$this->key] = $value ?? '';
@@ -129,7 +143,7 @@ class LanguageVariable
 	/**
 	 * Returns the value if the variable has been translated.
 	 */
-	public function value(): string|null
+	public function value(): string|array|null
 	{
 		return $this->language->translations()[$this->key] ?? null;
 	}

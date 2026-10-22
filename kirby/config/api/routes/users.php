@@ -1,6 +1,7 @@
 <?php
 
 use Kirby\Cms\Find;
+use Kirby\Exception\PermissionException;
 use Kirby\Filesystem\F;
 
 /**
@@ -87,17 +88,27 @@ return [
 		'method'  => 'POST',
 		'action'  => function (string $id) {
 			return $this->upload(
-				function ($source, $filename) use ($id) {
+				single: true,
+				callback: function ($source, $filename) use ($id) {
 					$user   = Find::user($id);
 					$method = $user->avatar() === null ? 'createAvatar' : 'replaceAvatar';
 
 					return $user->$method(
-						$source,
-						F::extension($filename),
-						true
+						source: $source,
+						extension: F::extension($filename),
+						move: true
 					)->avatar();
 				},
-				single: true
+				preflight: function () use ($id) {
+					$user = Find::user($id);
+
+					if ($user->permissions()->can('update') !== true) {
+						throw new PermissionException(
+							key: 'user.update.permission',
+							data: ['name' => $user->username()]
+						);
+					}
+				},
 			);
 		}
 	],
@@ -169,7 +180,27 @@ return [
 		],
 		'method'  => 'PATCH',
 		'action'  => function (string $id) {
-			return Find::user($id)->changePassword($this->requestBody('password'));
+			$user        = Find::user($id);
+			$currentUser = $this->kirby()->user();
+
+			// validate password of acting user unless they have logged in to reset it;
+			// always validate password of acting user when changing password of other users
+			if (
+				$this->kirby()->auth()->isResettingPassword($this->session()) !== true ||
+				$user->is($currentUser) !== true
+			) {
+				$currentUser->validatePassword($this->requestBody('currentPassword'));
+			}
+
+			$result = $user->changePassword($this->requestBody('password'));
+
+			// if we changed the password of the current user…
+			if ($user->isLoggedIn() === true) {
+				// …don't allow additional resets (now the password is known again)
+				$this->session()->remove('kirby.resetPassword');
+			}
+
+			return $result;
 		}
 	],
 	[

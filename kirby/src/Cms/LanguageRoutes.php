@@ -29,13 +29,27 @@ class LanguageRoutes
 				'pattern' => $language->pattern(),
 				'method'  => 'ALL',
 				'env'     => 'site',
-				'action'  => function ($path = null) use ($language) {
+				'action'  => function ($path = null) use ($kirby, $language, $baseurl) {
 					$result = $language->router()->call($path);
 
 					// explicitly test for null as $result can
 					// contain falsy values that should still be returned
 					if ($result !== null) {
 						return $result;
+					}
+
+					// a language without URL prefix matches any path;
+					// if the path belongs to the URL prefix of another
+					// language, that language stays the current one
+					if ($language->path() === '') {
+						$matched = $kirby->languages()
+							->filter('baseurl', $baseurl)
+							->findByPath($path);
+
+						if ($matched !== null) {
+							$kirby->setCurrentTranslation($matched->code());
+							$kirby->setCurrentLanguage($matched->code());
+						}
 					}
 
 					// jump through to the fallback if nothing
@@ -129,11 +143,10 @@ class LanguageRoutes
 
 				// if there's just one language,
 				// we take that to render the home page
-				if ($languages->count() === 1) {
-					$currentLanguage = $languages->first();
-				} else {
-					$currentLanguage = $kirby->defaultLanguage();
-				}
+				$currentLanguage = match ($languages->count()) {
+					1       => $languages->first(),
+					default => $kirby->defaultLanguage()
+				};
 
 				// language detection on the home page with / as URL
 				if ($kirby->url() !== $currentLanguage->url()) {

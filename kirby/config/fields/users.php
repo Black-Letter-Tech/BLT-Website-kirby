@@ -63,17 +63,17 @@ return [
 			$users = [];
 			$kirby = App::instance();
 
-			foreach (Data::decode($value, 'yaml') as $email) {
-				if (is_array($email) === true) {
-					$email = $email['email'] ?? null;
+			foreach (Data::decode($value, 'yaml') as $id) {
+				if (is_array($id) === true) {
+					$id =  $id['uuid'] ?? $id['id'] ?? $id['email'] ?? null;
 				}
 
-				if ($email !== null && ($user = $kirby->user($email))) {
+				if ($id !== null && ($user = $kirby->user($id))) {
 					// never disclose a user the current user must not list,
 					// but keep its ID to not drop it from the value on save
 					$users[] = match ($user->isListable()) {
 						true  => $this->userResponse($user),
-						false => $this->protectedResponse($email)
+						false => $this->protectedResponse($id)
 					};
 				}
 			}

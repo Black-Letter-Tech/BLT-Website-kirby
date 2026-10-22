@@ -80,7 +80,7 @@ class Database
 	/**
 	 * The last result set
 	 */
-	protected $lastResult;
+	protected mixed $lastResult;
 
 	/**
 	 * Optional prefix for table names
@@ -140,45 +140,55 @@ class Database
 	/**
 	 * Connects to a database
 	 *
-	 * @param array|null $params This can either be a config key or an array of parameters for the connection
 	 * @throws \Kirby\Exception\InvalidArgumentException
 	 */
-	public function connect(array|null $params = null): PDO|null
+	public function connect(array $params = []): PDO|null
 	{
-		$defaults = [
+		$options = [
 			'database' => null,
 			'type'     => 'mysql',
 			'prefix'   => null,
 			'user'     => null,
 			'password' => null,
-			'id'       => uniqid()
+			'id'       => uniqid(),
+			...$params
 		];
 
-		$options = array_merge($defaults, $params);
-
-		// store the database information
-		$this->database = $options['database'];
-		$this->type     = $options['type'];
-		$this->prefix   = $options['prefix'];
-		$this->id       = $options['id'];
-
-		if (isset(static::$types[$this->type]) === false) {
-			throw new InvalidArgumentException('Invalid database type: ' . $this->type);
+		if (isset(static::$types[$options['type']]) === false) {
+			throw new InvalidArgumentException(
+				message: 'Invalid database type: ' . $options['type']
+			);
 		}
 
-		// fetch the dsn and store it
-		$this->dsn = (static::$types[$this->type]['dsn'])($options);
+		// fetch the dsn; the connectors validate their own required params
+		$dsn = (static::$types[$options['type']]['dsn'])($options);
+
+		// backstop for connectors registered by plugins, which might not
+		// validate; the property below is a plain string
+		if ($options['database'] === null) {
+			throw new InvalidArgumentException(
+				message: 'The ' . $options['type'] . ' connection requires a "database" parameter'
+			);
+		}
 
 		// try to connect
-		$this->connection = new PDO($this->dsn, $options['user'], $options['password']);
-		$this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$this->connection->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+		$connection = new PDO($dsn, $options['user'], $options['password']);
+		$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$connection->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
 		// TODO: behavior without this attribute would be preferrable
 		// (actual types instead of all strings) but would be a breaking change
-		if ($this->type === 'sqlite') {
-			$this->connection->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
+		if ($options['type'] === 'sqlite') {
+			$connection->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 		}
+
+		// only mutate the instance once the connection actually succeeded
+		$this->database   = $options['database'];
+		$this->type       = $options['type'];
+		$this->prefix     = $options['prefix'];
+		$this->id         = $options['id'];
+		$this->dsn        = $dsn;
+		$this->connection = $connection;
 
 		// store the connection
 		static::$connections[$this->id] = $this;
@@ -305,6 +315,7 @@ class Database
 		// try to prepare and execute the sql
 		try {
 			$this->statement = $this->connection->prepare($query);
+
 			// bind parameters to statement
 			foreach ($bindings as $parameter => $value) {
 				// positional parameters start at 1
@@ -361,14 +372,13 @@ class Database
 		array $bindings = [],
 		array $params = []
 	) {
-		$defaults = [
+		$options = [
 			'flag'     => null,
 			'method'   => 'fetchAll',
 			'fetch'    => Obj::class,
 			'iterator' => Collection::class,
+			...$params
 		];
-
-		$options = array_merge($defaults, $params);
 
 		if ($this->hit($query, $bindings) === false) {
 			return false;
@@ -468,7 +478,7 @@ class Database
 			}
 		}
 
-		return in_array($table, $this->tables) === true;
+		return in_array($table, $this->tables, true) === true;
 	}
 
 	/**
@@ -493,7 +503,7 @@ class Database
 			}
 		}
 
-		return in_array($column, $this->columnWhitelist[$table]) === true;
+		return in_array($column, $this->columnWhitelist[$table], true) === true;
 	}
 
 	/**
@@ -513,7 +523,7 @@ class Database
 		}
 
 		// update cache
-		if (in_array($table, $this->tables ?? []) !== true) {
+		if (in_array($table, $this->tables ?? [], true) !== true) {
 			$this->tables[] = $table;
 		}
 
@@ -556,12 +566,19 @@ class Database
 Database::$types['mysql'] = [
 	'sql' => Mysql::class,
 	'dsn' => function (array $params): string {
-		if (isset($params['host']) === false && isset($params['socket']) === false) {
-			throw new InvalidArgumentException('The mysql connection requires either a "host" or a "socket" parameter');
+		if (
+			isset($params['host']) === false &&
+			isset($params['socket']) === false
+		) {
+			throw new InvalidArgumentException(
+				message: 'The mysql connection requires either a "host" or a "socket" parameter'
+			);
 		}
 
 		if (isset($params['database']) === false) {
-			throw new InvalidArgumentException('The mysql connection requires a "database" parameter');
+			throw new InvalidArgumentException(
+				message: 'The mysql connection requires a "database" parameter'
+			);
 		}
 
 		$parts = [];
@@ -595,7 +612,9 @@ Database::$types['sqlite'] = [
 	'sql' => Sqlite::class,
 	'dsn' => function (array $params): string {
 		if (isset($params['database']) === false) {
-			throw new InvalidArgumentException('The sqlite connection requires a "database" parameter');
+			throw new InvalidArgumentException(
+				message: 'The sqlite connection requires a "database" parameter'
+			);
 		}
 
 		return 'sqlite:' . $params['database'];

@@ -24,13 +24,8 @@ class BlockUuid extends FieldUuid
 	protected const FIELD = 'blocks';
 
 	/**
-	 * @var \Kirby\Cms\Block|null
-	 */
-	public Identifiable|null $model = null;
-
-	/**
 	 * Converts content field to a Blocks collection
-	 * @internal
+	 * @unstable
 	 */
 	public static function fieldToCollection(Field $field): Blocks
 	{

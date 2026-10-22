@@ -42,6 +42,29 @@ class I18n
 	protected static array $decimalsFormatters = [];
 
 	/**
+	 * Returns the entry for the key or `null`
+	 * if it is missing or an empty string
+	 *
+	 * @since 5.6.1
+	 */
+	protected static function entry(
+		array|string|null $values,
+		string $key
+	): mixed {
+		if (is_array($values) === false) {
+			return null;
+		}
+
+		$value = $values[$key] ?? null;
+
+		if ($value === '') {
+			return null;
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Returns the list of fallback locales
 	 */
 	public static function fallbacks(): array
@@ -72,14 +95,19 @@ class I18n
 			return 'none';
 		}
 
-		return $count === 1 ? 'singular' : 'plural';
+		return match ($count) {
+			1       => 'singular',
+			default => 'plural'
+		};
 	}
 
 	/**
 	 * Formats a number
 	 */
-	public static function formatNumber(int|float $number, string|null $locale = null): string
-	{
+	public static function formatNumber(
+		int|float $number,
+		string|null $locale = null
+	): string {
 		$locale  ??= static::locale();
 		$formatter = static::decimalNumberFormatter($locale);
 		$number    = $formatter?->format($number) ?? $number;
@@ -91,7 +119,7 @@ class I18n
 	 */
 	public static function locale(): string
 	{
-		if (is_callable(static::$locale) === true) {
+		if (static::$locale instanceof Closure) {
 			static::$locale = (static::$locale)();
 		}
 
@@ -120,7 +148,7 @@ class I18n
 
 		$template = static::translate($key, $fallback, $locale);
 
-		return Str::template($template, $replace, ['fallback' => '-']);
+		return Str::template($template, $replace ?? [], ['fallback' => '-']);
 	}
 
 	/**
@@ -148,7 +176,9 @@ class I18n
 		// (1) string $key: look up i18n string from global translations
 		if (is_string($key) === true) {
 			// look up locale in global translations list,
-			if ($result = static::translation($locale)[$key] ?? null) {
+			$result = static::entry(static::translation($locale), $key);
+
+			if ($result !== null) {
 				return $result;
 			}
 
@@ -169,7 +199,9 @@ class I18n
 					continue;
 				}
 
-				if ($result = static::translation($fallback)[$key] ?? null) {
+				$result = static::entry(static::translation($fallback), $key);
+
+				if ($result !== null) {
 					return $result;
 				}
 			}
@@ -181,18 +213,23 @@ class I18n
 		// (2) array|null $key with entries per locale
 
 		// try entry for long and short locale
-		if ($result = $key[$locale] ?? null) {
-			return $result;
-		}
-		if ($result = $key[$shortLocale] ?? null) {
+		$result =
+			static::entry($key, $locale) ??
+			static::entry($key, $shortLocale);
+
+		if ($result !== null) {
 			return $result;
 		}
 
 		// if the array as a global wildcard entry,
 		// use this one as i18n key and try to resolve
 		// this via part (1) of this method
-		if ($wildcard = $key['*'] ?? null) {
-			if ($result = static::translate($wildcard, $wildcard, $locale)) {
+		$wildcard = static::entry($key, '*');
+
+		if ($wildcard !== null) {
+			$result = static::translate($wildcard, $wildcard, $locale);
+
+			if ($result !== null) {
 				return $result;
 			}
 		}
@@ -200,22 +237,23 @@ class I18n
 		// if the $fallback parameter is an array, we can assume
 		// that it's also an array with entries per locale:
 		// check with long and short locale if we find a matching entry
-		if ($result = $fallback[$locale] ?? null) {
-			return $result;
-		}
-		if ($result = $fallback[$shortLocale] ?? null) {
+		$result =
+			static::entry($fallback, $locale) ??
+			static::entry($fallback, $shortLocale);
+
+		if ($result !== null) {
 			return $result;
 		}
 
 		// all options for long/short actual locale have been exhausted,
 		// revert to the list of fallback locales and try with each of them
 		foreach (static::fallbacks() as $locale) {
-			// first on the original input
-			if ($result = $key[$locale] ?? null) {
-				return $result;
-			}
-			// then on the fallback
-			if ($result = $fallback[$locale] ?? null) {
+			// first on the original input, then on the fallback
+			$result =
+				static::entry($key, $locale) ??
+				static::entry($fallback, $locale);
+
+			if ($result !== null) {
 				return $result;
 			}
 		}
@@ -273,8 +311,9 @@ class I18n
 	/**
 	 * Returns (and creates) a decimal number formatter for a given locale
 	 */
-	protected static function decimalNumberFormatter(string $locale): NumberFormatter|null
-	{
+	protected static function decimalNumberFormatter(
+		string $locale
+	): NumberFormatter|null {
 		if ($formatter = static::$decimalsFormatters[$locale] ?? null) {
 			return $formatter;
 		}

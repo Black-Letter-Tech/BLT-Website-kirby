@@ -3,8 +3,8 @@
 namespace Kirby\Filesystem;
 
 use Exception;
-use Kirby\Cms\App;
 use Kirby\Cms\Helpers;
+use Kirby\Cms\Inventory;
 use Kirby\Cms\Page;
 use Kirby\Toolkit\Str;
 use Throwable;
@@ -76,7 +76,7 @@ class Dir
 
 			if (
 				is_array($ignore) === true &&
-				in_array($root, $ignore) === true
+				in_array($root, $ignore, true) === true
 			) {
 				continue;
 			}
@@ -145,8 +145,8 @@ class Dir
 	/**
 	 * Read the directory and all subdirectories
 	 *
-	 * @todo Remove support for `$ignore = null` in a major release
-	 * @param array|false|null $ignore Array of absolut file paths;
+	 * @todo Remove support for `$ignore = null` in v6
+	 * @param array|false|null $ignore Array of absolute file paths;
 	 *                                 `false` to disable `Dir::$ignore` list
 	 *                                 (passing null is deprecated)
 	 */
@@ -165,7 +165,7 @@ class Dir
 
 			if (
 				is_array($ignore) === true &&
-				in_array($root, $ignore) === true
+				in_array($root, $ignore, true) === true
 			) {
 				continue;
 			}
@@ -189,7 +189,7 @@ class Dir
 	 */
 	public static function isEmpty(string $dir): bool
 	{
-		return count(static::read($dir)) === 0;
+		return static::read($dir) === [];
 	}
 
 	/**
@@ -217,7 +217,7 @@ class Dir
 	 *
 	 * Don't use outside the Cms context.
 	 *
-	 * @internal
+	 * @deprecated 5.6.0 Use `Kirby\Cms\Inventory::for()` instead. Will be removed in Kirby 6.
 	 */
 	public static function inventory(
 		string $dir,
@@ -225,145 +225,14 @@ class Dir
 		array|null $contentIgnore = null,
 		bool $multilang = false
 	): array {
-		$inventory = [
-			'children' => [],
-			'files'    => [],
-			'template' => 'default',
-		];
+		Helpers::deprecated('`Kirby\Filesystem\Dir::inventory()` has been deprecated. Please use `Kirby\Cms\Inventory::for()` instead.', 'dir-inventory');
 
-		$dir = realpath($dir);
-
-		if ($dir === false) {
-			return $inventory;
-		}
-
-		// a temporary store for all content files
-		$content = [];
-
-		// read and sort all items naturally to avoid sorting issues later
-		$items = static::read($dir, $contentIgnore);
-		natsort($items);
-
-		// loop through all directory items and collect all relevant information
-		foreach ($items as $item) {
-			// ignore all items with a leading dot or underscore
-			if (in_array(substr($item, 0, 1), ['.', '_']) === true) {
-				continue;
-			}
-
-			$root = $dir . '/' . $item;
-
-			// collect all directories as children
-			if (is_dir($root) === true) {
-				$inventory['children'][] = static::inventoryChild(
-					$item,
-					$root,
-					$contentExtension,
-					$multilang
-				);
-				continue;
-			}
-
-			$extension = pathinfo($item, PATHINFO_EXTENSION);
-
-			// don't track files with these extensions
-			if (in_array($extension, ['htm', 'html', 'php']) === true) {
-				continue;
-			}
-
-			// collect all content files separately,
-			// not as inventory entries
-			if ($extension === $contentExtension) {
-				$filename = pathinfo($item, PATHINFO_FILENAME);
-
-				// remove the language codes from all content filenames
-				if ($multilang === true) {
-					$filename = pathinfo($filename, PATHINFO_FILENAME);
-				}
-
-				$content[] = $filename;
-				continue;
-			}
-
-			// collect all other files
-			$inventory['files'][$item] = [
-				'filename'  => $item,
-				'extension' => $extension,
-				'root'      => $root,
-			];
-		}
-
-		$content = array_unique($content);
-
-		$inventory['template'] = static::inventoryTemplate(
-			$content,
-			$inventory['files']
+		return Inventory::for(
+			$dir,
+			$contentExtension,
+			$contentIgnore,
+			$multilang
 		);
-
-		return $inventory;
-	}
-
-	/**
-	 * Collect information for a child for the inventory
-	 */
-	protected static function inventoryChild(
-		string $item,
-		string $root,
-		string $contentExtension = 'txt',
-		bool $multilang = false
-	): array {
-		// extract the slug and num of the directory
-		if ($separator = strpos($item, static::$numSeparator)) {
-			$num  = (int)substr($item, 0, $separator);
-			$slug = substr($item, $separator + 1);
-		}
-
-		// determine the model
-		if (empty(Page::$models) === false) {
-			if ($multilang === true) {
-				$code = App::instance()->defaultLanguage()->code();
-				$contentExtension = $code . '.' . $contentExtension;
-			}
-
-			// look if a content file can be found
-			// for any of the available models
-			foreach (Page::$models as $modelName => $modelClass) {
-				if (is_file($root . '/' . $modelName . '.' . $contentExtension) === true) {
-					$model = $modelName;
-					break;
-				}
-			}
-		}
-
-		return [
-			'dirname' => $item,
-			'model'   => $model ?? null,
-			'num'     => $num ?? null,
-			'root'    => $root,
-			'slug'    => $slug ?? $item,
-		];
-	}
-
-	/**
-	 * Determines the main template for the inventory
-	 * from all collected content files, ignore file meta files
-	 */
-	protected static function inventoryTemplate(
-		array $content,
-		array $files,
-	): string {
-		foreach ($content as $name) {
-			// is a meta file corresponding to an actual file, i.e. cover.jpg
-			if (isset($files[$name]) === true) {
-				continue;
-			}
-
-			// it's most likely the template
-			// (will overwrite and use the last match for historic reasons)
-			$template = $name;
-		}
-
-		return $template ?? 'default';
 	}
 
 	/**
@@ -450,7 +319,10 @@ class Dir
 				true  => filemtime($dir . '/' . $item),
 				false => static::modified($dir . '/' . $item)
 			};
-			$modified = ($newModified > $modified) ? $newModified : $modified;
+
+			if ($newModified > $modified) {
+				$modified = $newModified;
+			}
 		}
 
 		return Str::date($modified, $format, $handler);
@@ -515,7 +387,7 @@ class Dir
 
 		// create the ignore pattern
 		$ignore ??= static::$ignore;
-		$ignore   = array_merge($ignore, ['.', '..']);
+		$ignore   = [...$ignore, '.', '..'];
 
 		// scan for all files and dirs
 		$result = array_values((array)array_diff(scandir($dir), $ignore));
@@ -553,6 +425,7 @@ class Dir
 			// cannot pass the containment check
 			$parent = rtrim($parent, '/\\');
 
+			// TODO: Tighten to only allow **inside** $parent in v6
 			if (
 				$realpath !== $parent &&
 				str_starts_with($realpath, $parent . DIRECTORY_SEPARATOR) === false
@@ -579,21 +452,93 @@ class Dir
 			return F::unlink($dir);
 		}
 
+		// Attempt an atomic rename before deletion to prevent race conditions
+		// where concurrent processes write new files between our scandir() and
+		// rmdir() calls: once renamed, the original path is gone and concurrent
+		// writes land in a fresh directory.
+		// The system tmp dir is tried first so the OS can garbage-collect any
+		// leftovers automatically; rename() across filesystems fails immediately
+		// (e.g. Linux tmpfs), so we fall back to a same-filesystem sibling dir.
+		$tmp = null;
+
+		foreach ([sys_get_temp_dir(), dirname($dir)] as $tmpParent) {
+			$candidate = $tmpParent . '/.remove-' . uniqid('', true);
+
+			$renamed = Helpers::handleErrors(
+				fn (): bool => rename($dir, $candidate),
+				fn () => true,
+				false
+			);
+
+			if ($renamed === true) {
+				$tmp = $candidate;
+				break;
+			}
+		}
+
+		if ($tmp !== null) {
+			// Original path is atomically gone; clean up the renamed copy.
+			// If cleanup fails, we still return true because the original path
+			// no longer exists and any tmp leftovers will be garbage-collected by the OS.
+			try {
+				static::removeRecursive($tmp);
+			} catch (Throwable) {
+				// ignore
+			}
+			return true;
+		}
+
+		// Rename failed (e.g. permission on parent); fall back to in-place removal.
+		// Delete all contents first, then retry to tolerate transient
+		// "directory not empty" errors caused by concurrent writes.
+		static::removeRecursive($dir);
+
+		// removeRecursive may have already removed $dir successfully;
+		// only retry if it still exists
+		if (is_dir($dir) === false) {
+			return true;
+		}
+
+		for ($attempt = 0; $attempt < 5; $attempt++) {
+			if ($attempt > 0) {
+				usleep(10_000);
+			}
+
+			static::removeRecursive($dir);
+
+			if (is_dir($dir) === false) {
+				return true;
+			}
+		}
+
+		throw new Exception('The directory could not be deleted');
+	}
+
+	/**
+	 * Recursively removes all contents of a directory and then the directory
+	 * itself; errors on the final rmdir are silently suppressed so that
+	 * partial failures (e.g. inside a renamed tmp dir) do not abort callers
+	 */
+	protected static function removeRecursive(string $dir): void
+	{
 		foreach (scandir($dir) as $childName) {
-			if (in_array($childName, ['.', '..']) === true) {
+			if (in_array($childName, ['.', '..'], true) === true) {
 				continue;
 			}
 
 			$child = $dir . '/' . $childName;
 
 			if (is_dir($child) === true && is_link($child) === false) {
-				static::remove($child);
+				static::removeRecursive($child);
 			} else {
 				F::unlink($child);
 			}
 		}
 
-		return rmdir($dir);
+		Helpers::handleErrors(
+			fn (): bool => rmdir($dir),
+			fn () => true
+		);
 	}
 
 	/**
@@ -608,14 +553,20 @@ class Dir
 			return false;
 		}
 
-		// Get size for all direct files
-		$size = F::size(static::files($dir, null, true));
+		$size = 0;
 
-		// if recursive, add sizes of all subdirectories
-		if ($recursive === true) {
-			foreach (static::dirs($dir, null, true) as $subdir) {
-				$size += static::size($subdir);
+		// Read once and distinguish files from subdirs per entry
+		// instead of scanning the directory twice via ::files() and ::dirs()
+		foreach (static::read($dir, absolute: true) as $item) {
+			if (is_dir($item) === true) {
+				if ($recursive === true) {
+					$size += static::size($item);
+				}
+
+				continue;
 			}
+
+			$size += F::size($item);
 		}
 
 		return $size;

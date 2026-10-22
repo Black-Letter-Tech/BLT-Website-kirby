@@ -4,10 +4,12 @@ namespace Kirby\Panel;
 
 use Closure;
 use Kirby\Cms\File as CmsFile;
+use Kirby\Cms\Language;
 use Kirby\Cms\ModelWithContent;
 use Kirby\Filesystem\Asset;
-use Kirby\Form\Form;
+use Kirby\Form\Fields;
 use Kirby\Http\Uri;
+use Kirby\Panel\Ui\Item\ModelItem;
 use Kirby\Toolkit\A;
 
 /**
@@ -28,11 +30,18 @@ abstract class Model
 	}
 
 	/**
+	 * Returns header button names which should be displayed
+	 */
+	abstract public function buttons(): array;
+
+	/**
 	 * Get the content values for the model
+	 *
+	 * @deprecated 5.0.0 Use `self::versions()` instead
 	 */
 	public function content(): array
 	{
-		return Form::for($this->model)->values();
+		return $this->versions()['changes'];
 	}
 
 	/**
@@ -63,7 +72,7 @@ abstract class Model
 	 *
 	 * @param string|null $type (`auto`|`kirbytext`|`markdown`)
 	 */
-	public function dragTextType(string|null $type = null): string
+	public function dragTextType(string|null $type = 'auto'): string
 	{
 		$type ??= 'auto';
 
@@ -92,7 +101,6 @@ abstract class Model
 
 	/**
 	 * Returns the Panel image definition
-	 * @internal
 	 */
 	public function image(
 		string|array|false|null $settings = [],
@@ -132,13 +140,26 @@ abstract class Model
 		}
 
 		// merge with defaults and blueprint option
-		$settings = array_merge(
-			$this->imageDefaults(),
-			$settings ?? [],
-			$blueprint ?? [],
-		);
+		$settings = [
+			...$this->imageDefaults(),
+			...$settings ?? [],
+			...$blueprint ?? [],
+		];
 
-		if ($image = $this->imageSource($settings['query'] ?? null)) {
+		$query = $settings['query'] ?? null;
+		unset($settings['query']);
+
+		// resolve options defined as query before they are used,
+		// e.g. as `ratio` for the srcset
+		$settings = A::map($settings, function ($option) {
+			if (is_string($option) === false) {
+				return $option;
+			}
+
+			return $this->model->toString($option);
+		});
+
+		if ($image = $this->imageSource($query)) {
 			// main url
 			$settings['url'] = $image->url();
 
@@ -151,16 +172,7 @@ abstract class Model
 			}
 		}
 
-		unset($settings['query']);
-
-		// resolve remaining options defined as query
-		return A::map($settings, function ($option) {
-			if (is_string($option) === false) {
-				return $option;
-			}
-
-			return $this->model->toString($option);
-		});
+		return $settings;
 	}
 
 	/**
@@ -178,7 +190,6 @@ abstract class Model
 
 	/**
 	 * Data URI placeholder string for Panel image
-	 * @internal
 	 */
 	public static function imagePlaceholder(): string
 	{
@@ -187,7 +198,6 @@ abstract class Model
 
 	/**
 	 * Returns the image file object based on provided query
-	 * @internal
 	 */
 	protected function imageSource(
 		string|null $query = null
@@ -205,7 +215,6 @@ abstract class Model
 	/**
 	 * Provides the correct srcset string based on
 	 * the layout and settings
-	 * @internal
 	 */
 	protected function imageSrcset(
 		CmsFile|Asset $image,
@@ -230,9 +239,18 @@ abstract class Model
 		if ($layout === 'cards') {
 			$ratio = $settings['ratio'] ?? '1/1';
 
+			// turn fractions like `16/9` into a float and
+			// fall back to a square for malformed values
 			if (is_numeric($ratio) === false) {
-				$ratio = explode('/', $ratio);
-				$ratio = $ratio[0] / $ratio[1];
+				$parts = explode('/', $ratio);
+				$ratio = 1;
+
+				if (
+					is_numeric($parts[0]) === true &&
+					(float)($parts[1] ?? 0) > 0
+				) {
+					$ratio = $parts[0] / $parts[1];
+				}
 			}
 
 			return $image->srcset([
@@ -288,14 +306,12 @@ abstract class Model
 	}
 
 	/**
-	 * Returns lock info for the Panel
-	 *
-	 * @return array|false array with lock info,
-	 *                     false if locking is not supported
+	 * Returns the corresponding model object
+	 * @since 5.0.0
 	 */
-	public function lock(): array|false
+	public function model(): ModelWithContent
 	{
-		return $this->model->lock()?->toArray() ?? false;
+		return $this->model;
 	}
 
 	/**
@@ -309,9 +325,9 @@ abstract class Model
 	{
 		$options = $this->model->permissions()->toArray();
 
-		if ($this->model->isLocked()) {
+		if ($this->model->lock()->isLocked() === true) {
 			foreach ($options as $key => $value) {
-				if (in_array($key, $unlock)) {
+				if (in_array($key, $unlock, true)) {
 					continue;
 				}
 
@@ -333,36 +349,46 @@ abstract class Model
 	 */
 	public function pickerData(array $params = []): array
 	{
+		$item = new ModelItem(
+			model: $this->model,
+			image: $params['image'] ?? null,
+			info: $params['info'] ?? null,
+			layout: $params['layout'] ?? null,
+			text: $params['text'] ?? null,
+		);
+
 		return [
-			'id'       => $this->model->id(),
-			'image'    => $this->image(
-				$params['image'] ?? [],
-				$params['layout'] ?? 'list'
-			),
-			'info'     => $this->model->toSafeString($params['info'] ?? false),
-			'link'     => $this->url(true),
+			...$item->props(),
 			'sortable' => true,
-			'text'     => $this->model->toSafeString($params['text'] ?? false),
-			'uuid'     => $this->model->uuid()?->toString()
+			'url'      => $this->url(true)
 		];
 	}
 
 	/**
-	 * Returns the data array for the
-	 * view's component props
-	 * @internal
+	 * Returns the data array for the view's component props
 	 */
 	public function props(): array
 	{
 		$blueprint = $this->model->blueprint();
+		$link      = $this->url(true);
 		$request   = $this->model->kirby()->request();
 		$tabs      = $blueprint->tabs();
 		$tab       = $blueprint->tab($request->get('tab')) ?? $tabs[0] ?? null;
+		$versions  = $this->versions();
 
 		$props = [
-			'lock'        => $this->lock(),
+			'api'         => $link,
+			'buttons'     => fn () => $this->buttons(),
+			'id'          => $this->model->id(),
+			'link'        => $link,
+			'lock'        => $this->model->lock()->toArray(),
 			'permissions' => $this->model->permissions()->toArray(),
 			'tabs'        => $tabs,
+			'uuid'        => fn () => $this->model->uuid()?->toString(),
+			'versions'    => [
+				'latest'  => (object)$versions['latest'],
+				'changes' => (object)$versions['changes']
+			]
 		];
 
 		// only send the tab if it exists
@@ -378,7 +404,6 @@ abstract class Model
 	/**
 	 * Returns link url and title
 	 * for model (e.g. used for prev/next navigation)
-	 * @internal
 	 */
 	public function toLink(string $title = 'title'): array
 	{
@@ -392,8 +417,6 @@ abstract class Model
 	 * Returns link url and title
 	 * for optional sibling model and
 	 * preserves tab selection
-	 *
-	 * @internal
 	 */
 	protected function toPrevNextLink(
 		ModelWithContent|null $model = null,
@@ -419,8 +442,6 @@ abstract class Model
 	/**
 	 * Returns the url to the editing view
 	 * in the Panel
-	 *
-	 * @internal
 	 */
 	public function url(bool $relative = false): string
 	{
@@ -432,10 +453,37 @@ abstract class Model
 	}
 
 	/**
-	 * Returns the data array for
-	 * this model's Panel view
+	 * Creates an array with two versions of the content:
+	 * `latest` and `changes`.
 	 *
-	 * @internal
+	 * The content is passed through the Fields class
+	 * to ensure that the content is in the correct format
+	 * for the Panel. If there's no `changes` version, the `latest`
+	 * version is used for both.
+	 */
+	public function versions(): array
+	{
+		$language = Language::ensure('current');
+		$fields   = Fields::for($this->model, $language);
+
+		$latestVersion  = $this->model->version('latest');
+		$changesVersion = $this->model->version('changes');
+
+		$latestContent  = $latestVersion->content($language)->toArray();
+		$changesContent = $latestContent;
+
+		if ($changesVersion->exists($language) === true) {
+			$changesContent = $changesVersion->content($language)->toArray();
+		}
+
+		return [
+			'latest'  => $fields->reset()->fill($latestContent)->toFormValues(),
+			'changes' => $fields->reset()->fill($changesContent)->toFormValues()
+		];
+	}
+
+	/**
+	 * Returns the data array for this model's Panel view
 	 */
 	abstract public function view(): array;
 }

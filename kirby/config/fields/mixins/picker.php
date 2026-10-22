@@ -91,6 +91,10 @@ return [
 		},
 	],
 	'methods' => [
+		'emptyValue' => function () {
+			return [];
+		},
+
 		/**
 		 * Stand-in for a model that exists, but that the current user
 		 * is not allowed to list. It only echoes back the ID that is

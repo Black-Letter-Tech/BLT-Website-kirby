@@ -4,7 +4,6 @@ namespace Kirby\Cms;
 
 use Closure;
 use Kirby\Exception\Exception;
-use Kirby\Filesystem\F;
 use Kirby\Http\Response;
 use Kirby\Toolkit\I18n;
 use Throwable;
@@ -30,8 +29,6 @@ trait AppErrors
 	 * Allows to disable Whoops globally in CI;
 	 * can be overridden by explicitly setting
 	 * the `whoops` option to `true` or `false`
-	 *
-	 * @internal
 	 */
 	public static bool $enableWhoops = true;
 
@@ -42,11 +39,11 @@ trait AppErrors
 
 	/**
 	 * Replaces absolute file paths with placeholders such as
-	 * {kirby}, {site} or {index} to avoid exposing too many
-	 * details about the filesystem and keeping error responses
-	 * short and readable in debug mode.
+	 * {kirby_folder}, {site_folder} or {index_folder} to avoid
+	 * exposing too many details about the filesystem and keeping
+	 * error responses short and readable in debug mode.
 	 *
-	 * @since 4.9.5
+	 * @since 5.3.0
 	 * @internal
 	 */
 	public function disguiseFilePath(string $file): string
@@ -168,11 +165,11 @@ trait AppErrors
 			if ($this->option('debug') === true) {
 				echo Response::json([
 					'status'    => 'error',
-					'exception' => get_class($exception),
+					'exception' => $exception::class,
 					'code'      => $code,
 					'message'   => $exception->getMessage(),
 					'details'   => $details,
-					'file'      => F::relativepath($exception->getFile(), $this->environment()->get('DOCUMENT_ROOT', '')),
+					'file'      => $this->disguiseFilePath($exception->getFile()),
 					'line'      => $exception->getLine(),
 				], $httpCode);
 			} else {
