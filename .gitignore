@@ -16,6 +16,6 @@ backups
 content-starter
 site-starter
 .htpasswd
-content
+/content/
 /public/assets/css/site.css
 site/cache/
