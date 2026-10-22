@@ -2,7 +2,6 @@ type: pages
 headline: 
   en: Products
   de: Produkte
-query: site.children.listed.template('shop')
 template: product
 info: "{{ page.category }}"
 empty: 

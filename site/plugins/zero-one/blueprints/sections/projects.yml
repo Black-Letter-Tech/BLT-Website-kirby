@@ -2,7 +2,6 @@ type: pages
 headline: 
   en: Projects
   de: Projekte
-query: site.children.listed.template('work')
 info: "{{ page.tags }}"
 template: project
 empty: 
