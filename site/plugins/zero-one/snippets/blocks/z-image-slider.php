@@ -30,7 +30,7 @@ $arrowsInside     = $data->navigationArrows() == 'inside' ? null : ' uk-hidden@s
                     <div class="uk-cover-container<?php e($site->siteBorderRadius() == "true", ' uk-border-rounded') ?>">
                         <canvas width="<?= $imageWidth ?>" height="<?= $imageHeight ?>"></canvas>
                         <picture>
-                            <source type="image/webp" srcset="<?= $image->thumb(['crop' => 'true', 'width' => $imageWidth, 'height' => $imageHeight, 'format' => 'webp'])->url() ?>" />
+                            <source type="image/webp" srcset="<?= $image->thumb(['crop' => true, 'width' => $imageWidth, 'height' => $imageHeight, 'format' => 'webp'])->url() ?>" />
                             <img src="<?= $image->crop($imageWidth, $imageHeight)->url() ?>" alt="<?= $image->alt() ?>" width="<?= $imageWidth ?>" height="<?= $imageHeight ?>" loading="lazy" uk-cover>
                         </picture>
                         <?php if ($image->caption()->isNotEmpty()): ?>

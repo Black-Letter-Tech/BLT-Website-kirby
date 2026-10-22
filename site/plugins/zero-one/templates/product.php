@@ -13,7 +13,7 @@
                                     <li>
                                         <a href="<?= $img->url() ?>" alt="<?= $img->alt() ?>" data-no-swup data-caption="<?= $img->caption() ?>">
                                             <picture>
-                                                <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $coverimg_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $coverimg_width, 'height' => $coverimg_height, 'format' => 'webp'])->url()) ?>" />
+                                                <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $coverimg_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => true, 'width' => $coverimg_width, 'height' => $coverimg_height, 'format' => 'webp'])->url()) ?>" />
                                                 <img src="<?php e($img->getClip() !== null, $img->resize(null, $coverimg_height)->url(), $img->crop($coverimg_width, $coverimg_height)->url()) ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $img->alt() ?>" width="<?= $coverimg_width ?>" height="<?= $coverimg_height ?>" loading="lazy">
                                             </picture>
                                         </a>
@@ -24,7 +24,7 @@
                                     <li>
                                         <a href="<?= $image->url() ?>" alt="<?= $image->alt() ?>" data-no-swup data-caption="<?= $image->caption() ?>">
                                         <picture>
-                                            <source type="image/webp" srcset="<?php e($image->getClip() !== null, $image->thumb(['clip' => $image->getClip(), 'height' => $coverimg_height, 'format' => 'webp'])->url(), $image->thumb(['crop' => 'true', 'width' => $coverimg_width, 'height' => $coverimg_height, 'format' => 'webp'])->url()) ?>" />
+                                            <source type="image/webp" srcset="<?php e($image->getClip() !== null, $image->thumb(['clip' => $image->getClip(), 'height' => $coverimg_height, 'format' => 'webp'])->url(), $image->thumb(['crop' => true, 'width' => $coverimg_width, 'height' => $coverimg_height, 'format' => 'webp'])->url()) ?>" />
                                             <img src="<?php e($image->getClip() !== null, $image->resize(null, $coverimg_height)->url(), $image->crop($coverimg_width, $coverimg_height)->url()) ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $image->alt() ?>" width="<?= $coverimg_width ?>" height="<?= $coverimg_height ?>" loading="lazy">
                                         </picture>
                                         </a>
@@ -38,7 +38,7 @@
                                                 <li uk-slideshow-item="0" class="<?php e($img->isActive(), 'uk-active') ?>">
                                                     <a href="#" data-no-swup>
                                                         <picture>
-                                                            <source type="image/webp" srcset="<?= $img->thumb(['crop' => 'true', 'width' => 150, 'height' => 150, 'format' => 'webp'])->url() ?>" />
+                                                            <source type="image/webp" srcset="<?= $img->thumb(['crop' => true, 'width' => 150, 'height' => 150, 'format' => 'webp'])->url() ?>" />
                                                             <img src="<?= $img->crop(150, 150)->url() ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $img->alt() ?> thumbnail" width="150" height="150" loading="lazy">
                                                         </picture>
                                                     </a>
@@ -47,7 +47,7 @@
                                                 <li uk-slideshow-item="<?= $number ?>" class="<?php e($slide->isActive(), 'uk-active') ?>">
                                                     <a href="#" data-no-swup>
                                                         <picture>
-                                                            <source type="image/webp" srcset="<?= $slide->thumb(['crop' => 'true', 'width' => 150, 'height' => 150, 'format' => 'webp'])->url() ?>" />
+                                                            <source type="image/webp" srcset="<?= $slide->thumb(['crop' => true, 'width' => 150, 'height' => 150, 'format' => 'webp'])->url() ?>" />
                                                             <img src="<?= $slide->crop(150, 150)->url() ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $slide->alt() ?> thumbnail" width="150" height="150" loading="lazy">
                                                         </picture>
                                                     </a>
@@ -90,7 +90,7 @@
                             <div class="uk-inline">
                                 <figure>
                                     <picture>
-                                        <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $coverimg_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $coverimg_width, 'height' => $coverimg_height, 'format' => 'webp'])->url()) ?>" />
+                                        <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $coverimg_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => true, 'width' => $coverimg_width, 'height' => $coverimg_height, 'format' => 'webp'])->url()) ?>" />
                                         <img src="<?php e($img->getClip() !== null, $img->resize(null, $coverimg_height)->url(), $img->crop($coverimg_width, $coverimg_height)->url()) ?>"<?php e($site->siteBorderRadius() == "true", ' class="uk-border-rounded"') ?> alt="<?= $img->alt() ?>" width="<?= $coverimg_width ?>" height="<?= $coverimg_height ?>" loading="lazy">
                                     </picture>
                                     <?php if ($img->caption()->isNotEmpty()): ?>

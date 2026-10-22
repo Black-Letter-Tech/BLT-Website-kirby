@@ -28,7 +28,7 @@
     <div class="<?php e($page->listingStyle() == "classic", 'uk-card-media-left uk-cover-container', 'uk-card-media-top') ?> uk-inline-clip">
       <a href="<?= $article->url() ?>">
         <picture>
-          <source type="image/webp" srcset="<?= $img->thumb(['crop' => 'true', 'width' => $imgWidth, 'height' => 600, 'format' => 'webp'])->url() ?>" />
+          <source type="image/webp" srcset="<?= $img->thumb(['crop' => true, 'width' => $imgWidth, 'height' => 600, 'format' => 'webp'])->url() ?>" />
           <img class="uk-transition-scale-up uk-transition-opaque" src="<?= $img->crop($imgWidth, 600)->url() ?>" alt="<?= $article->title()->html() ?>" loading="lazy"<?php e($page->listingStyle() == "classic", ' uk-cover') ?>>
         </picture>
         <?php e($page->listingStyle() == "classic", '<canvas width="800" height="600"></canvas>') ?>

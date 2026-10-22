@@ -26,7 +26,7 @@ $articles = $related->count() > 0 ? $related : $similarPages->shuffle()->limit(5
             <div class="uk-card-media-top">
             <a href="<?= $article->url() ?>">
               <picture>
-                <source type="image/webp" srcset="<?= $img->thumb(['crop' => 'true', 'width' => 400, 'height' => 500, 'format' => 'webp'])->url() ?>" />
+                <source type="image/webp" srcset="<?= $img->thumb(['crop' => true, 'width' => 400, 'height' => 500, 'format' => 'webp'])->url() ?>" />
                 <img src="<?= $img->crop(400, 500)->url() ?>" alt="<?= $article->title()->html() ?>" width="400" height="500" loading="lazy">
               </picture>
             </a>

@@ -3,7 +3,7 @@
 <article role="article">
   <header class="uk-margin-bottom uk-animation-slide-bottom-small<?php e($page->parent()->coverWidthArticle() == "default", ' uk-container') ?><?php e($page->parent()->coverWidthArticle() == "large", ' uk-container uk-container-expand') ?>">
   <?php if($img = $page->cover()->toFile()): ?>
-  <div class="uk-section-large uk-background-cover uk-background-center-center uk-text-center<?php e($page->parent()->inverseImageTextColor() == "true", ' uk-dark', ' uk-light') ?>" sources="srcset: <?= $img->thumb(['crop' => 'true', 'width' => 1920, 'height' => 900, 'format' => 'webp'])->url() ?>" data-src="<?= $img->crop(1920, 900)->url() ?>" style="background-color: rgba(0,0,0,0.45); background-blend-mode: overlay; background-repeat: no-repeat" uk-parallax="bgy: -50" uk-img="loading: eager">
+  <div class="uk-section-large uk-background-cover uk-background-center-center uk-text-center<?php e($page->parent()->inverseImageTextColor() == "true", ' uk-dark', ' uk-light') ?>" sources="srcset: <?= $img->thumb(['crop' => true, 'width' => 1920, 'height' => 900, 'format' => 'webp'])->url() ?>" data-src="<?= $img->crop(1920, 900)->url() ?>" style="background-color: rgba(0,0,0,0.45); background-blend-mode: overlay; background-repeat: no-repeat" uk-parallax="bgy: -50" uk-img="loading: eager">
   <?php else: ?>
   <div class="uk-section uk-section-muted uk-text-center">
   <?php endif ?>

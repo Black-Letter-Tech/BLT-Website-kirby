@@ -26,12 +26,12 @@ $cover_height     = $site->coverHeight()->isNotEmpty() ? $site->coverHeight()->t
         <div class="tm-projects uk-inline-clip uk-transition-toggle" tabindex="0">
             <?php if($data->projectsCover()->isTrue()): ?>
             <picture>
-                <source type="image/webp" srcset="<?= $img->thumb(['crop' => 'true', 'width' => $data->coverWidth()->or(600)->int(), 'height' => $data->coverHeight()->or(800)->int(), 'format' => 'webp'])->url() ?>" />
+                <source type="image/webp" srcset="<?= $img->thumb(['crop' => true, 'width' => $data->coverWidth()->or(600)->int(), 'height' => $data->coverHeight()->or(800)->int(), 'format' => 'webp'])->url() ?>" />
                 <img class="uk-transition-scale-up uk-transition-opaque" src="<?= $img->crop($data->coverWidth()->or(600)->int(), $data->coverHeight()->or(800)->int())->url() ?>" alt="<?= $project->title()->html() ?>" width="<?= $data->coverWidth()->or(600)->int() ?>" height="<?= $data->coverHeight()->or(800)->int() ?>" loading="lazy">
             </picture>
             <?php else: ?>
             <picture>
-                <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $cover_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $cover_width, 'height' => $cover_height, 'format' => 'webp'])->url()) ?>" />
+                <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $cover_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => true, 'width' => $cover_width, 'height' => $cover_height, 'format' => 'webp'])->url()) ?>" />
                 <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->resize(null, $cover_height)->url(), $img->crop($cover_width, $cover_height)->url()) ?>" alt="<?= $project->title()->html() ?>" width="<?= $img->resize()->width() ?>" height="<?= $img->resize()->height() ?>" loading="lazy">
             </picture>
             <?php endif ?>

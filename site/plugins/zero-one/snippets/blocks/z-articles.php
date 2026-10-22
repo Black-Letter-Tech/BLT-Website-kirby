@@ -18,7 +18,7 @@ $articles         = $data->articles()->toPages()->count() > 0 ? $data->articles(
 <div class="uk-card-media-top uk-inline-clip">
 <a href="<?= $article->url() ?>">
   <picture>
-    <source type="image/webp" srcset="<?= $img->thumb(['crop' => 'true', 'width' => 500, 'height' => 400, 'format' => 'webp'])->url() ?>" />
+    <source type="image/webp" srcset="<?= $img->thumb(['crop' => true, 'width' => 500, 'height' => 400, 'format' => 'webp'])->url() ?>" />
     <img class="uk-transition-scale-up uk-transition-opaque" src="<?= $img->crop(500, 400)->url() ?>" alt="<?= $article->title()->html() ?>" width="500" height="400" loading="lazy">
   </picture>
 </a>

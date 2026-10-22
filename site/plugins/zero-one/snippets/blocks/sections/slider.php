@@ -11,7 +11,7 @@
                         <li class="uk-transition-toggle uk-width-1-1<?= $data->sliderImgWidth() ?>" tabindex="0">
                             <div class="uk-cover-container<?php e($site->siteBorderRadius() == "true", ' uk-border-rounded') ?>">
                                 <picture>
-                                    <source type="image/webp" srcset="<?= $image->thumb(['crop' => 'true', 'width' => 1200, 'height' => 800, 'format' => 'webp'])->url() ?>" />
+                                    <source type="image/webp" srcset="<?= $image->thumb(['crop' => true, 'width' => 1200, 'height' => 800, 'format' => 'webp'])->url() ?>" />
                                     <img src="<?= $image->crop(1200, 800)->url() ?>" alt="<?= $image->alt() ?>" loading="lazy" uk-cover>
                                 </picture>
                                 <?php if ($image->caption()->isNotEmpty()): ?>

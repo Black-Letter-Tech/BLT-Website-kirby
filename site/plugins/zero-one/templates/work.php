@@ -13,7 +13,7 @@
     <a class="uk-link-toggle" href="<?= $project->url() ?>" uk-parallax="media: @m; y: -50; easing: -1.2">
     <span class="tm-hover-img">
       <picture>
-        <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $cover_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $cover_width, 'height' => $cover_height, 'format' => 'webp'])->url()) ?>" />
+        <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $cover_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => true, 'width' => $cover_width, 'height' => $cover_height, 'format' => 'webp'])->url()) ?>" />
         <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->resize(null, $cover_height)->url(), $img->crop($cover_width, $cover_height)->url()) ?>" alt="<?= $project->title()->html() ?>" width="<?= $img->resize()->width() ?>" height="<?= $img->resize()->height() ?>" loading="lazy">
       </picture>
     </span>
@@ -40,7 +40,7 @@
   <a href="<?= $project->url() ?>" class="uk-link-toggle">
   <div class="tm-projects uk-inline-clip uk-transition-toggle" tabindex="0">
     <picture>
-      <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $cover_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => 'true', 'width' => $cover_width, 'height' => $cover_height, 'format' => 'webp'])->url()) ?>" />
+      <source type="image/webp" srcset="<?php e($img->getClip() !== null, $img->thumb(['clip' => $img->getClip(), 'height' => $cover_height, 'format' => 'webp'])->url(), $img->thumb(['crop' => true, 'width' => $cover_width, 'height' => $cover_height, 'format' => 'webp'])->url()) ?>" />
       <img class="uk-transition-scale-up uk-transition-opaque" src="<?php e($img->getClip() !== null, $img->resize(null, $cover_height)->url(), $img->crop($cover_width, $cover_height)->url()) ?>" alt="<?= $project->title()->html() ?>" width="<?= $img->resize()->width() ?>" height="<?= $img->resize()->height() ?>" loading="lazy">
     </picture>
     <div class="uk-overlay-gradient uk-position-cover"></div>

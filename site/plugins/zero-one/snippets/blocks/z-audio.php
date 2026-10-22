@@ -7,7 +7,7 @@
     ?>
   <div class="<?php e($block->layout() != "true", 'uk-width-1-3@s uk-card-media-left uk-cover-container', 'uk-card-media-top') ?>">
     <picture>
-      <source type="image/webp" srcset="<?= $poster->thumb(['crop' => 'true', 'width' => $imgWidth, 'height' => 400, 'format' => 'webp'])->url() ?>" />
+      <source type="image/webp" srcset="<?= $poster->thumb(['crop' => true, 'width' => $imgWidth, 'height' => 400, 'format' => 'webp'])->url() ?>" />
       <img src="<?= $poster->crop($imgWidth, 400)->url() ?>" alt="<?= $poster->alt() ?>" loading="lazy"<?php e($block->layout() != "true", ' uk-cover') ?>>
     </picture>
     </canvas><?php e($block->layout() != "true", '<canvas width="400" height="400">') ?>

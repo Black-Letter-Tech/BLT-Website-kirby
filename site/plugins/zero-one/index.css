@@ -190,9 +190,3 @@ details summary .k-writer {
 .table-field .row-cell {
     min-width: 100px;
 }
-/* code-editor 1.1.0 styles its editor with Kirby 5 variables (light-dark(),
-   --color-gray-950), which Kirby 4 lacks; the background collapses to
-   transparent under light-gray text. Give the editor its dark back. */
-.k-code-editor-input {
-  background: var(--color-gray-950, var(--color-gray-900, #1d1d1d));
-}

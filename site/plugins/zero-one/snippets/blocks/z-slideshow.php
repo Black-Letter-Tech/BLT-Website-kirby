@@ -53,7 +53,7 @@
             <li uk-slideshow-item="<?= $number ?>" class="<?php e($slide->isActive(), 'uk-active') ?>">
                 <a href="#" data-no-swup>
                     <picture>
-                        <source type="image/webp" srcset="<?= $image->thumb(['crop' => 'true', 'width' => 150, 'height' => 100, 'format' => 'webp'])->url() ?>" />
+                        <source type="image/webp" srcset="<?= $image->thumb(['crop' => true, 'width' => 150, 'height' => 100, 'format' => 'webp'])->url() ?>" />
                         <img src="<?= $image->crop(150, 100)->url() ?>" alt="<?= $image->alt() ?> thumbnail" loading="lazy">
                     </picture>
                 </a>

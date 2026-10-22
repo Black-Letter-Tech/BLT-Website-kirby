@@ -5,7 +5,7 @@
     <?php if($img = $page->profileImage()->toFile()): ?>
     <div class="uk-card-media-top">
       <picture>
-        <source type="image/webp" srcset="<?= $img->thumb(['crop' => 'true', 'width' => 600, 'height' => 400, 'format' => 'webp'])->url() ?>" />
+        <source type="image/webp" srcset="<?= $img->thumb(['crop' => true, 'width' => 600, 'height' => 400, 'format' => 'webp'])->url() ?>" />
         <img src="<?= $img->crop(600, 400)->url() ?>" alt="<?= $img->alt() ?>" width="600" height="400" loading="lazy">
       </picture>
     </div>

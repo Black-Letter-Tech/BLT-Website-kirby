@@ -15,7 +15,7 @@ $horizontal = $block->imageRatio() == 'horizontal';
 <div class="uk-inline-clip uk-transition-toggle" tabindex="0">
   <?php if($image): ?>
     <picture>
-      <source type="image/webp" srcset="<?php if($vertical): ?><?= $image->thumb(['crop' => 'true', 'width' => 600, 'height' => 900, 'format' => 'webp'])->url() ?><?php elseif($horizontal): ?><?= $image->thumb(['crop' => 'true', 'width' => 900, 'height' => 600, 'format' => 'webp'])->url() ?><?php else: ?><?= $image->thumb(['crop' => 'true', 'width' => 800, 'height' => 800, 'format' => 'webp'])->url() ?><?php endif; ?>" />
+      <source type="image/webp" srcset="<?php if($vertical): ?><?= $image->thumb(['crop' => true, 'width' => 600, 'height' => 900, 'format' => 'webp'])->url() ?><?php elseif($horizontal): ?><?= $image->thumb(['crop' => true, 'width' => 900, 'height' => 600, 'format' => 'webp'])->url() ?><?php else: ?><?= $image->thumb(['crop' => true, 'width' => 800, 'height' => 800, 'format' => 'webp'])->url() ?><?php endif; ?>" />
       <img class="uk-transition-scale-up uk-transition-opaque" src="<?php if($vertical): ?><?= $image->crop(600,900)->url() ?><?php elseif($horizontal): ?><?= $image->crop(900,600)->url() ?><?php else: ?><?= $image->crop(800,800)->url() ?><?php endif; ?>"<?php if($vertical): ?> width="600" height="900"<?php elseif($horizontal): ?> width="900" height="600"<?php else: ?> width="800" height="800"<?php endif; ?> alt="<?= $image->alt() ?>" loading="lazy">
     </picture>
   <?php endif ?>
