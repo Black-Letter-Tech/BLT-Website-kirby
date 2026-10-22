@@ -325,15 +325,8 @@ tabs:
                 columns: 3
                 default: none
                 options:
-                  commentions: Kirby Commentions
                   embed: Embed
                   none: None
-          # Commentions
-          commentions:
-            type: commentions
-            show: all
-            when:
-              commentsOptionSelect: commentions
           # Embed comments
           embedComments:
             type: fields
@@ -357,24 +350,4 @@ tabs:
       
       right:
         width: 1/3
-        sections:
-          commentionsOption:
-            type: fields
-            when:
-              commentsOptionSelect: commentions
-            fields:
-              webmentions:
-                label: Webmentions
-                type: toggle
-                default: false
-              info:
-                label: Info
-                type: info
-                text: |
-                  Dear admin,
-                
-                  To completely enable Webmentions on your website you must do few more things.
-
-                  Check out (link: https://www.one.thezero.club/guide/blog-section/webmentions text: www.one.thezero.club/guide/blog-section/webmentions target: _blank)
-                when:
-                  webmentions: true
+        sections: []
