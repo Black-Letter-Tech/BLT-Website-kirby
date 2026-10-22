@@ -17,13 +17,18 @@ PHP 8.4. Trigger: CVE-2026-109618/109619 (PHP 8.1 receives no fix).
       URL set verified identical to the live sitemap
 - [x] verify-vs-prod.py reports 18 pages, 0 differences against
       production on Kirby 4 (fresh staging content, transforms applied)
-- [ ] Panel walkthrough on Kirby 4 (fields, blocks, deploy button)
-- [ ] Core upgrade to Kirby 5.6, bnomei plugins to 5.x
-- [ ] Decide link-field on Kirby 5 (its release constraint stops at
-      Kirby 4: vendor it if it works, replace with an object field
-      if not)
-- [ ] Rebuild the webhook deploy button as a Kirby 5 view button
-- [ ] PHP bump to 8.4 in the Dockerfile
+- [x] Panel walkthrough on Kirby 4 (code-editor contrast and menu
+      builder mobile column fixed along the way)
+- [x] Core upgrade to Kirby 5.6.1, bnomei plugins to 5.x; crop
+      values boolean; contact controller emptied (Kirby 5 merges the
+      site controller, which holds the same form handler)
+- [x] link-field vendored at 6.0.2 (composer constraint stops at
+      Kirby 4; no removed Panel APIs in its code)
+- [x] webhook-field kept (no removed Panel APIs); deploy button needs
+      a Panel click-through before cutover
+- [x] PHP bump to 8.4 in the Dockerfile
+- [ ] Panel walkthrough on Kirby 5 (link fields, deploy tab,
+      code-editor, one save per page type)
 - [ ] Kirby license purchase (needed at launch, not for dev)
 
 ## Cutover checklist (staging, then production)
