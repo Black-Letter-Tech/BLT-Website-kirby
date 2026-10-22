@@ -94,11 +94,11 @@ return [
     // ],
     // Remove update notification for some plugins
     'updates.plugins' => [
-      'avoskitchen/sanitizer'         => false,
       'bvdputte/kirby-bettersearch'   => false,
-      'hananils/kirby-colors'         => false,
       'kirbyzone/sitemapper'          => false,
+      'pju/webhook-field'             => false,
       'sylvainjule/code-editor'       => false,
+      'wagnerpaul/deploy-content'     => false,
       'zero/zero-one'                 => false
     ],
     'bnomei.dotenv' => [
