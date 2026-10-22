@@ -16,9 +16,11 @@ return [
     ],
 
     // https://getkirby.com/docs/reference/system/options/panel#custom-panel-css
-    'panel' => [
+    // The Panel exists only where the container says so. ENABLE_PANEL has
+    // been in the compose files since 2023; this is what finally reads it.
+    'panel' => getenv('ENABLE_PANEL') === 'true' ? [
       'css' => 'assets/css/panel.css'
-    ],
+    ] : false,
     // https://getkirby.com/docs/reference/system/options/languages
     'languages' => true,
     // 'languages.detect' => true
