@@ -50,7 +50,14 @@ PHP 8.4. Trigger: CVE-2026-109618/109619 (PHP 8.1 receives no fix).
 
 - Deleted comment test data lives in `_commentions/` folders in
   staging content; harmless, remove during cutover.
-- autoresize is abandoned upstream but works; replace with a hook in
-  zero-one if it breaks later.
-- sitemapper and texnixe/similar are old but server-side; test and
-  replace only on failure.
+- Final plugin verification on Kirby 5.6.1 / PHP 8.4.27:
+  - deploy-content: start route tested live (key check works),
+    route:after hook and Remote/Response aliases confirmed; the
+    Panel button's click lifecycle is tested on staging at cutover.
+  - autoresize: abandoned upstream but verified working (3000px
+    upload stored at the 2500px max via the file.create hook).
+  - lessphp (less.php 3.2.1): compiles on every page render; the
+    harness exercised fresh compiles on PHP 8.4 without errors.
+    Leave vendored; upgrade only on failure.
+  - texnixe/similar: exercised by the related-articles slider on
+    every article page; working.
