@@ -151,9 +151,11 @@ fn_pushcontent_atomic() {
     echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT})
 
     docker rm -f "$sync_container" >/dev/null 2>&1 || true
+    # the B2 backup below can run past an hour on a new chain; the helper
+    # must outlive it or the replace step execs into a dead container
     docker create --name "$sync_container" \
         -v "${SLD}-stg-content:/target" \
-        alpine sleep 600 >/dev/null || return 1
+        alpine sleep 7200 >/dev/null || return 1
     docker cp ./content "$sync_container:/incoming" || {
         docker rm -f "$sync_container" >/dev/null
         return 1
@@ -183,6 +185,8 @@ fn_pushcontent_atomic() {
         docker start "${SLD}-stg" >/dev/null
         docker rm -f "$sync_container" >/dev/null
         docker exec "${SLD}-stg" test -f /app/public/assets/css/site.css || return 1
+        # pages rendered from the old content stay cached otherwise
+        docker exec "${SLD}-stg" sh -c 'rm -rf /app/storage/cache/*' || return 1
         fn_verify_staging_https || return 1
         greenprint "Local content is live on staging and custom CSS was regenerated."
     else
