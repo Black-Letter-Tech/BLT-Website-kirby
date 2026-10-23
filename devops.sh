@@ -90,7 +90,7 @@ fn_promoteapp() {
         docker push wagnerpaul/${SLD}-main-app:`date +%Y%m%d` && \
         docker-compose -f docker-compose.prod.yml up -d --force-recreate
         echo $(yellowprint "Clearing Cache On $1") && \
-        docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/storage/cache/*'
+        docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/storage/cache/* && mkdir -p "/app/storage/cache/$SERVER_NAME/pages" && chown -R www-data:www-data /app/storage/cache'
     else
         redprint "Canceling app promotion to $1."
         $2
@@ -113,7 +113,7 @@ This will DELETE AND REPLACE all content on $1. [y/N]"
         echo $(yellowprint "Setting Permissions On $1") && \
         docker exec -it ${SLD}-${1} sh -c 'chown -R www-data:www-data /app/content' && \
         echo $(yellowprint "Deleting Cache On $1") && \
-        docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/storage/cache/*' && \
+        docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/storage/cache/* && mkdir -p "/app/storage/cache/$SERVER_NAME/pages" && chown -R www-data:www-data /app/storage/cache' && \
         echo $(yellowprint "Finished Content Push to $1")
     else
         redprint "Canceling content promotion to $1."
@@ -186,7 +186,7 @@ fn_pushcontent_atomic() {
         docker rm -f "$sync_container" >/dev/null
         docker exec "${SLD}-stg" test -f /app/public/assets/css/site.css || return 1
         # pages rendered from the old content stay cached otherwise
-        docker exec "${SLD}-stg" sh -c 'rm -rf /app/storage/cache/*' || return 1
+        docker exec "${SLD}-stg" sh -c 'rm -rf /app/storage/cache/* && mkdir -p "/app/storage/cache/$SERVER_NAME/pages" && chown -R www-data:www-data /app/storage/cache' || return 1
         fn_verify_staging_https || return 1
         greenprint "Local content is live on staging and custom CSS was regenerated."
     else
