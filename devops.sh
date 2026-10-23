@@ -3,6 +3,9 @@
 ### ENV ##
 set -o allexport; source .env; set +o allexport;
 
+# DOCKER_DEFAULT_PLATFORM from the login shell breaks remote compose/build
+unset DOCKER_DEFAULT_PLATFORM
+
 ### Colors ##
 ESC=$(printf '\033') RESET="${ESC}[0m" BLACK="${ESC}[30m" RED="${ESC}[31m"
 GREEN="${ESC}[32m" YELLOW="${ESC}[33m" BLUE="${ESC}[34m" MAGENTA="${ESC}[35m"
@@ -84,11 +87,15 @@ fn_promoteapp() {
         docker tag wagnerpaul/${SLD}-main-app:stg wagnerpaul/${SLD}-main-app:latest && \
         echo $(yellowprint "Pushing image ${SLD}-main-app:latest") && \
         docker push wagnerpaul/${SLD}-main-app:latest && \
-        echo $(yellowprint "Tagging image ${SLD}-main-app:latesgt as ${SLD}-main-app:`date +%Y%m%d`") && \
+        echo $(yellowprint "Tagging image ${SLD}-main-app:latest as ${SLD}-main-app:`date +%Y%m%d`") && \
         docker tag wagnerpaul/${SLD}-main-app:latest wagnerpaul/${SLD}-main-app:`date +%Y%m%d` && \
         echo $(yellowprint "Pushing image ${SLD}-main-app:`date +%Y%m%d`") && \
         docker push wagnerpaul/${SLD}-main-app:`date +%Y%m%d` && \
         docker-compose -f docker-compose.prod.yml up -d --force-recreate
+        echo $(yellowprint "Copying .env File To $1") && \
+        docker cp ./.env ${SLD}-${1}:app
+        echo $(yellowprint "Creating .htpasswd File On $1") && \
+        docker exec -it ${SLD}-${1} sh -c 'set -o allexport; source .env; set +o allexport; htpasswd -c -B -b /etc/nginx/.htpasswd $BASIC_AUTH_USER $BASIC_AUTH_PASSWORD'
         echo $(yellowprint "Clearing Cache On $1") && \
         docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/storage/cache/* && mkdir -p "/app/storage/cache/$SERVER_NAME/pages" && chown -R www-data:www-data /app/storage/cache'
     else
