@@ -17,6 +17,12 @@ volumes:
   cache-prod:
     external: true
     name: ${SLD}-prod-cache
+  # duplicity chain metadata; persisting it across recreates saves the
+  # backup a full re-sync from B2 (one cache per backup container)
+  backup-cache-content:
+    name: ${SLD}-backup-cache-content-stg
+  backup-cache-accounts:
+    name: ${SLD}-backup-cache-accounts-stg
 services:
   stg:
     build: .
@@ -57,6 +63,7 @@ services:
         exec /opt/volumerize/docker-entrypoint.sh volumerize
     volumes:
       - content:/content:ro
+      - backup-cache-content:/volumerize-cache
     environment:
       VOLUMERIZE_FULL_IF_OLDER_THAN: 1M
       VOLUMERIZE_RETAIN_FULL_CHAINS: 3
@@ -82,6 +89,7 @@ services:
         exec /opt/volumerize/docker-entrypoint.sh volumerize
     volumes:
       - accounts:/accounts:ro
+      - backup-cache-accounts:/volumerize-cache
     environment:
       VOLUMERIZE_FULL_IF_OLDER_THAN: 1M
       VOLUMERIZE_RETAIN_FULL_CHAINS: 3
