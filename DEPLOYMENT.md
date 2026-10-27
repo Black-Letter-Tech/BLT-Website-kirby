@@ -187,19 +187,31 @@ Staging and production share the Compose project and proxy network.
 
 ## Backups
 
-Volumerize backs up these staging volumes to Backblaze B2:
+Duplicity (the tecnativa/docker-duplicity image, pinned by digest) backs up
+these staging volumes to Backblaze B2 over its S3 endpoint:
 
 - `${SLD}-stg-content`
 - `${SLD}-accounts`
 
-Jobs run daily at 04:00 UTC. A new full chain starts after one month. Production
-content is published from staging, so the staging content backup is the content
-recovery source.
+Jobs run daily at 04:00 UTC: a backup (new full chain after one month), then
+retention keeping the latest three full chains, about three months of history.
+Both are JOB_* entries on the shared `backup-env` anchor in docker-compose.yml.
+Production content is published from staging, so the staging content backup is
+the content recovery source. Each backup container persists the duplicity
+cache in its own volume; without it, a recreated container re-syncs chain
+metadata from B2 before its first run.
 
-After each successful backup, a Compose-defined post-backup hook retains the
-latest three full chains and their incrementals. This provides about three
-months of history. Set `VOLUMERIZE_RETAIN_FULL_CHAINS` on both backup services
-to change the retention count. Failed backups do not trigger pruning.
+Run a backup cycle by hand (backup plus retention):
+
+```sh
+docker exec "${SLD}-content-backups-stg" /etc/periodic/daily/jobrunner
+```
+
+Inspect a chain:
+
+```sh
+docker exec "${SLD}-content-backups-stg" sh -c 'dup collection-status $DST'
+```
 
 Create and inspect backups through the interactive menu:
 

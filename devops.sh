@@ -175,7 +175,7 @@ fn_pushcontent_atomic() {
     }
 
     yellowprint "Backing up current staging content before replacement."
-    docker exec "${SLD}-content-backups-stg" backup || {
+    docker exec "${SLD}-content-backups-stg" /etc/periodic/daily/jobrunner || {
         redprint "Backup failed. Staging was not changed."
         docker rm -f "$sync_container" >/dev/null
         return 1
@@ -292,18 +292,18 @@ fn_backup() {
     export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
     echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
     echo $(yellowprint "Backing Up Content On $1") && \
-    docker exec ${SLD}-content-backups-${1} backup  && \
+    docker exec ${SLD}-content-backups-${1} /etc/periodic/daily/jobrunner  && \
     echo $(yellowprint "Backing Up Accounts On $1") && \
-    docker exec ${SLD}-accounts-backups-${1} backup
+    docker exec ${SLD}-accounts-backups-${1} /etc/periodic/daily/jobrunner
 }
 
 fn_listbackups() {
     export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
     echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
     echo $(yellowprint "Content Backups On $1") && \
-    docker exec ${SLD}-content-backups-${1} list  && \
+    docker exec ${SLD}-content-backups-${1} sh -c 'dup collection-status $DST'  && \
     echo $(yellowprint "Accounts Backups On $1") && \
-    docker exec ${SLD}-accounts-backups-${1} list
+    docker exec ${SLD}-accounts-backups-${1} sh -c 'dup collection-status $DST'
 }
 fn_restore() {
     echo -ne "
@@ -314,10 +314,10 @@ $(greenprint 'Restore time point should be considered carefully.')
 $(yellowprint 'Command Example')
 $(blueprint 'set -o allexport; source .env; set +o allexport && \')
 $(blueprint 'export DOCKER_CONTEXT=blt-pub02 && \')
-$(blueprint "docker exec ${SLD}-content-backups-${1} restore -t 3D")
+$(blueprint "docker exec ${SLD}-content-backups-${1} sh -c 'dup restore -t 3D --force \$DST \$SRC'")
 
 $(yellowprint 'Documentation')
-$(cyanprint 'https://github.com/blacklabelops/volumerize')
+$(cyanprint 'https://github.com/Tecnativa/docker-duplicity')
     "
 }
 

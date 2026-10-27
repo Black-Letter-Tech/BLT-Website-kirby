@@ -1,3 +1,13 @@
+x-backup-env: &backup-env
+  AWS_ACCESS_KEY_ID: ${B2_ID}
+  AWS_SECRET_ACCESS_KEY: ${B2_KEY}
+  OPTIONS: --no-encryption --s3-endpoint-url https://s3.us-west-001.backblazeb2.com --s3-region-name us-west-001
+  CRONTAB_DAILY: 0 4 * * *
+  JOB_300_WHAT: dup --full-if-older-than 1M $$SRC $$DST
+  JOB_300_WHEN: daily
+  JOB_400_WHAT: dup remove-all-but-n-full 3 --force $$DST
+  JOB_400_WHEN: daily
+
 volumes:
   content:
     external: true
@@ -44,57 +54,27 @@ services:
     container_name: ${SLD}-stg
     restart: always
   backups-content-stg:
-    image: blacklabelops/volumerize
+    image: ghcr.io/tecnativa/docker-duplicity:edge@sha256:08169ebec4ebc59c0d0b702b40fc541054fc9582e2d1ca7272fd5357749077b2
     container_name: ${SLD}-content-backups-stg
+    hostname: ${SLD}-content-backups-stg
     restart: unless-stopped
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        mkdir -p /postexecute/backup
-        printf '%s\n' \
-          'if [ "$${DUPLICITY_RETURN_CODE:-1}" -eq 0 ]; then' \
-          '  echo "Pruning old backup chains; retaining $${VOLUMERIZE_RETAIN_FULL_CHAINS:-3}."' \
-          '  /etc/volumerize/remove-all-but-n-full "$${VOLUMERIZE_RETAIN_FULL_CHAINS:-3}" --force' \
-          'else' \
-          '  echo "Backup failed; skipping retention cleanup."' \
-          'fi' \
-          > /postexecute/backup/retention.sh
-        exec /opt/volumerize/docker-entrypoint.sh volumerize
     volumes:
-      - content:/content:ro
-      - backup-cache-content:/volumerize-cache
+      - content:/mnt/backup/src:ro
+      - backup-cache-content:/root
     environment:
-      VOLUMERIZE_FULL_IF_OLDER_THAN: 1M
-      VOLUMERIZE_RETAIN_FULL_CHAINS: 3
-      VOLUMERIZE_SOURCE: /content
-      VOLUMERIZE_TARGET: b2://${B2_ID}:${B2_KEY}@${B2_BUCKET}/${SLD}-backups/content-stg
+      <<: *backup-env
+      DST: boto3+s3://${B2_BUCKET}/${SLD}-backups/content-stg
   backups-accounts-stg:
-    image: blacklabelops/volumerize
+    image: ghcr.io/tecnativa/docker-duplicity:edge@sha256:08169ebec4ebc59c0d0b702b40fc541054fc9582e2d1ca7272fd5357749077b2
     container_name: ${SLD}-accounts-backups-stg
+    hostname: ${SLD}-accounts-backups-stg
     restart: unless-stopped
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        mkdir -p /postexecute/backup
-        printf '%s\n' \
-          'if [ "$${DUPLICITY_RETURN_CODE:-1}" -eq 0 ]; then' \
-          '  echo "Pruning old backup chains; retaining $${VOLUMERIZE_RETAIN_FULL_CHAINS:-3}."' \
-          '  /etc/volumerize/remove-all-but-n-full "$${VOLUMERIZE_RETAIN_FULL_CHAINS:-3}" --force' \
-          'else' \
-          '  echo "Backup failed; skipping retention cleanup."' \
-          'fi' \
-          > /postexecute/backup/retention.sh
-        exec /opt/volumerize/docker-entrypoint.sh volumerize
     volumes:
-      - accounts:/accounts:ro
-      - backup-cache-accounts:/volumerize-cache
+      - accounts:/mnt/backup/src:ro
+      - backup-cache-accounts:/root
     environment:
-      VOLUMERIZE_FULL_IF_OLDER_THAN: 1M
-      VOLUMERIZE_RETAIN_FULL_CHAINS: 3
-      VOLUMERIZE_SOURCE: /accounts
-      VOLUMERIZE_TARGET: b2://${B2_ID}:${B2_KEY}@${B2_BUCKET}/${SLD}-backups/accounts-stg
+      <<: *backup-env
+      DST: boto3+s3://${B2_BUCKET}/${SLD}-backups/accounts-stg
 networks:
   default:
     external: true
