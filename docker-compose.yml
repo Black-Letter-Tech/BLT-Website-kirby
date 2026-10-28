@@ -1,7 +1,7 @@
 x-backup-env: &backup-env
   AWS_ACCESS_KEY_ID: ${B2_ID}
   AWS_SECRET_ACCESS_KEY: ${B2_KEY}
-  OPTIONS: --no-encryption --s3-endpoint-url https://s3.us-west-001.backblazeb2.com --s3-region-name us-west-001
+  OPTIONS: --no-encryption --s3-endpoint-url ${B2_S3_ENDPOINT} --s3-region-name ${B2_S3_REGION}
   CRONTAB_DAILY: 0 4 * * *
   JOB_300_WHAT: dup --full-if-older-than 1M $$SRC $$DST
   JOB_300_WHEN: daily
