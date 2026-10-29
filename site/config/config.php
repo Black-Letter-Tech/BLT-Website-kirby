@@ -1,10 +1,6 @@
 <?php
-// load dotenv plugins class so getenv can be used outside of closures
-require_once __DIR__ . '/../plugins/kirby3-dotenv/global.php';
-loadenv([
-    'dir' => realpath(__DIR__ . '/../../'),
-    'file' => '.env',
-]);
+// Configuration comes from the container environment (compose fills it
+// from the 1Password pipe); php-fpm runs with clear_env=no so getenv() sees it.
 
 return [
     //some sensible defaults for development
@@ -103,19 +99,16 @@ return [
       'wagnerpaul/deploy-content'     => false,
       'zero/zero-one'                 => false
     ],
-    'bnomei.dotenv' => [
-      'dir' => function() { return kirby()->roots()->base(); },
-    ],
     // More info on this setings at https://getkirby.com/docs/cookbook/forms/using-mailhog-for-email-testing#what-is-mailhog
     'email' => [
       'transport' => [
         'type' => 'smtp',
-        'host' => env('EMAIL_TRANSPORT_HOST'),
+        'host' => getenv('EMAIL_TRANSPORT_HOST'),
         'port' => 587,
         'security' => true,
         'auth' => true,
-        'username' => env('EMAIL_TRANSPORT_USERNAME'),
-        'password' => env('EMAIL_TRANSPORT_PASSWORD'),
+        'username' => getenv('EMAIL_TRANSPORT_USERNAME'),
+        'password' => getenv('EMAIL_TRANSPORT_PASSWORD'),
         'beforeSend' => function ($mailer) {
           $mailer->SMTPDebug = 2;
           return $mailer;

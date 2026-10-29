@@ -34,11 +34,11 @@ Kirby::plugin('wagnerpaul/deploy-content', [
         return [
 
             [
-                'pattern' => env('DEPLOY_CONTENT_HOOK').'/start',
+                'pattern' => getenv('DEPLOY_CONTENT_HOOK').'/start',
                 'method' => 'POST',
                 'action'  => function () {
                   $key = kirby()->request()->get('key');
-                  if (option('env') !== 'prod' && $key === env('DEPLOY_CONTENT_KEY')) {
+                  if (option('env') !== 'prod' && $key === getenv('DEPLOY_CONTENT_KEY')) {
                     $response = Response::json(['status' => 'start'], 200);
                   } else {
                     $response = Response::json(['status' => 'error'], 400);
@@ -52,7 +52,7 @@ Kirby::plugin('wagnerpaul/deploy-content', [
       'hooks' => [
           //after our progress has started do the directory copying
           'route:after' => function ($route, $path, $method) {
-            $endpointAndHook = env('WEBHOOKS_ENDPOINT').'/'.env('DEPLOY_CONTENT_HOOK');
+            $endpointAndHook = getenv('WEBHOOKS_ENDPOINT').'/'.getenv('DEPLOY_CONTENT_HOOK');
             if (option('env') !== 'prod' && $path === $endpointAndHook.'/progress' && $method === 'POST') {
               $kirby = kirby();
               $site = $kirby->site();
@@ -64,7 +64,7 @@ Kirby::plugin('wagnerpaul/deploy-content', [
                 $url = kirby()->site()->url().'/'.$endpointAndHook.'/success';
                 $data = ['status' => 'success'];
                 $options = [
-                    'basicAuth'=> env('BASIC_AUTH_USER').':'.env('BASIC_AUTH_PASSWORD'),
+                    'basicAuth'=> getenv('BASIC_AUTH_USER').':'.getenv('BASIC_AUTH_PASSWORD'),
                     'method'  => 'POST',
                     'data'    => json_encode($data)
                  ];

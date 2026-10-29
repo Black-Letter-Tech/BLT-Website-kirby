@@ -23,7 +23,6 @@
         "bnomei/kirby3-fingerprint": "^5.0",
         "bnomei/kirby3-robots-txt": "^5.0",
         "medienbaecker/autoresize": "^2.1",
-        "bnomei/kirby3-dotenv": "^5.0",
         "bvdputte/kirby-bettersearch": "^2.1",
         "sylvainjule/code-editor": "^1.1",
         "texnixe/similar": "^3.0"

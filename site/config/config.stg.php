@@ -7,11 +7,11 @@ return [
         ]
     ],
  	//deployment webhook config
-    'pju.webhook-field.endpoint' => env('WEBHOOKS_ENDPOINT'),
+    'pju.webhook-field.endpoint' => getenv('WEBHOOKS_ENDPOINT'),
     'pju.webhook-field.hooks' => [
-        env('DEPLOY_CONTENT_HOOK') => [
-          'url' => '/'.env('DEPLOY_CONTENT_HOOK').'/start',
-          'payload' => ['key' => env('DEPLOY_CONTENT_KEY')],
+        getenv('DEPLOY_CONTENT_HOOK') => [
+          'url' => '/'.getenv('DEPLOY_CONTENT_HOOK').'/start',
+          'payload' => ['key' => getenv('DEPLOY_CONTENT_KEY')],
           'showOutdated' => false
         ]
     ],

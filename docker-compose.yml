@@ -55,6 +55,15 @@ services:
       ENABLE_PW: 'true'
       LETSENCRYPT_HOST: stg.${SLD}.${TLD}
       LETSENCRYPT_EMAIL: jeremy@korb.studio
+      # app secrets and settings from the 1Password Environment (.env)
+      EMAIL_TRANSPORT_HOST: ${EMAIL_TRANSPORT_HOST}
+      EMAIL_TRANSPORT_USERNAME: ${EMAIL_TRANSPORT_USERNAME}
+      EMAIL_TRANSPORT_PASSWORD: ${EMAIL_TRANSPORT_PASSWORD}
+      WEBHOOKS_ENDPOINT: ${WEBHOOKS_ENDPOINT}
+      DEPLOY_CONTENT_HOOK: ${DEPLOY_CONTENT_HOOK}
+      DEPLOY_CONTENT_KEY: ${DEPLOY_CONTENT_KEY}
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER}
+      BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD}
     container_name: ${SLD}-stg
     restart: always
   backups-content-stg:

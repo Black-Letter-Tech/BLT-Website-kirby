@@ -143,22 +143,18 @@ docker buildx build --platform linux/amd64 \
 docker save "wagnerpaul/${SLD}-main-app:stg" | ssh blt-pub02 docker load
 ```
 
-Then recreate the staging container and re-inject the two files that
-live in the container layer by design (images stay secret-free):
+Then recreate the staging container:
 
 ```sh
 export DOCKER_CONTEXT=blt-pub02
 docker compose up -d --force-recreate stg
-docker exec -i "${SLD}-stg" sh -c 'cat > /app/.env && chmod 600 /app/.env' < .env
-docker exec "${SLD}-stg" sh -c 'set -o allexport; . ./.env; set +o allexport; \
-  htpasswd -c -B -b /etc/nginx/.htpasswd "$BASIC_AUTH_USER" "$BASIC_AUTH_PASSWORD"'
 ```
 
-`.env` is a 1Password Environment pipe, so it is streamed in with
-`docker exec -i`; `docker cp` would copy the pipe node, not its contents.
-
-Any container recreation, by compose or otherwise, loses `.env` and
-`.htpasswd`; always replay the injection step.
+Everything the app needs arrives as container environment: compose fills it
+from the 1Password Environment (`.env`) when it creates the container, and
+the entrypoint writes `/etc/nginx/.htpasswd` from `BASIC_AUTH_*` when
+`ENABLE_PW` is true. Nothing is copied into the container afterwards, and
+the image stays secret-free.
 
 `DOCKER_DEFAULT_PLATFORM` must stay unset for compose and build
 commands; it is set in the login shell and changes build targets.
@@ -225,8 +221,7 @@ Create and inspect backups through the interactive menu:
 Select **Staging**, then **Backup Staging** or **List Staging Backups**.
 **Recreate Staging Backup Containers** rebuilds the two duplicity containers
 from the current `.env` and compose file (run it after the B2 key or endpoint
-in 1Password changes) and then takes a backup. **Re-inject .env + .htpasswd**
-on the Staging and Production menus replays the injection step on its own.
+in 1Password changes) and then takes a backup.
 
 Equivalent commands are:
 
