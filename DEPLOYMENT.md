@@ -149,10 +149,13 @@ live in the container layer by design (images stay secret-free):
 ```sh
 export DOCKER_CONTEXT=blt-pub02
 docker compose up -d --force-recreate stg
-docker cp ./.env "${SLD}-stg:app"
+docker exec -i "${SLD}-stg" sh -c 'cat > /app/.env && chmod 600 /app/.env' < .env
 docker exec "${SLD}-stg" sh -c 'set -o allexport; . ./.env; set +o allexport; \
   htpasswd -c -B -b /etc/nginx/.htpasswd "$BASIC_AUTH_USER" "$BASIC_AUTH_PASSWORD"'
 ```
+
+`.env` is a 1Password Environment pipe, so it is streamed in with
+`docker exec -i`; `docker cp` would copy the pipe node, not its contents.
 
 Any container recreation, by compose or otherwise, loses `.env` and
 `.htpasswd`; always replay the injection step.
@@ -220,6 +223,10 @@ Create and inspect backups through the interactive menu:
 ```
 
 Select **Staging**, then **Backup Staging** or **List Staging Backups**.
+**Recreate Staging Backup Containers** rebuilds the two duplicity containers
+from the current `.env` and compose file (run it after the B2 key or endpoint
+in 1Password changes) and then takes a backup. **Re-inject .env + .htpasswd**
+on the Staging and Production menus replays the injection step on its own.
 
 Equivalent commands are:
 

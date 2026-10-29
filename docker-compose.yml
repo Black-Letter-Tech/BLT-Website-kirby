@@ -1,3 +1,7 @@
+# The live containers on blt-pub02 were created under this project name;
+# pinning it keeps compose from re-deriving it from the checkout directory.
+name: blt-main-app
+
 x-backup-env: &backup-env
   AWS_ACCESS_KEY_ID: ${B2_ID}
   AWS_SECRET_ACCESS_KEY: ${B2_KEY}

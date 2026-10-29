@@ -1,3 +1,6 @@
+# Same compose project as staging (see docker-compose.yml).
+name: blt-main-app
+
 volumes:
   content:
     external: true

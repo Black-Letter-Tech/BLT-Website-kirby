@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
 ### ENV ##
-set -o allexport; source .env; set +o allexport;
+# .env is a 1Password Environment pipe. A read can come back empty (locked,
+# or the approval prompt missed), and the script would then run with blank
+# secrets, so read it once, refuse when empty, and keep the text for
+# fn_injectenv so a deploy needs only one approval.
+ENV_CONTENT=$(cat .env 2>/dev/null)
+[ -n "$ENV_CONTENT" ] || { echo ".env came back empty: unlock 1Password and approve the read, then rerun." >&2; exit 1; }
+set -o allexport; eval "$ENV_CONTENT"; set +o allexport
 
 # DOCKER_DEFAULT_PLATFORM from the login shell breaks remote compose/build
 unset DOCKER_DEFAULT_PLATFORM
@@ -68,11 +74,8 @@ fn_deployapp() {
         echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
         docker build -t wagnerpaul/${SLD}-main-app:${1} . && \
         docker-compose up -d --force-recreate
-        echo $(yellowprint "Copying .env File To $1") && \
-        docker cp ./.env ${SLD}-${1}:app
-        echo $(yellowprint "Creating .htpasswd File On $1") && \
-        docker exec -it ${SLD}-${1} sh -c 'set -o allexport; source .env; set +o allexport; htpasswd -c -B -b /etc/nginx/.htpasswd $BASIC_AUTH_USER $BASIC_AUTH_PASSWORD'
-    else 
+        fn_injectenv "$1"
+    else
         redprint "Canceling app deployement to $1."
         $2
     fi
@@ -92,10 +95,7 @@ fn_promoteapp() {
         echo $(yellowprint "Pushing image ${SLD}-main-app:`date +%Y%m%d`") && \
         docker push wagnerpaul/${SLD}-main-app:`date +%Y%m%d` && \
         docker-compose -f docker-compose.prod.yml up -d --force-recreate
-        echo $(yellowprint "Copying .env File To $1") && \
-        docker cp ./.env ${SLD}-${1}:app
-        echo $(yellowprint "Creating .htpasswd File On $1") && \
-        docker exec -it ${SLD}-${1} sh -c 'set -o allexport; source .env; set +o allexport; htpasswd -c -B -b /etc/nginx/.htpasswd $BASIC_AUTH_USER $BASIC_AUTH_PASSWORD'
+        fn_injectenv "$1"
         echo $(yellowprint "Clearing Cache On $1") && \
         docker exec -it ${SLD}-${1} sh -c 'rm -rf /app/storage/cache/* && mkdir -p "/app/storage/cache/$SERVER_NAME/pages" && chown -R www-data:www-data /app/storage/cache'
     else
@@ -305,6 +305,34 @@ fn_listbackups() {
     echo $(yellowprint "Accounts Backups On $1") && \
     docker exec ${SLD}-accounts-backups-${1} sh -c 'dup collection-status $DST'
 }
+fn_injectenv() { # stg | prod
+    # The app container keeps .env and .htpasswd in its own layer, so every
+    # recreate loses them. .env is a 1Password pipe: stream the text already
+    # read at startup (docker cp would copy the pipe node, not its contents).
+    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
+    echo $(yellowprint "Writing .env Into $1") && \
+    printf '%s\n' "$ENV_CONTENT" | docker exec -i ${SLD}-${1} sh -c 'cat > /app/.env && chmod 600 /app/.env' && \
+    echo $(yellowprint "Creating .htpasswd File On $1") && \
+    docker exec ${SLD}-${1} sh -c 'set -o allexport; . /app/.env; set +o allexport; htpasswd -c -B -b /etc/nginx/.htpasswd "$BASIC_AUTH_USER" "$BASIC_AUTH_PASSWORD"' && \
+    greenprint "Injected .env and .htpasswd into ${SLD}-${1}."
+}
+
+fn_recreatebackups() { # stg
+    # Picks up .env (new B2 key, endpoint) and compose changes. The duplicity
+    # cache lives in a named volume, so the chain continues without a re-sync.
+    if fn_confirm "Recreate the $1 backup containers from .env and docker-compose.yml? [y/N]"
+    then
+        export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
+        echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
+        docker-compose up -d --no-deps --force-recreate backups-content-${1} backups-accounts-${1} && \
+        fn_backup "$1"
+    else
+        redprint "Canceling backup container recreation on $1."
+        $2
+    fi
+}
+
 fn_restore() {
     echo -ne "
 $(yellowprint 'Restore Should Be Handled With Care')
@@ -344,6 +372,8 @@ $(cyanprint '3)') Backup Staging
 $(yellowprint '4)') List Staging Backups
 $(blueprint '5)') Restore Staging Backups
 $(greenprint '6)') Get Staging Shell
+$(cyanprint '7)') Recreate Staging Backup Containers
+$(yellowprint '8)') Re-inject .env + .htpasswd Into Staging
 
 $(magentaprint 'M)') Go Back to Main Menu
 $(redprint '0)') Exit
@@ -352,6 +382,14 @@ Choose an option:  "
     case $ans in
     1)
         fn_deployapp stg menu_staging
+        menu_staging
+        ;;
+    7)
+        fn_recreatebackups stg menu_staging
+        menu_staging
+        ;;
+    8)
+        fn_injectenv stg
         menu_staging
         ;;
     2)
@@ -429,6 +467,7 @@ $(blueprint 'CHOOSE TASK')
 $(greenprint '1)') Promote Production App
 $(blueprint '2)') Promote Staging Content -> Production
 $(greenprint '3)') Get Production Shell
+$(yellowprint '4)') Re-inject .env + .htpasswd Into Production
 
 $(magentaprint 'M)') Go Back to Main Menu
 $(redprint '0)') Exit
@@ -437,6 +476,10 @@ Choose an option:  "
     case $ans in
     1)
         fn_promoteapp prod menu_production
+        menu_production
+        ;;
+    4)
+        fn_injectenv prod
         menu_production
         ;;
     2)
