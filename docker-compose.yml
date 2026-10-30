@@ -6,8 +6,13 @@ x-backup-env: &backup-env
   AWS_ACCESS_KEY_ID: ${B2_ID}
   AWS_SECRET_ACCESS_KEY: ${B2_KEY}
   OPTIONS: --no-encryption --s3-endpoint-url ${B2_S3_ENDPOINT} --s3-region-name ${B2_S3_REGION}
-  # Nightly slot per service (not shared): see status.md slot table. New site: inventory
-  # pub02 (docker inspect CRONTAB_DAILY on *backups*) and take a free 10-min slot in 00:00-04:00 UTC.
+  # Nightly schedule: every backup container on blt-pub02, across all sites, gets its
+  # own slot, 10 minutes apart, between 00:00 and 04:00 UTC, so CRONTAB_DAILY is set per
+  # service below rather than shared. Before adding or moving a slot, list what is running:
+  #   docker --context blt-pub02 ps --format '{{.Names}}' | grep backups | while read -r c; do
+  #     docker --context blt-pub02 inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$c" \
+  #       | grep '^CRONTAB_DAILY=' | sed "s|^|$c |"; done
+  # and take a free slot.
   JOB_300_WHAT: dup --full-if-older-than 1M $$SRC $$DST
   JOB_300_WHEN: daily
   JOB_400_WHAT: dup remove-all-but-n-full 3 --force $$DST
