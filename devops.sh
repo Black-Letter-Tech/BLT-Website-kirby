@@ -35,8 +35,9 @@ fn_goodmorning() {
 
     export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
     echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
-    docker build -t wagnerpaul/${SLD}-main-app:stg . && \
-    docker-compose up -d --force-recreate
+    docker --context desktop-linux buildx build --platform linux/amd64 --load -t wagnerpaul/${SLD}-main-app:stg . && \
+    docker --context desktop-linux save wagnerpaul/${SLD}-main-app:stg | docker load && \
+    docker-compose up -d --no-deps --no-build --force-recreate stg
 
 }
 
@@ -70,10 +71,15 @@ fn_docker_machine_ssh() {
 fn_deployapp() {
     if fn_confirm "Would you really like to deploy the app to $1? [y/N]"
     then
+        # the 2GB host never builds: build for amd64 on this Mac, ship the
+        # image over the context, recreate only the app service
         export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
         echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT}) && \
-        docker build -t wagnerpaul/${SLD}-main-app:${1} . && \
-        docker-compose up -d --force-recreate
+        echo $(yellowprint "Building wagnerpaul/${SLD}-main-app:${1} for linux/amd64 on this Mac") && \
+        docker --context desktop-linux buildx build --platform linux/amd64 --load -t wagnerpaul/${SLD}-main-app:${1} . && \
+        echo $(yellowprint "Copying the image to ${DOCKER_CONTEXT}") && \
+        docker --context desktop-linux save wagnerpaul/${SLD}-main-app:${1} | docker load && \
+        docker-compose up -d --no-deps --no-build --force-recreate ${1}
     else
         redprint "Canceling app deployement to $1."
         $2
@@ -342,9 +348,9 @@ fn_getshell() {
 }
 
 fn_buildimage(){
-    export DOCKER_CONTEXT="${DOCKER_CONTEXT:-blt-pub02}" && \
-    echo $(yellowprint 'Docker context: ') $(blueprint ${DOCKER_CONTEXT})
-   docker build -t wagnerpaul/${SLD}-main-app:${1} .
+    # local image for menu_localhost; built on the Mac, never on the host
+    echo $(yellowprint "Building wagnerpaul/${SLD}-main-app:${1} on this Mac") && \
+    docker --context desktop-linux build -t wagnerpaul/${SLD}-main-app:${1} .
 }
 
 ### Menus ##
