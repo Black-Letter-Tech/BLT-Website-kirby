@@ -21,3 +21,31 @@ private-notes.md
 
 ## backups
 /backups
+# --- added 2026-10-30: only the app ships ---
+# repo and editor files
+.dockerignore
+.DS_Store
+.claude
+# storage is volumes (accounts, sessions, cache) or runtime state; the
+# mounts create the directory in the container
+/storage
+# ops tooling and docs
+devops.sh
+devops
+docker-compose.yml
+docker-compose.prod.yml
+Dockerfile
+*.md
+verify-vs-prod.py
+migrate-content.py
+check-blueprints.php
+panel-check.php
+deploy
+# build tooling not used at runtime
+composer.phar
+Gruntfile.js
+grunt
+package.json
+package-lock.json
+postcss.config.js
+.env*
