@@ -6,7 +6,8 @@ x-backup-env: &backup-env
   AWS_ACCESS_KEY_ID: ${B2_ID}
   AWS_SECRET_ACCESS_KEY: ${B2_KEY}
   OPTIONS: --no-encryption --s3-endpoint-url ${B2_S3_ENDPOINT} --s3-region-name ${B2_S3_REGION}
-  CRONTAB_DAILY: 0 4 * * *
+  # Nightly slot per service (not shared): see status.md slot table. New site: inventory
+  # pub02 (docker inspect CRONTAB_DAILY on *backups*) and take a free 10-min slot in 00:00-04:00 UTC.
   JOB_300_WHAT: dup --full-if-older-than 1M $$SRC $$DST
   JOB_300_WHEN: daily
   JOB_400_WHAT: dup remove-all-but-n-full 3 --force $$DST
@@ -77,6 +78,7 @@ services:
     environment:
       <<: *backup-env
       DST: boto3+s3://${B2_BUCKET}/${SLD}-backups/content-stg
+      CRONTAB_DAILY: 30 1 * * *
   backups-accounts-stg:
     image: ghcr.io/tecnativa/docker-duplicity:edge@sha256:08169ebec4ebc59c0d0b702b40fc541054fc9582e2d1ca7272fd5357749077b2
     container_name: ${SLD}-accounts-backups-stg
@@ -88,6 +90,7 @@ services:
     environment:
       <<: *backup-env
       DST: boto3+s3://${B2_BUCKET}/${SLD}-backups/accounts-stg
+      CRONTAB_DAILY: 40 1 * * *
 networks:
   default:
     external: true
