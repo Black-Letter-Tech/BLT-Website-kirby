@@ -7,8 +7,9 @@ x-backup-env: &backup-env
   AWS_SECRET_ACCESS_KEY: ${B2_KEY}
   OPTIONS: --no-encryption --s3-endpoint-url ${B2_S3_ENDPOINT} --s3-region-name ${B2_S3_REGION}
   # Nightly schedule: every backup container on blt-pub02, across all sites, gets its
-  # own slot, 10 minutes apart, between 00:00 and 04:00 UTC, so CRONTAB_DAILY is set per
-  # service below rather than shared. Before adding or moving a slot, list what is running:
+  # own slot, 10 minutes apart, between 00:00 and 04:00 UTC. This file's two slots are the
+  # CRONTAB_DAILY lines under services.backups-content-stg.environment and
+  # services.backups-accounts-stg.environment. Before adding or moving a slot, list what is running:
   #   docker --context blt-pub02 ps --format '{{.Names}}' | grep backups | while read -r c; do
   #     docker --context blt-pub02 inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$c" \
   #       | grep '^CRONTAB_DAILY=' | sed "s|^|$c |"; done
@@ -83,7 +84,7 @@ services:
     environment:
       <<: *backup-env
       DST: boto3+s3://${B2_BUCKET}/${SLD}-backups/content-stg
-      CRONTAB_DAILY: 30 1 * * *
+      CRONTAB_DAILY: 30 1 * * *   # this container's nightly slot (UTC); rule above the backup anchor
   backups-accounts-stg:
     image: ghcr.io/tecnativa/docker-duplicity:edge@sha256:08169ebec4ebc59c0d0b702b40fc541054fc9582e2d1ca7272fd5357749077b2
     container_name: ${SLD}-accounts-backups-stg
@@ -95,7 +96,7 @@ services:
     environment:
       <<: *backup-env
       DST: boto3+s3://${B2_BUCKET}/${SLD}-backups/accounts-stg
-      CRONTAB_DAILY: 40 1 * * *
+      CRONTAB_DAILY: 40 1 * * *   # this container's nightly slot (UTC); rule above the backup anchor
 networks:
   default:
     external: true
